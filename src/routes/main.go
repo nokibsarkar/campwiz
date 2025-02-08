@@ -21,18 +21,20 @@ func WithSession(callback func(*gin.Context, *cache.Session)) gin.HandlerFunc {
 	}
 }
 func GetSession(c *gin.Context) *cache.Session {
-	session, ok := c.MustGet("session").(*cache.Session)
+	sess, ok := c.Get("session")
 	if !ok {
 		return nil
 	}
+	session, ok := sess.(*cache.Session)
 	return session
 }
 func NewRoutes(parent *gin.RouterGroup) {
 
-	NewUserAuthenticationRoutes(parent)
+	UserAuthenticationRoutes(parent)
 	r := parent.Group("/api/v2")
 	authenticatorService := NewAuthenticationService()
 	r.Use(authenticatorService.Authenticate)
 	NewCampaignRoutes(r)
 	NewSubmissionRoutes(r)
+	NewUserRoutes(r)
 }

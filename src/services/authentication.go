@@ -111,14 +111,23 @@ func (a *AuthenticationService) RefreshSession(cacheDB *gorm.DB, tokenMap *Sessi
 
 	accessToken, session, err = a.NewSession(tx, tokenMap)
 	if err != nil {
-		fmt.Println("Error: ", err)
 		tx.Rollback()
 		return "", nil, err
 	}
 	tx.Commit()
 	return accessToken, session, nil
 }
-func (a *AuthenticationService) RemoveSession(cache *gorm.DB, tokenMap *SessionClaims) error {
-	fmt.Println("Removing session")
+func (a *AuthenticationService) RemoveSession(cacheDB *gorm.DB, ID string) error {
+	session := &cache.Session{ID: ID}
+	result := cacheDB.Delete(session)
+	if result.Error != nil {
+		return result.Error
+	}
 	return nil
+}
+func (a *AuthenticationService) Logout(session *cache.Session) error {
+	conn, close := cache.GetCacheDB()
+	defer close()
+	// Remove the session
+	return a.RemoveSession(conn, session.ID)
 }
