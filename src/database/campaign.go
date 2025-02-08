@@ -24,7 +24,7 @@ secretBallot : bool
 allowJuryToParticipate : bool
 allowMultipleJudgement : bool
 */
-type CampaignRestrictions struct {
+type ArticleCampaignRestrictions struct {
 	MaximumSubmissionOfSameArticle int    `json:"maximum_submission_of_same_article"`
 	AllowExpansions                bool   `json:"allow_expansions"`
 	AllowCreations                 bool   `json:"allow_creations"`
@@ -37,6 +37,14 @@ type CampaignRestrictions struct {
 	AllowMultipleJudgement         bool   `json:"allow_multiple_judgement"`
 	Blacklist                      string `json:"blacklist"`
 }
+type ImageCampaignRestrictions struct {
+	MaximumSubmissionOfSameImage int `json:"maximum_submission_of_same_image"`
+	MinimumTotalImageSize        int `json:"minimum_total_image_size"`
+}
+type MediaCampaignRestrictions struct {
+	ImageCampaignRestrictions
+}
+
 type Campaign struct {
 	ID          uint            `gorm:"primaryKey" json:"id"`
 	Name        string          `json:"name"`
@@ -46,5 +54,4 @@ type Campaign struct {
 	Language    consts.Language `json:"language"`
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
-	CampaignRestrictions
 }

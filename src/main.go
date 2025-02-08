@@ -15,6 +15,8 @@ func preRun() {
 func postRun() {
 }
 func main() {
+	// batch_service := services.NewBatchService()
+	// batch_service.CreateBatchFromCommonsCategory()
 	preRun()
 	r := gin.Default()
 	routes.NewRoutes(r.Group("/"))

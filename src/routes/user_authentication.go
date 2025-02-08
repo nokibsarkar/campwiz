@@ -89,7 +89,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 		},
 	}
 	tx := cacheDB.Begin()
-	newAccessToken, err := auth_service.NewSession(tx, claims)
+	newAccessToken, _, err := auth_service.NewSession(tx, claims)
 	if err != nil {
 		tx.Rollback()
 		c.JSON(500, ResponseError{

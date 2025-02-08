@@ -6,7 +6,7 @@ import (
 )
 
 type Session struct {
-	ID         uint64                 `json:"id" gorm:"primaryKey,autoIncrement"`
+	ID         string                 `json:"id" gorm:"primaryKey"`
 	UserID     string                 `json:"userId"`
 	Username   string                 `json:"username"`
 	Permission consts.PermissionGroup `json:"permission"`

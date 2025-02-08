@@ -99,6 +99,7 @@ func (a *AuthenticationMiddleWare) Authenticate(c *gin.Context) {
 			c.AbortWithStatusJSON(401, ResponseError{Detail: "Unauthorized : No token found"})
 			return
 		} else {
+			var session *cache.Session
 			tokenMap, err := a.decodeToken(token)
 			cache_db, close := cache.GetCacheDB()
 			defer close()
@@ -106,13 +107,14 @@ func (a *AuthenticationMiddleWare) Authenticate(c *gin.Context) {
 			if err != nil {
 				if strings.Contains(err.Error(), "token is expired") {
 					// Token is expired
-					newAccessToken, err := auth_service.RefreshSession(cache_db, tokenMap)
+					newAccessToken, sess, err := auth_service.RefreshSession(cache_db, tokenMap)
 					if err != nil {
 						c.Set("error", err)
 						c.AbortWithStatusJSON(401, ResponseError{Detail: "Unauthorized : Token expired and could not be refreshed"})
 						return
 					} else {
 						c.SetCookie(AuthenticationCookieName, newAccessToken, a.Config.Expiry, "/", "", false, true)
+						session = sess
 					}
 				} else {
 					c.Set("error", err)
@@ -120,14 +122,17 @@ func (a *AuthenticationMiddleWare) Authenticate(c *gin.Context) {
 					return
 				}
 			} else {
-				err = auth_service.VerifyToken(cache_db, tokenMap)
+				session, err = auth_service.VerifyToken(cache_db, tokenMap)
 				if err != nil {
 					c.Set("error", err)
 					c.AbortWithStatusJSON(401, ResponseError{Detail: "Unauthorized : Invalid token"})
 					return
 				}
 			}
-			fmt.Println("Token verified")
+			if session == nil {
+				c.AbortWithStatusJSON(401, ResponseError{Detail: "Unauthorized : No session found"})
+			}
+			c.Set("session", session)
 		}
 	}
 	c.Next()

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"nokib/campwiz/consts"
 	"nokib/campwiz/database/cache"
-	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -25,12 +24,26 @@ func NewAuthenticationService() *AuthenticationService {
 		Config: &consts.Config.Auth,
 	}
 }
-func (a *AuthenticationService) VerifyToken(cache *gorm.DB, tokenMap *SessionClaims) error {
+func (a *AuthenticationService) VerifyToken(cacheDB *gorm.DB, tokenMap *SessionClaims) (*cache.Session, error) {
 	fmt.Println("Verifying token")
-	return nil
-}
-func (a *AuthenticationService) NewSession(tx *gorm.DB, tokenMap *SessionClaims) (string, error) {
+	// Check if the token is in the cache
+	sessionIDString := tokenMap.ID
+	if sessionIDString == "" {
+		return nil, fmt.Errorf("No session ID found")
+	}
 	session := &cache.Session{
+		ID:     sessionIDString,
+		UserID: tokenMap.Subject,
+	}
+	result := cacheDB.First(session)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return session, nil
+}
+func (a *AuthenticationService) NewSession(tx *gorm.DB, tokenMap *SessionClaims) (string, *cache.Session, error) {
+	session := &cache.Session{
+		ID:         GenerateID(),
 		UserID:     tokenMap.Subject,
 		Username:   tokenMap.Name,
 		Permission: tokenMap.Permission,
@@ -38,16 +51,16 @@ func (a *AuthenticationService) NewSession(tx *gorm.DB, tokenMap *SessionClaims)
 	}
 	result := tx.Create(session)
 	if result.Error != nil {
-		fmt.Println("Error: ", result.Error)
-		return "", result.Error
+		return "", nil, result.Error
 	}
+	tokenMap.ID = session.ID
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenMap)
 	accessToken, err := token.SignedString([]byte(a.Config.Secret))
 	if err != nil {
 		fmt.Println("Error: ", err)
-		return "", err
+		return "", nil, err
 	}
-	return accessToken, nil
+	return accessToken, session, nil
 }
 func (a *AuthenticationService) NewRefreshToken(tokenMap *SessionClaims) (string, error) {
 	refreshClaims := &SessionClaims{
@@ -68,52 +81,44 @@ func (a *AuthenticationService) NewRefreshToken(tokenMap *SessionClaims) (string
 	}
 	return refreshToken, nil
 }
-func (a *AuthenticationService) RefreshSession(cacheDB *gorm.DB, tokenMap *SessionClaims) (accessToken string, err error) {
+func (a *AuthenticationService) RefreshSession(cacheDB *gorm.DB, tokenMap *SessionClaims) (accessToken string, session *cache.Session, err error) {
 	fmt.Println("Refreshing session")
 	sessionIDString := tokenMap.ID
 	if sessionIDString == "" {
-		return "", fmt.Errorf("No session ID found")
+		return "", nil, fmt.Errorf("No session ID found")
 	}
-	sessionID, err := strconv.ParseUint(sessionIDString, 10, 64)
-	if err != nil {
-		return "", err
-	}
-	session := &cache.Session{
-		ID:         sessionID,
+	session = &cache.Session{
+		ID:         sessionIDString,
 		UserID:     tokenMap.Subject,
 		Username:   tokenMap.Name,
 		Permission: tokenMap.Permission,
 		ExpiresAt:  tokenMap.ExpiresAt.Time,
 	}
 	tx := cacheDB.Begin()
-	result := tx.First(session, &cache.Session{ID: sessionID})
+	result := tx.First(session, &cache.Session{ID: sessionIDString})
 	if result.Error != nil {
 		fmt.Println("Error: ", result.Error)
 		tx.Rollback()
-		return "", result.Error
+		return "", nil, result.Error
 	}
 	session.ExpiresAt = time.Now().UTC().Add(time.Minute * time.Duration(a.Config.Expiry))
 	result = tx.Save(session)
 	if result.Error != nil {
 		fmt.Println("Error: ", result.Error)
 		tx.Rollback()
-		return "", result.Error
+		return "", nil, result.Error
 	}
 
-	accessToken, err = a.NewSession(tx, tokenMap)
+	accessToken, session, err = a.NewSession(tx, tokenMap)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		tx.Rollback()
-		return "", err
+		return "", nil, err
 	}
 	tx.Commit()
-	return accessToken, nil
+	return accessToken, session, nil
 }
 func (a *AuthenticationService) RemoveSession(cache *gorm.DB, tokenMap *SessionClaims) error {
 	fmt.Println("Removing session")
 	return nil
-}
-func (a *AuthenticationService) Init(redirectUri string) string {
-	fmt.Println("Initializing OAuth 2.0")
-	return ""
 }
