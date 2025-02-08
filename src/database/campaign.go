@@ -55,3 +55,7 @@ type Campaign struct {
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
 }
+type CampaignRequest struct {
+	Campaign
+	Jury []uint `json:"jury"`
+}

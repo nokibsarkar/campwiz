@@ -1,9 +1,11 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"nokib/campwiz/consts"
 	"nokib/campwiz/database/cache"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -130,4 +132,54 @@ func (a *AuthenticationService) Logout(session *cache.Session) error {
 	defer close()
 	// Remove the session
 	return a.RemoveSession(conn, session.ID)
+}
+func (a *AuthenticationService) decodeToken(tokenString string) (*SessionClaims, error) {
+	claims := &SessionClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		claims := token.Claims.(jwt.Claims)
+		iss, ok := claims.GetIssuer()
+		if ok != nil {
+			return nil, errors.New("Issuer not found")
+		}
+		if iss != a.Config.Issuer {
+			return nil, errors.New("Invalid issuer")
+		}
+
+		return []byte(a.Config.Secret), nil
+	})
+	if err != nil {
+		return claims, err
+	}
+	if !token.Valid {
+		return claims, errors.New("Invalid token")
+	}
+	return claims, nil
+}
+func (auth_service *AuthenticationService) Authenticate(token string) (string, *cache.Session, error, bool) {
+	tokenMap, err := auth_service.decodeToken(token)
+	cache_db, close := cache.GetCacheDB()
+	defer close()
+	if err != nil {
+		if strings.Contains(err.Error(), "token is expired") {
+			// Token is expired
+			newAccessToken, session, err := auth_service.RefreshSession(cache_db, tokenMap)
+			if err != nil {
+				return "", nil, errors.New("Token expired and could not be refreshed"), false
+			} else {
+				return newAccessToken, session, nil, true
+			}
+		} else {
+			return "", nil, errors.New("Token could not be decoded"), false
+		}
+	} else {
+		session, err := auth_service.VerifyToken(cache_db, tokenMap)
+		if err != nil {
+			return "", nil, errors.New("Invalid token"), false
+		}
+		return token, session, nil, false
+	}
 }
