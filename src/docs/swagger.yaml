@@ -11,6 +11,7 @@ definitions:
   database.Campaign:
     properties:
       created_at:
+        description: read only
         type: string
       created_by:
         type: string
@@ -40,8 +41,6 @@ definitions:
     type: object
   services.CampaignRequest:
     properties:
-      created_at:
-        type: string
       created_by:
         type: string
       description:
@@ -78,6 +77,19 @@ paths:
   /campaign/:
     get:
       description: get all campaigns
+      parameters:
+      - collectionFormat: csv
+        in: query
+        items:
+          type: integer
+        name: ids
+        type: array
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: nextToken
+        type: string
       produces:
       - application/json
       responses:

@@ -14,11 +14,18 @@ import (
 // @Produce  json
 // @Success 200 {object} ResponseList[database.Campaign]
 // @Router /campaign/ [get]
+// @param CampaignFilter query database.CampaignFilter false "Filter the campaigns"
 // @Tags Campaign
 // @Error 400 {object} ResponseError
 func ListAllCampaigns(c *gin.Context) {
+	query := &database.CampaignFilter{}
+	err := c.ShouldBindQuery(query)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Invalid request : " + err.Error()})
+		return
+	}
 	campaignService := services.NewCampaignService()
-	campaignList := campaignService.GetAllCampaigns()
+	campaignList := campaignService.GetAllCampaigns(query)
 	c.JSON(200, ResponseList[database.Campaign]{Data: campaignList})
 }
 
@@ -42,14 +49,19 @@ func ListAllJury(c *gin.Context) {
 }
 func CreateCampaign(c *gin.Context, sess *cache.Session) {
 	createRequest := &services.CampaignRequest{}
-	err := c.BindJSON(createRequest)
+	err := c.ShouldBindBodyWithJSON(createRequest)
+	createRequest.CreatedBy = sess.UserID
 	if err != nil {
-		c.JSON(400, ResponseError{Detail: "Invalid request"})
+		c.JSON(400, ResponseError{Detail: "Invalid request : " + err.Error()})
 		return
 	}
-	c.JSON(200, gin.H{
-		"message": "Hello, World!",
-	})
+	camapign_service := services.NewCampaignService()
+	campaign, err := camapign_service.CreateCampaign(createRequest)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Failed to create campaign : " + err.Error()})
+		return
+	}
+	c.JSON(200, ResponseSingle[*database.Campaign]{Data: campaign})
 }
 func UpdateCampaign(c *gin.Context) {
 	c.JSON(200, gin.H{

@@ -19,7 +19,7 @@ type AuthenticationMiddleWare struct {
 	Config *consts.AuthenticationConfiguration
 }
 
-const AuthenticationCookieName = "auth"
+const AuthenticationCookieName = "c-auth"
 const RefreshCookieName = "X-Refresh-Token"
 const SESSION_KEY = "session"
 
@@ -59,11 +59,19 @@ func (a *AuthenticationMiddleWare) checkIfUnauthenticatedAllowed(c *gin.Context)
 	var UnRestrictedPaths = []string{
 		"/user/login",
 		"/user/callback",
-		"/api/v2/campaign/",
+		// "/api/v2/campaign/",
 	}
 	for _, p := range UnRestrictedPaths {
-		if strings.HasPrefix(path, p) {
-			return true
+		if strings.HasSuffix(p, "*") {
+			rest := p[:len(p)-1]
+			if strings.HasPrefix(path, rest) {
+				return true
+			}
+		} else {
+			if p == path {
+				fmt.Println("Unrestricted path")
+				return true
+			}
 		}
 	}
 	return false
@@ -91,7 +99,7 @@ func (a *AuthenticationMiddleWare) Authenticate(c *gin.Context) {
 				c.AbortWithStatusJSON(401, ResponseError{Detail: "Unauthorized : Invalid token"})
 				return
 			} else {
-				if setCookie {
+				if setCookie || true {
 					c.SetCookie(AuthenticationCookieName, accessToken, consts.Config.Auth.Expiry*60, "/", "", false, true)
 				}
 				c.Set(SESSION_KEY, session)

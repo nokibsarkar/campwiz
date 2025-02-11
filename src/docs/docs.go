@@ -32,6 +32,27 @@ const docTemplate = `{
                     "Campaign"
                 ],
                 "summary": "List all campaigns",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "nextToken",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -88,6 +109,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
+                    "description": "read only",
                     "type": "string"
                 },
                 "created_by": {
@@ -133,9 +155,6 @@ const docTemplate = `{
         "services.CampaignRequest": {
             "type": "object",
             "properties": {
-                "created_at": {
-                    "type": "string"
-                },
                 "created_by": {
                     "type": "string"
                 },

@@ -1,10 +1,13 @@
 package services
 
-import "nokib/campwiz/database"
+import (
+	"fmt"
+	"nokib/campwiz/database"
+)
 
 type CampaignService struct{}
 type CampaignRequest struct {
-	database.Campaign
+	database.CampaignWithWriteableFields
 	Jury []uint `json:"jury"`
 }
 
@@ -23,14 +26,17 @@ func NewCampaignService() *CampaignService {
 func (service *CampaignService) CreateCampaign(campaignRequest *CampaignRequest) (*database.Campaign, error) {
 	// Create a new campaign
 	campaign := &database.Campaign{
-		Name:        campaignRequest.Name,
-		Description: campaignRequest.Description,
-		ID:          GenerateID(),
-		StartDate:   campaignRequest.StartDate,
-		EndDate:     campaignRequest.EndDate,
-		Language:    campaignRequest.Language,
-		Rules:       campaignRequest.Rules,
-		Image:       campaignRequest.Image,
+		CampaignWithWriteableFields: database.CampaignWithWriteableFields{
+			Name:        campaignRequest.Name,
+			Description: campaignRequest.Description,
+			ID:          GenerateID(),
+			StartDate:   campaignRequest.StartDate,
+			EndDate:     campaignRequest.EndDate,
+			Language:    campaignRequest.Language,
+			Rules:       campaignRequest.Rules,
+			Image:       campaignRequest.Image,
+			CreatedBy:   campaignRequest.CreatedBy,
+		},
 	}
 	conn, close := database.GetDB()
 	defer close()
@@ -40,10 +46,21 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignRequest)
 	}
 	return campaign, nil
 }
-func (service *CampaignService) GetAllCampaigns() []database.Campaign {
+func (service *CampaignService) GetAllCampaigns(query *database.CampaignFilter) []database.Campaign {
+	fmt.Println("GetAllCampaigns", query)
 	conn, close := database.GetDB()
 	defer close()
 	var campaigns []database.Campaign
-	conn.Find(&campaigns)
+	stmt := conn
+	if query != nil {
+		if query.Limit > 0 {
+			stmt = stmt.Limit(query.Limit)
+		}
+	}
+	result := stmt.Find(&campaigns)
+	if result.Error != nil {
+		fmt.Println("Error: ", result.Error)
+		return nil
+	}
 	return campaigns
 }

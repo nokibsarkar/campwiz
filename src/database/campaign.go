@@ -44,8 +44,7 @@ type ImageCampaignRestrictions struct {
 type MediaCampaignRestrictions struct {
 	ImageCampaignRestrictions
 }
-
-type Campaign struct {
+type CampaignWithWriteableFields struct {
 	ID          string          `gorm:"primaryKey" json:"id"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
@@ -55,8 +54,14 @@ type Campaign struct {
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
 	CreatedBy   string          `json:"created_by"`
-	CreatedAt   time.Time       `json:"created_at" gorm:"autoCreateTime"`
+}
+type Campaign struct {
+	// read only
+	CreatedAt *time.Time `json:"created_at,omitEmpty" gorm:"-<-:create"`
+	CampaignWithWriteableFields
 }
 type CampaignFilter struct {
-	IDs []uint `json:"ids"`
+	IDs       []uint `form:"ids,omitEmpty"`
+	Limit     int    `form:"limit,omitEmpty"`
+	NextToken string `form:"nextToken,omitEmpty"`
 }

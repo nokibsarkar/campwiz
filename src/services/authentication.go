@@ -27,7 +27,6 @@ func NewAuthenticationService() *AuthenticationService {
 	}
 }
 func (a *AuthenticationService) VerifyToken(cacheDB *gorm.DB, tokenMap *SessionClaims) (*cache.Session, error) {
-	fmt.Println("Verifying token")
 	// Check if the token is in the cache
 	sessionIDString := tokenMap.ID
 	if sessionIDString == "" {
@@ -39,6 +38,7 @@ func (a *AuthenticationService) VerifyToken(cacheDB *gorm.DB, tokenMap *SessionC
 	}
 	result := cacheDB.First(session)
 	if result.Error != nil {
+		fmt.Println("Error: ", result.Error)
 		return nil, result.Error
 	}
 	return session, nil
