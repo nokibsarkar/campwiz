@@ -1,0 +1,115 @@
+basePath: /api/v2
+definitions:
+  consts.Language:
+    enum:
+    - en
+    - bn
+    type: string
+    x-enum-varnames:
+    - English
+    - Bangla
+  database.Campaign:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      description:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      language:
+        $ref: '#/definitions/consts.Language'
+      name:
+        type: string
+      rules:
+        type: string
+      start_date:
+        type: string
+    type: object
+  routes.ResponseList-database_Campaign:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/database.Campaign'
+        type: array
+    type: object
+  services.CampaignRequest:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: string
+      description:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      jury:
+        items:
+          type: integer
+        type: array
+      language:
+        $ref: '#/definitions/consts.Language'
+      name:
+        type: string
+      rules:
+        type: string
+      start_date:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the API documentation for Campwiz
+  license:
+    name: LGPL-3.0
+    url: http://www.gnu.org/licenses/lgpl-3.0.html
+  title: Campwiz API
+  version: "1"
+paths:
+  /campaign/:
+    get:
+      description: get all campaigns
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseList-database_Campaign'
+      summary: List all campaigns
+      tags:
+      - Campaign
+    post:
+      description: Create a new campaign
+      parameters:
+      - description: The campaign request
+        in: body
+        name: campaignRequest
+        required: true
+        schema:
+          $ref: '#/definitions/services.CampaignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/database.Campaign'
+      summary: Create a new campaign
+      tags:
+      - Campaign
+produces:
+- application/json
+schemes:
+- http
+- https
+swagger: "2.0"

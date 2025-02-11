@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"encoding/json"
-	"net/url"
 	"nokib/campwiz/consts"
 	"time"
 
@@ -35,8 +34,8 @@ func NewOAuth2Service() *OAuth2Service {
 	}
 }
 func (o *OAuth2Service) Init(callback string) string {
-	state := url.QueryEscape(callback)
-	return OAuth2Config.AuthCodeURL(state)
+	// state := url.QueryEscape(callback)
+	return OAuth2Config.AuthCodeURL(callback)
 }
 func (o *OAuth2Service) GetToken(code string) (*oauth2.Token, error) {
 	token, err := OAuth2Config.Exchange(context.Background(), code)

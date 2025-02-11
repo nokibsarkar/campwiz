@@ -21,6 +21,7 @@ type AuthenticationMiddleWare struct {
 
 const AuthenticationCookieName = "auth"
 const RefreshCookieName = "X-Refresh-Token"
+const SESSION_KEY = "session"
 
 func NewAuthenticationService() *AuthenticationMiddleWare {
 	return &AuthenticationMiddleWare{
@@ -54,7 +55,18 @@ func (a *AuthenticationMiddleWare) extractRefreshToken(c *gin.Context) (string, 
 }
 func (a *AuthenticationMiddleWare) checkIfUnauthenticatedAllowed(c *gin.Context) bool {
 	path := c.Request.URL.Path
-	return strings.HasPrefix(path, "/user/callback")
+	// return true
+	var UnRestrictedPaths = []string{
+		"/user/login",
+		"/user/callback",
+		"/api/v2/campaign/",
+	}
+	for _, p := range UnRestrictedPaths {
+		if strings.HasPrefix(path, p) {
+			return true
+		}
+	}
+	return false
 }
 
 /*
@@ -82,7 +94,7 @@ func (a *AuthenticationMiddleWare) Authenticate(c *gin.Context) {
 				if setCookie {
 					c.SetCookie(AuthenticationCookieName, accessToken, consts.Config.Auth.Expiry*60, "/", "", false, true)
 				}
-				c.Set("session", session)
+				c.Set(SESSION_KEY, session)
 			}
 		}
 		c.Next()

@@ -105,8 +105,8 @@ func HandleOAuth2Callback(c *gin.Context) {
 		})
 		return
 	}
-	c.SetCookie(AuthenticationCookieName, newAccessToken, consts.Config.Auth.Expiry, "/", "", false, true)
-	c.SetCookie(RefreshCookieName, newRefreshToken, consts.Config.Auth.Refresh, "/", "", false, true)
+	c.SetCookie(AuthenticationCookieName, newAccessToken, consts.Config.Auth.Expiry, "/", "", false, false)
+	c.SetCookie(RefreshCookieName, newRefreshToken, consts.Config.Auth.Refresh, "/", "", false, false)
 	c.Redirect(302, state)
 	tx.Commit()
 }

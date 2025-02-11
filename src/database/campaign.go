@@ -46,7 +46,7 @@ type MediaCampaignRestrictions struct {
 }
 
 type Campaign struct {
-	ID          uint            `gorm:"primaryKey" json:"id"`
+	ID          string          `gorm:"primaryKey" json:"id"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	StartDate   time.Time       `json:"start_date"`
@@ -54,8 +54,9 @@ type Campaign struct {
 	Language    consts.Language `json:"language"`
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
+	CreatedBy   string          `json:"created_by"`
+	CreatedAt   time.Time       `json:"created_at" gorm:"autoCreateTime"`
 }
-type CampaignRequest struct {
-	Campaign
-	Jury []uint `json:"jury"`
+type CampaignFilter struct {
+	IDs []uint `json:"ids"`
 }

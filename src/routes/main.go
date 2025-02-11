@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+
 	"nokib/campwiz/database/cache"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,7 @@ func WithSession(callback func(*gin.Context, *cache.Session)) gin.HandlerFunc {
 	}
 }
 func GetSession(c *gin.Context) *cache.Session {
-	sess, ok := c.Get("session")
+	sess, ok := c.Get(SESSION_KEY)
 	if !ok {
 		return nil
 	}
