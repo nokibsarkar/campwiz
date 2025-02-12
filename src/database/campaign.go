@@ -53,11 +53,11 @@ type CampaignWithWriteableFields struct {
 	Language    consts.Language `json:"language"`
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
-	CreatedBy   string          `json:"created_by"`
 }
 type Campaign struct {
 	// read only
 	CreatedAt *time.Time `json:"created_at,omitEmpty" gorm:"-<-:create"`
+	CreatedBy string     `json:"created_by"`
 	CampaignWithWriteableFields
 }
 type CampaignFilter struct {

@@ -47,14 +47,23 @@ func ListAllJury(c *gin.Context) {
 		"message": "Hello, World!",
 	})
 }
+
+// CreateCampaign godoc
+// @Summary Create a new campaign
+// @Description Create a new campaign
+// @Produce  json
+// @Success 200 {object} ResponseSingle[database.Campaign]
+// @Router /campaign/ [post]
+// @Tags Campaign
+// @Param campaignRequest body database.CampaignWithWriteableFields true "The campaign request"
 func CreateCampaign(c *gin.Context, sess *cache.Session) {
 	createRequest := &services.CampaignRequest{}
 	err := c.ShouldBindBodyWithJSON(createRequest)
-	createRequest.CreatedBy = sess.UserID
 	if err != nil {
 		c.JSON(400, ResponseError{Detail: "Invalid request : " + err.Error()})
 		return
 	}
+	createRequest.CreatedBy = sess.UserID
 	camapign_service := services.NewCampaignService()
 	campaign, err := camapign_service.CreateCampaign(createRequest)
 	if err != nil {

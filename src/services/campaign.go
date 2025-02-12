@@ -8,7 +8,9 @@ import (
 type CampaignService struct{}
 type CampaignRequest struct {
 	database.CampaignWithWriteableFields
-	Jury []uint `json:"jury"`
+
+	CreatedBy string `json:"created_by"`
+	Jury      []uint `json:"jury"`
 }
 
 func NewCampaignService() *CampaignService {
@@ -35,8 +37,8 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignRequest)
 			Language:    campaignRequest.Language,
 			Rules:       campaignRequest.Rules,
 			Image:       campaignRequest.Image,
-			CreatedBy:   campaignRequest.CreatedBy,
 		},
+		CreatedBy: campaignRequest.CreatedBy,
 	}
 	conn, close := database.GetDB()
 	defer close()

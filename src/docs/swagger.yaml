@@ -32,12 +32,38 @@ definitions:
       start_date:
         type: string
     type: object
+  database.CampaignWithWriteableFields:
+    properties:
+      created_by:
+        type: string
+      description:
+        type: string
+      end_date:
+        type: string
+      id:
+        type: string
+      image:
+        type: string
+      language:
+        $ref: '#/definitions/consts.Language'
+      name:
+        type: string
+      rules:
+        type: string
+      start_date:
+        type: string
+    type: object
   routes.ResponseList-database_Campaign:
     properties:
       data:
         items:
           $ref: '#/definitions/database.Campaign'
         type: array
+    type: object
+  routes.ResponseSingle-database_Campaign:
+    properties:
+      data:
+        $ref: '#/definitions/database.Campaign'
     type: object
   services.CampaignRequest:
     properties:

@@ -141,6 +141,38 @@ const docTemplate = `{
                 }
             }
         },
+        "database.CampaignWithWriteableFields": {
+            "type": "object",
+            "properties": {
+                "created_by": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "language": {
+                    "$ref": "#/definitions/consts.Language"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "rules": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                }
+            }
+        },
         "routes.ResponseList-database_Campaign": {
             "type": "object",
             "properties": {
@@ -149,6 +181,14 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/database.Campaign"
                     }
+                }
+            }
+        },
+        "routes.ResponseSingle-database_Campaign": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/database.Campaign"
                 }
             }
         },
