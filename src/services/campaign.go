@@ -40,29 +40,50 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignRequest)
 		},
 		CreatedBy: campaignRequest.CreatedBy,
 	}
+	campaign_repo := database.NewCampaignRepository()
+	round_repo := database.NewCampaignRoundRepository()
 	conn, close := database.GetDB()
 	defer close()
-	result := conn.Create(campaign)
-	if result.Error != nil {
-		return nil, result.Error
+	tx := conn.Begin()
+	err := campaign_repo.Create(tx, campaign)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
 	}
+	round := &database.CampaignRound{
+		CampaignID:       campaign.ID,
+		Name:             "Round 1",
+		Description:      "The first round of the campaign",
+		StartDate:        campaign.StartDate,
+		EndDate:          campaign.EndDate,
+		IsOpen:           true,
+		IsPublic:         false,
+		CreatedByID:      campaign.CreatedBy,
+		ID:               GenerateID(),
+		DependsOnRoundID: nil,
+		MediaCampaignRestrictions: database.MediaCampaignRestrictions{
+			ImageCampaignRestrictions: database.ImageCampaignRestrictions{
+				MaximumSubmissionOfSameImage: 1,
+				MinimumTotalImageSize:        1024,
+			},
+		},
+	}
+	err = round_repo.Create(tx, round)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
 	return campaign, nil
 }
 func (service *CampaignService) GetAllCampaigns(query *database.CampaignFilter) []database.Campaign {
-	fmt.Println("GetAllCampaigns", query)
 	conn, close := database.GetDB()
 	defer close()
-	var campaigns []database.Campaign
-	stmt := conn
-	if query != nil {
-		if query.Limit > 0 {
-			stmt = stmt.Limit(query.Limit)
-		}
-	}
-	result := stmt.Find(&campaigns)
-	if result.Error != nil {
-		fmt.Println("Error: ", result.Error)
-		return nil
+	campaign_repo := database.NewCampaignRepository()
+	campaigns, err := campaign_repo.ListAllCampaigns(conn, query)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return []database.Campaign{}
 	}
 	return campaigns
 }

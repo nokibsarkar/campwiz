@@ -3,6 +3,8 @@ package database
 import (
 	"nokib/campwiz/consts"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 /*
@@ -64,4 +66,29 @@ type CampaignFilter struct {
 	IDs       []uint `form:"ids,omitEmpty"`
 	Limit     int    `form:"limit,omitEmpty"`
 	NextToken string `form:"nextToken,omitEmpty"`
+}
+type CampaignRepository struct{}
+
+func NewCampaignRepository() *CampaignRepository {
+	return &CampaignRepository{}
+}
+func (c *CampaignRepository) Create(conn *gorm.DB, campaign *Campaign) error {
+	result := conn.Create(campaign)
+	return result.Error
+}
+func (c *CampaignRepository) FindByID(conn *gorm.DB, id string) (*Campaign, error) {
+	campaign := &Campaign{}
+	result := conn.First(campaign, "id = ?", id)
+	return campaign, result.Error
+}
+func (c *CampaignRepository) ListAllCampaigns(conn *gorm.DB, query *CampaignFilter) ([]Campaign, error) {
+	var campaigns []Campaign
+	stmt := conn
+	if query != nil {
+		if query.Limit > 0 {
+			stmt = stmt.Limit(query.Limit)
+		}
+	}
+	result := stmt.Find(&campaigns)
+	return campaigns, result.Error
 }

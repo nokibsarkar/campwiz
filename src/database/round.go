@@ -2,6 +2,8 @@ package database
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // These are the restrictions that are applied to the articles that are submitted to the campaign
@@ -26,17 +28,26 @@ type CampaignRoundRestrictions struct {
 	CampaignRoundImageRestrictions
 }
 type CampaignRound struct {
-	ID               uint64         `json:"id" gorm:"primaryKey"`
-	CampaignID       uint64         `json:"campaignId"`
+	ID               string         `json:"id" gorm:"primaryKey"`
+	CampaignID       string         `json:"campaignId" gorm:"index"`
 	Name             string         `json:"name"`
 	Description      string         `json:"description" gorm:"type:text"`
 	StartDate        time.Time      `json:"startDate" gorm:"type:datetime"`
 	EndDate          time.Time      `json:"endDate" gorm:"type:datetime"`
 	IsOpen           bool           `json:"isOpen" gorm:"default:true"`
 	IsPublic         bool           `json:"isPublic" gorm:"default:false"`
-	DependsOnRoundID uint64         `json:"dependsOnRoundId" gorm:"default:null"`
-	CreatedByID      uint64         `json:"createdById"`
-	DependsOnRound   *CampaignRound `json:"-"`
-	Campaign         *Campaign      `json:"-"`
+	DependsOnRoundID *string        `json:"dependsOnRoundId" gorm:"default:null"`
+	CreatedByID      string         `json:"createdById"`
+	DependsOnRound   *CampaignRound `json:"-" gorm:"foreignKey:DependsOnRoundID"`
+	Campaign         *Campaign      `json:"-" gorm:"foreignKey:CampaignID"`
 	MediaCampaignRestrictions
+}
+type CampaignRoundRepository struct{}
+
+func NewCampaignRoundRepository() *CampaignRoundRepository {
+	return &CampaignRoundRepository{}
+}
+func (r *CampaignRoundRepository) Create(conn *gorm.DB, campaignRound *CampaignRound) error {
+	result := conn.Create(campaignRound)
+	return result.Error
 }
