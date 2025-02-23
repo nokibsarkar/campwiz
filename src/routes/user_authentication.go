@@ -54,7 +54,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 				ID:           user.CentralID,
 				RegisteredAt: user.Registered,
 				Username:     user.Name,
-				Permission:   consts.PermissionGroupUSER,
+				Permission:   consts.PermissionGroupADMIN,
 			}
 			trx := conn.Create(db_user)
 			if trx.Error != nil {

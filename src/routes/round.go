@@ -18,7 +18,7 @@ import (
 // @Tags CampaignRound
 // @Error 400 {object} ResponseError
 func BulkAddRound(c *gin.Context, sess *cache.Session) {
-	HandleError("BulkAddRound")
+	defer HandleError("BulkAddRound")
 	requestedRounds := services.RoundRequest{
 		CreatedByID: sess.UserID,
 	}
@@ -47,7 +47,7 @@ func BulkAddRound(c *gin.Context, sess *cache.Session) {
 // @Tags CampaignRound
 // @Error 400 {object} ResponseError
 func ListAllRounds(c *gin.Context, sess *cache.Session) {
-	HandleError("ListAllRounds")
+	defer HandleError("ListAllRounds")
 	filter := &database.RoundFilter{}
 	err := c.ShouldBindQuery(filter)
 	if err != nil {
