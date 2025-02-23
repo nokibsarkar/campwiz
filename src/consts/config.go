@@ -30,11 +30,12 @@ type OAuth2Configuration struct {
 	APIURL       string `mapstructure:"APIURL"`
 }
 type AuthenticationConfiguration struct {
-	Secret  string              `mapstructure:"Secret"`
-	Expiry  int                 `mapstructure:"Expiry"`
-	Refresh int                 `mapstructure:"Refresh"`
-	Issuer  string              `mapstructure:"Issuer"`
-	OAuth2  OAuth2Configuration `mapstructure:"OAuth2"`
+	Secret      string              `mapstructure:"Secret"`
+	Expiry      int                 `mapstructure:"Expiry"`
+	Refresh     int                 `mapstructure:"Refresh"`
+	Issuer      string              `mapstructure:"Issuer"`
+	OAuth2      OAuth2Configuration `mapstructure:"OAuth2"`
+	AccessToken string              `mapstructure:"AccessToken"`
 }
 
 type ApplicationConfiguration struct {

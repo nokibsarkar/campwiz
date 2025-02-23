@@ -120,7 +120,7 @@ func RedirectForLogin(c *gin.Context) {
 	c.Redirect(302, redirect_uri)
 }
 
-func UserAuthenticationRoutes(parent *gin.RouterGroup) {
+func NewUserAuthenticationRoutes(parent *gin.RouterGroup) {
 	user := parent.Group("/")
 	user.GET("/user/login", RedirectForLogin)
 	user.GET("/user/callback", HandleOAuth2Callback)

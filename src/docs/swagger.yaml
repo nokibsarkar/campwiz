@@ -10,14 +10,14 @@ definitions:
     - Bangla
   database.Campaign:
     properties:
-      created_at:
+      createdAt:
         description: read only
         type: string
-      created_by:
+      createdBy:
         type: string
       description:
         type: string
-      end_date:
+      endDate:
         type: string
       id:
         type: string
@@ -29,16 +29,68 @@ definitions:
         type: string
       rules:
         type: string
-      start_date:
+      startDate:
+        type: string
+    type: object
+  database.CampaignRound:
+    properties:
+      campaignId:
+        type: string
+      createdAt:
+        type: string
+      createdById:
+        type: string
+      dependsOnRoundId:
+        type: string
+      description:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: string
+      isOpen:
+        type: boolean
+      isPublic:
+        type: boolean
+      maximumSubmissionOfSameImage:
+        type: integer
+      minimumTotalImageSize:
+        type: integer
+      name:
+        type: string
+      serial:
+        type: integer
+      startDate:
+        type: string
+    type: object
+  database.CampaignRoundWritable:
+    properties:
+      dependsOnRoundId:
+        type: string
+      description:
+        type: string
+      endDate:
+        type: string
+      isOpen:
+        type: boolean
+      isPublic:
+        type: boolean
+      maximumSubmissionOfSameImage:
+        type: integer
+      minimumTotalImageSize:
+        type: integer
+      name:
+        type: string
+      serial:
+        type: integer
+      startDate:
         type: string
     type: object
   database.CampaignWithWriteableFields:
     properties:
-      created_by:
-        type: string
       description:
         type: string
-      end_date:
+      endDate:
         type: string
       id:
         type: string
@@ -50,7 +102,7 @@ definitions:
         type: string
       rules:
         type: string
-      start_date:
+      startDate:
         type: string
     type: object
   routes.ResponseList-database_Campaign:
@@ -60,6 +112,13 @@ definitions:
           $ref: '#/definitions/database.Campaign'
         type: array
     type: object
+  routes.ResponseList-database_CampaignRound:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/database.CampaignRound'
+        type: array
+    type: object
   routes.ResponseSingle-database_Campaign:
     properties:
       data:
@@ -67,11 +126,11 @@ definitions:
     type: object
   services.CampaignRequest:
     properties:
-      created_by:
+      createdBy:
         type: string
       description:
         type: string
-      end_date:
+      endDate:
         type: string
       id:
         type: string
@@ -87,8 +146,17 @@ definitions:
         type: string
       rules:
         type: string
-      start_date:
+      startDate:
         type: string
+    type: object
+  services.RoundRequest:
+    properties:
+      campaignId:
+        type: string
+      rounds:
+        items:
+          $ref: '#/definitions/database.CampaignRoundWritable'
+        type: array
     type: object
 host: localhost:8080
 info:
@@ -145,6 +213,46 @@ paths:
       summary: Create a new campaign
       tags:
       - Campaign
+  /round/:
+    get:
+      description: get all rounds
+      parameters:
+      - in: query
+        name: campaignId
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseList-database_CampaignRound'
+      summary: List all rounds
+      tags:
+      - CampaignRound
+  /round/bulk-add:
+    post:
+      description: Add multiple rounds to a campaign
+      parameters:
+      - description: The round request
+        in: body
+        name: roundRequest
+        required: true
+        schema:
+          $ref: '#/definitions/services.RoundRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseList-database_CampaignRound'
+      summary: Add multiple rounds to a campaign
+      tags:
+      - CampaignRound
 produces:
 - application/json
 schemes:

@@ -3,15 +3,16 @@ package services
 import (
 	"fmt"
 	"math/rand/v2"
+	"nokib/campwiz/database"
 	"slices"
 )
 
 type BatchService struct{}
-type Image struct {
-	ID   uint64 `json:"id"`
-	Name string `json:"name"`
+
+func NewBatchService() *BatchService {
+	return &BatchService{}
 }
-type batch []Evaluation
+
 type Jury struct {
 	ID            uint64 `json:"id" gorm:"primaryKey"`
 	totalAssigned int
@@ -22,33 +23,15 @@ type Evaluation struct {
 	DistributionRound int    `json:"distributionRound"`
 	Name              string `json:"name"`
 }
-
-func NewBatchService() *BatchService {
-	return &BatchService{}
-}
-
 type ByAssigned []*Jury
 
 func (a ByAssigned) Len() int           { return len(a) }
 func (a ByAssigned) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByAssigned) Less(i, j int) bool { return a[i].totalAssigned < a[j].totalAssigned }
 func (b *BatchService) CreateBatchFromCommonsCategory() {
-	// Create batch from commons category
-	images := []Image{
-		{ID: 1, Name: "Image 1"},
-		{ID: 2, Name: "Image 2"},
-		{ID: 3, Name: "Image 3"},
-		{ID: 4, Name: "Image 4"},
-		{ID: 5, Name: "Image 5"},
-		{ID: 6, Name: "Image 6"},
-		{ID: 7, Name: "Image 7"},
-		{ID: 8, Name: "Image 8"},
-		{ID: 9, Name: "Image 9"},
-		{ID: 10, Name: "Image 10"},
-	}
-	for t := 0; t < 1000000; t++ {
-		images = append(images, Image{ID: uint64(t + 11), Name: fmt.Sprintf("Image %d", t+11)})
-	}
+	categories := []string{"Category:Images_from_Wikimedia_Commons"}
+	commons_repo := database.NewCommonsRepository("accessToken")
+	images := commons_repo.GetImagesFromCommonsCategories(categories)
 	juries := []*Jury{}
 	for i := 1; i <= 100; i++ {
 		juries = append(juries, &Jury{ID: uint64(i), totalAssigned: rand.IntN(100)})

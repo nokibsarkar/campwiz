@@ -27,15 +27,18 @@ func GetSession(c *gin.Context) *cache.Session {
 		return nil
 	}
 	session, ok := sess.(*cache.Session)
+	if !ok {
+		return nil
+	}
 	return session
 }
-func NewRoutes(parent *gin.RouterGroup) {
-
-	UserAuthenticationRoutes(parent)
-	r := parent.Group("/api/v2")
+func NewRoutes(nonAPIParent *gin.RouterGroup) {
+	r := nonAPIParent.Group("/api/v2")
 	authenticatorService := NewAuthenticationService()
 	r.Use(authenticatorService.Authenticate)
+	NewUserAuthenticationRoutes(nonAPIParent)
 	NewCampaignRoutes(r)
 	NewSubmissionRoutes(r)
 	NewUserRoutes(r)
+	NewRoundRoutes(r)
 }

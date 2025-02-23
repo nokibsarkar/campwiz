@@ -7,41 +7,22 @@ import (
 	"gorm.io/gorm"
 )
 
-/*
-name : str
-language : Language
-start_at : datetime | date
-end_at : datetime | date
-description : str | None
-rules : str | list[str]
-blacklist : list[str] | str | None
-image : str | None
-maximumSubmissionOfSameArticle : int
-allowExpansions : bool
-minimumTotalBytes : int
-minimumTotalWords : int
-minimumAddedBytes : int
-minimumAddedWords : int
-secretBallot : bool
-allowJuryToParticipate : bool
-allowMultipleJudgement : bool
-*/
 type ArticleCampaignRestrictions struct {
-	MaximumSubmissionOfSameArticle int    `json:"maximum_submission_of_same_article"`
-	AllowExpansions                bool   `json:"allow_expansions"`
-	AllowCreations                 bool   `json:"allow_creations"`
-	MinimumTotalBytes              int    `json:"minimum_total_bytes"`
-	MinimumTotalWords              int    `json:"minimum_total_words"`
-	MinimumAddedBytes              int    `json:"minimum_added_bytes"`
-	MinimumAddedWords              int    `json:"minimum_added_words"`
-	SecretBallot                   bool   `json:"secret_ballot"`
-	AllowJuryToParticipate         bool   `json:"allow_jury_to_participate"`
-	AllowMultipleJudgement         bool   `json:"allow_multiple_judgement"`
+	MaximumSubmissionOfSameArticle int    `json:"maximumSubmissionOfSameArticle"`
+	AllowExpansions                bool   `json:"allowExpansions"`
+	AllowCreations                 bool   `json:"allowCreations"`
+	MinimumTotalBytes              int    `json:"minimumTotalBytes"`
+	MinimumTotalWords              int    `json:"minimumTotalWords"`
+	MinimumAddedBytes              int    `json:"minimumAddedBytes"`
+	MinimumAddedWords              int    `json:"minimumAddedWords"`
+	SecretBallot                   bool   `json:"secretBallot"`
+	AllowJuryToParticipate         bool   `json:"allowJuryToParticipate"`
+	AllowMultipleJudgement         bool   `json:"allowMultipleJudgement"`
 	Blacklist                      string `json:"blacklist"`
 }
 type ImageCampaignRestrictions struct {
-	MaximumSubmissionOfSameImage int `json:"maximum_submission_of_same_image"`
-	MinimumTotalImageSize        int `json:"minimum_total_image_size"`
+	MaximumSubmissionOfSameImage int `json:"maximumSubmissionOfSameImage"`
+	MinimumTotalImageSize        int `json:"minimumTotalImageSize"`
 }
 type MediaCampaignRestrictions struct {
 	ImageCampaignRestrictions
@@ -50,16 +31,16 @@ type CampaignWithWriteableFields struct {
 	ID          string          `gorm:"primaryKey" json:"id"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
-	StartDate   time.Time       `json:"start_date"`
-	EndDate     time.Time       `json:"end_date"`
+	StartDate   time.Time       `json:"startDate"`
+	EndDate     time.Time       `json:"endDate"`
 	Language    consts.Language `json:"language"`
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
 }
 type Campaign struct {
 	// read only
-	CreatedAt *time.Time `json:"created_at,omitEmpty" gorm:"-<-:create"`
-	CreatedBy string     `json:"created_by"`
+	CreatedAt *time.Time `json:"createdAt" gorm:"-<-:create"`
+	CreatedBy string     `json:"createdBy"`
 	CampaignWithWriteableFields
 }
 type CampaignFilter struct {
@@ -78,7 +59,8 @@ func (c *CampaignRepository) Create(conn *gorm.DB, campaign *Campaign) error {
 }
 func (c *CampaignRepository) FindByID(conn *gorm.DB, id string) (*Campaign, error) {
 	campaign := &Campaign{}
-	result := conn.First(campaign, "id = ?", id)
+	where := &Campaign{CampaignWithWriteableFields: CampaignWithWriteableFields{ID: id}}
+	result := conn.First(campaign, where)
 	return campaign, result.Error
 }
 func (c *CampaignRepository) ListAllCampaigns(conn *gorm.DB, query *CampaignFilter) ([]Campaign, error) {

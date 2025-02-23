@@ -27,9 +27,7 @@ type CampaignRoundRestrictions struct {
 	CampaignRoundAudioVideoRestrictions
 	CampaignRoundImageRestrictions
 }
-type CampaignRound struct {
-	ID               string         `json:"id" gorm:"primaryKey"`
-	CampaignID       string         `json:"campaignId" gorm:"index"`
+type CampaignRoundWritable struct {
 	Name             string         `json:"name"`
 	Description      string         `json:"description" gorm:"type:text"`
 	StartDate        time.Time      `json:"startDate" gorm:"type:datetime"`
@@ -37,17 +35,43 @@ type CampaignRound struct {
 	IsOpen           bool           `json:"isOpen" gorm:"default:true"`
 	IsPublic         bool           `json:"isPublic" gorm:"default:false"`
 	DependsOnRoundID *string        `json:"dependsOnRoundId" gorm:"default:null"`
-	CreatedByID      string         `json:"createdById"`
 	DependsOnRound   *CampaignRound `json:"-" gorm:"foreignKey:DependsOnRoundID"`
 	Campaign         *Campaign      `json:"-" gorm:"foreignKey:CampaignID"`
+	Serial           int            `json:"serial" gorm:"default:0"`
 	MediaCampaignRestrictions
+}
+type CampaignRound struct {
+	CampaignID  string     `json:"campaignId" gorm:"index"`
+	ID          string     `json:"id" gorm:"primaryKey"`
+	CreatedAt   *time.Time `json:"createdAt" gorm:"-<-:create"`
+	CreatedByID string     `json:"createdById"`
+	CampaignRoundWritable
+}
+type RoundFilter struct {
+	CampaignID string `form:"campaignId"`
+	Limit      int    `form:"limit"`
 }
 type CampaignRoundRepository struct{}
 
 func NewCampaignRoundRepository() *CampaignRoundRepository {
 	return &CampaignRoundRepository{}
 }
-func (r *CampaignRoundRepository) Create(conn *gorm.DB, campaignRound *CampaignRound) error {
-	result := conn.Create(campaignRound)
+func (r *CampaignRoundRepository) Create(conn *gorm.DB, rounds []CampaignRound) error {
+	result := conn.Create(rounds)
 	return result.Error
+}
+func (r *CampaignRoundRepository) FindAll(conn *gorm.DB, filter *RoundFilter) ([]CampaignRound, error) {
+	var rounds []CampaignRound
+	where := &CampaignRound{}
+	if filter != nil {
+		if filter.CampaignID != "" {
+			where.CampaignID = filter.CampaignID
+		}
+	}
+	stmt := conn.Where(where)
+	if filter.Limit > 0 {
+		stmt = stmt.Limit(filter.Limit)
+	}
+	result := stmt.Find(&rounds)
+	return rounds, result.Error
 }

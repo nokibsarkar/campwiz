@@ -16,7 +16,7 @@ type AuthenticationService struct {
 	Config *consts.AuthenticationConfiguration
 }
 type SessionClaims struct {
-	Permission consts.PermissionGroup `json:"permission,required"`
+	Permission consts.PermissionGroup `json:"permission"`
 	Name       string                 `json:"name"`
 	jwt.RegisteredClaims
 }
@@ -30,7 +30,7 @@ func (a *AuthenticationService) VerifyToken(cacheDB *gorm.DB, tokenMap *SessionC
 	// Check if the token is in the cache
 	sessionIDString := tokenMap.ID
 	if sessionIDString == "" {
-		return nil, fmt.Errorf("No session ID found")
+		return nil, fmt.Errorf("no session ID found")
 	}
 	session := &cache.Session{
 		ID:     sessionIDString,
@@ -87,7 +87,7 @@ func (a *AuthenticationService) RefreshSession(cacheDB *gorm.DB, tokenMap *Sessi
 	fmt.Println("Refreshing session")
 	sessionIDString := tokenMap.ID
 	if sessionIDString == "" {
-		return "", nil, fmt.Errorf("No session ID found")
+		return "", nil, fmt.Errorf("no session ID found")
 	}
 	session = &cache.Session{
 		ID:         sessionIDString,
@@ -138,15 +138,15 @@ func (a *AuthenticationService) decodeToken(tokenString string) (*SessionClaims,
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		claims := token.Claims.(jwt.Claims)
+		claims := token.Claims
 		iss, ok := claims.GetIssuer()
 		if ok != nil {
-			return nil, errors.New("Issuer not found")
+			return nil, errors.New("issuer not found")
 		}
 		if iss != a.Config.Issuer {
-			return nil, errors.New("Invalid issuer")
+			return nil, errors.New("invalid issuer")
 		}
 
 		return []byte(a.Config.Secret), nil
@@ -155,7 +155,7 @@ func (a *AuthenticationService) decodeToken(tokenString string) (*SessionClaims,
 		return claims, err
 	}
 	if !token.Valid {
-		return claims, errors.New("Invalid token")
+		return claims, errors.New("invalid-token")
 	}
 	return claims, nil
 }
@@ -168,17 +168,17 @@ func (auth_service *AuthenticationService) Authenticate(token string) (string, *
 			// Token is expired
 			newAccessToken, session, err := auth_service.RefreshSession(cache_db, tokenMap)
 			if err != nil {
-				return "", nil, errors.New("Token expired and could not be refreshed"), false
+				return "", nil, errors.New("token expired and could not be refreshed"), false
 			} else {
 				return newAccessToken, session, nil, true
 			}
 		} else {
-			return "", nil, errors.New("Token could not be decoded"), false
+			return "", nil, errors.New("token could not be decoded"), false
 		}
 	} else {
 		session, err := auth_service.VerifyToken(cache_db, tokenMap)
 		if err != nil {
-			return "", nil, errors.New("Invalid token"), false
+			return "", nil, errors.New("invalid token"), false
 		}
 		return token, session, nil, false
 	}

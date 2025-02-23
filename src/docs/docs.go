@@ -91,6 +91,69 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/round/": {
+            "get": {
+                "description": "get all rounds",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CampaignRound"
+                ],
+                "summary": "List all rounds",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "campaignId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseList-database_CampaignRound"
+                        }
+                    }
+                }
+            }
+        },
+        "/round/bulk-add": {
+            "post": {
+                "description": "Add multiple rounds to a campaign",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "CampaignRound"
+                ],
+                "summary": "Add multiple rounds to a campaign",
+                "parameters": [
+                    {
+                        "description": "The round request",
+                        "name": "roundRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.RoundRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseList-database_CampaignRound"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -108,17 +171,17 @@ const docTemplate = `{
         "database.Campaign": {
             "type": "object",
             "properties": {
-                "created_at": {
+                "createdAt": {
                     "description": "read only",
                     "type": "string"
                 },
-                "created_by": {
+                "createdBy": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
-                "end_date": {
+                "endDate": {
                     "type": "string"
                 },
                 "id": {
@@ -136,7 +199,89 @@ const docTemplate = `{
                 "rules": {
                     "type": "string"
                 },
-                "start_date": {
+                "startDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.CampaignRound": {
+            "type": "object",
+            "properties": {
+                "campaignId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdById": {
+                    "type": "string"
+                },
+                "dependsOnRoundId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "isOpen": {
+                    "type": "boolean"
+                },
+                "isPublic": {
+                    "type": "boolean"
+                },
+                "maximumSubmissionOfSameImage": {
+                    "type": "integer"
+                },
+                "minimumTotalImageSize": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "serial": {
+                    "type": "integer"
+                },
+                "startDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.CampaignRoundWritable": {
+            "type": "object",
+            "properties": {
+                "dependsOnRoundId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "isOpen": {
+                    "type": "boolean"
+                },
+                "isPublic": {
+                    "type": "boolean"
+                },
+                "maximumSubmissionOfSameImage": {
+                    "type": "integer"
+                },
+                "minimumTotalImageSize": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "serial": {
+                    "type": "integer"
+                },
+                "startDate": {
                     "type": "string"
                 }
             }
@@ -144,13 +289,10 @@ const docTemplate = `{
         "database.CampaignWithWriteableFields": {
             "type": "object",
             "properties": {
-                "created_by": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
-                "end_date": {
+                "endDate": {
                     "type": "string"
                 },
                 "id": {
@@ -168,7 +310,7 @@ const docTemplate = `{
                 "rules": {
                     "type": "string"
                 },
-                "start_date": {
+                "startDate": {
                     "type": "string"
                 }
             }
@@ -184,6 +326,17 @@ const docTemplate = `{
                 }
             }
         },
+        "routes.ResponseList-database_CampaignRound": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.CampaignRound"
+                    }
+                }
+            }
+        },
         "routes.ResponseSingle-database_Campaign": {
             "type": "object",
             "properties": {
@@ -195,13 +348,13 @@ const docTemplate = `{
         "services.CampaignRequest": {
             "type": "object",
             "properties": {
-                "created_by": {
+                "createdBy": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
-                "end_date": {
+                "endDate": {
                     "type": "string"
                 },
                 "id": {
@@ -225,8 +378,22 @@ const docTemplate = `{
                 "rules": {
                     "type": "string"
                 },
-                "start_date": {
+                "startDate": {
                     "type": "string"
+                }
+            }
+        },
+        "services.RoundRequest": {
+            "type": "object",
+            "properties": {
+                "campaignId": {
+                    "type": "string"
+                },
+                "rounds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.CampaignRoundWritable"
+                    }
                 }
             }
         }

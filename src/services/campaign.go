@@ -8,8 +8,7 @@ import (
 type CampaignService struct{}
 type CampaignRequest struct {
 	database.CampaignWithWriteableFields
-
-	CreatedBy string `json:"created_by"`
+	CreatedBy string `json:"createdBy"`
 	Jury      []uint `json:"jury"`
 }
 
@@ -50,21 +49,26 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignRequest)
 		tx.Rollback()
 		return nil, err
 	}
-	round := &database.CampaignRound{
-		CampaignID:       campaign.ID,
-		Name:             "Round 1",
-		Description:      "The first round of the campaign",
-		StartDate:        campaign.StartDate,
-		EndDate:          campaign.EndDate,
-		IsOpen:           true,
-		IsPublic:         false,
-		CreatedByID:      campaign.CreatedBy,
-		ID:               GenerateID(),
-		DependsOnRoundID: nil,
-		MediaCampaignRestrictions: database.MediaCampaignRestrictions{
-			ImageCampaignRestrictions: database.ImageCampaignRestrictions{
-				MaximumSubmissionOfSameImage: 1,
-				MinimumTotalImageSize:        1024,
+	round := []database.CampaignRound{
+		{
+			CreatedByID: campaign.CreatedBy,
+			CampaignID:  campaign.ID,
+			ID:          GenerateID(),
+			CampaignRoundWritable: database.CampaignRoundWritable{
+				Name:             "Round 0",
+				Description:      "The system round of the campaign",
+				StartDate:        campaign.StartDate,
+				EndDate:          campaign.EndDate,
+				IsOpen:           true,
+				IsPublic:         false,
+				Serial:           0,
+				DependsOnRoundID: nil,
+				MediaCampaignRestrictions: database.MediaCampaignRestrictions{
+					ImageCampaignRestrictions: database.ImageCampaignRestrictions{
+						MaximumSubmissionOfSameImage: 1,
+						MinimumTotalImageSize:        1024,
+					},
+				},
 			},
 		},
 	}
@@ -80,6 +84,7 @@ func (service *CampaignService) GetAllCampaigns(query *database.CampaignFilter) 
 	conn, close := database.GetDB()
 	defer close()
 	campaign_repo := database.NewCampaignRepository()
+
 	campaigns, err := campaign_repo.ListAllCampaigns(conn, query)
 	if err != nil {
 		fmt.Println("Error: ", err)

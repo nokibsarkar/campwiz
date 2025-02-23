@@ -42,17 +42,9 @@ func (a *AuthenticationMiddleWare) extractAccessToken(c *gin.Context) (string, e
 			return token[7:], nil
 		}
 	}
-	return "", errors.New("No Access token found")
+	return "", errors.New("no-access-token")
 }
-func (a *AuthenticationMiddleWare) extractRefreshToken(c *gin.Context) (string, error) {
-	cookies := c.Request.Cookies()
-	for _, cookie := range cookies {
-		if cookie.Name == RefreshCookieName {
-			return cookie.Value, nil
-		}
-	}
-	return "", errors.New("No Refresh token found")
-}
+
 func (a *AuthenticationMiddleWare) checkIfUnauthenticatedAllowed(c *gin.Context) bool {
 	path := c.Request.URL.Path
 	// return true
