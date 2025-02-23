@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"nokib/campwiz/consts"
 	"nokib/campwiz/database"
 	"nokib/campwiz/database/cache"
 	"nokib/campwiz/services"
@@ -64,6 +65,6 @@ func ListAllRounds(c *gin.Context, sess *cache.Session) {
 }
 func NewRoundRoutes(parent *gin.RouterGroup) {
 	r := parent.Group("/round")
-	r.POST("/bulk-add", WithSession(BulkAddRound))
+	r.POST("/bulk-add", WithPermission(consts.PermissionCreateCampaign, BulkAddRound))
 	r.GET("/", WithSession(ListAllRounds))
 }
