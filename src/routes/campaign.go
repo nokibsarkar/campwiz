@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"nokib/campwiz/consts"
 	"nokib/campwiz/database"
 	"nokib/campwiz/database/cache"
 	"nokib/campwiz/services"
@@ -113,7 +114,7 @@ func NewCampaignRoutes(parent *gin.RouterGroup) {
 	r.GET("/timeline2", GetAllCampaignTimeLine)
 	r.GET("/:id", GetSingleCampaign)
 	r.GET("/jury", ListAllJury)
-	r.POST("/", WithSession(CreateCampaign))
+	r.POST("/", WithPermission(consts.PermissionCreateCampaign, CreateCampaign))
 	r.POST("/:id", UpdateCampaign)
 	r.GET("/:id/result", GetCampaignResult)
 	r.GET("/:id/submissions", GetCampaignSubmissions)
