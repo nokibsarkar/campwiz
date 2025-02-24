@@ -12,7 +12,7 @@ import (
 func GetDB() (db *gorm.DB, close func()) {
 	dsn := consts.Config.Database.Main.DSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logger.Warn),
 	})
 	if err != nil {
 		panic("failed to connect database")
@@ -29,13 +29,15 @@ func InitDB() {
 	conn, close := GetDB()
 	defer close()
 	db := conn.Begin()
-	db.AutoMigrate(&Campaign{})
+	// set character set to utf8mb4
+	db.Exec("ALTER DATABASE campwiz CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci;")
 	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Participant{})
+	db.AutoMigrate(&Campaign{})
 	db.AutoMigrate(&CampaignRound{})
 	db.AutoMigrate(&Batch{})
-	db.AutoMigrate(&Evaluation{})
 	db.AutoMigrate(&Jury{})
-	db.AutoMigrate(&Participant{})
+	db.AutoMigrate(&Evaluation{})
 	db.AutoMigrate(&Submission{})
 	fmt.Println((db))
 	db.Commit()

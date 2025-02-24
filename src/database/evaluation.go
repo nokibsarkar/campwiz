@@ -10,7 +10,7 @@ type Evaluation struct {
 	Comment       string       `json:"comment" gorm:"default:null"`
 	Serial        uint         `json:"serial"`
 	Batch         *Batch       `json:"-"`
-	Submission    *Submission  `json:"-" gorm:"foreignKey:SubmissionID"`
-	Participant   *Participant `json:"-" gorm:"foreignKey:ParticipantID"`
-	Judge         *Jury        `json:"-" gorm:"foreignKey:JudgeID"`
+	Submission    *Submission  `json:"-"`
+	Participant   *Participant `json:"-"`
+	Judge         *Jury        `json:"-"`
 }

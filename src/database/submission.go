@@ -34,18 +34,18 @@ type MediaSubmission struct {
 	AudioVideoSubmission
 }
 type Submission struct {
-	SubmissionID  string      `json:"pageid" `
+	SubmissionID  string      `json:"pageid" gorm:"primaryKey;type:varchar(255)"`
 	Name          string      `json:"title"`
-	CampaignID    uint64      `json:"campaignId" gorm:"index"`
+	CampaignID    string      `json:"campaignId" gorm:"null;index;type:varchar(255)"`
 	URL           string      `json:"url"`
-	Author        string      `json:"author"`        // The Actual Author in the Wikimedia
-	AuthorID      uint64      `json:"authorId"`      // The Actual Author ID in the Wikimedia
-	SubmittedByID uint64      `json:"submittedById"` // The User who submitted the article on behalf of the participant
-	ParticipantID uint64      `json:"participantId"`
+	Author        string      `json:"author"`                                 // The Actual Author in the Wikimedia
+	AuthorID      string      `json:"authorId" gorm:"type:varchar(255)"`      // The Actual Author ID in the Wikimedia
+	SubmittedByID string      `json:"submittedById" gorm:"type:varchar(255)"` // The User who submitted the article on behalf of the participant
+	ParticipantID string      `json:"participantId" gorm:"type:varchar(255)"`
 	SubmittedAt   time.Time   `json:"submittedAt"`
 	Participant   Participant `json:"-"`
 	Submitter     User        `json:"-" gorm:"foreignKey:SubmittedByID"`
-	Campaign      *Campaign   `json:"-" gorm:"foreignKey:CampaignID"`
+	Campaign      *Campaign   `json:"-"`
 	MediaSubmission
 }
 type SubmissionRepository struct{}

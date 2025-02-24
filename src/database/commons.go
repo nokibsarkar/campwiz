@@ -116,6 +116,15 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 		if image == nil {
 			break
 		}
+		if len(image.Info) == 0 {
+			fmt.Println("No image info found. Skipping")
+			continue
+		}
+		info := image.Info[0]
+		submission := &Submission{
+			URL: info.URL,
+		}
+		fmt.Println("Creating submission with URL: ", submission.URL)
 		result = append(result, Image{
 			ID:   uint64(image.Pageid),
 			Name: image.Title,

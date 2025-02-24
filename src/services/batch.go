@@ -60,8 +60,17 @@ func (b *BatchService) CreateBatchFromCommonsCategory(req *CreateFromCommons) (*
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
+	round_repo := database.NewCampaignRoundRepository()
+	round, err := round_repo.FindByID(tx, req.RoundId)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else if round == nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("round not found")
+	}
 	batch_repo := database.NewBatchRepository()
-	batch, err := batch_repo.CreateBatch(tx, batch)
+	batch, err = batch_repo.CreateBatch(tx, batch)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -69,8 +78,9 @@ func (b *BatchService) CreateBatchFromCommonsCategory(req *CreateFromCommons) (*
 	submission_repo := database.NewSubmissionRepository()
 	for _, image := range images {
 		submission := &database.Submission{
-			// SubmissionID: GenerateID(),
-			Name: image.Name,
+			SubmissionID: GenerateID(),
+			Name:         image.Name,
+			CampaignID:   round.CampaignID,
 		}
 		err = submission_repo.CreateSubmission(tx, submission)
 		if err != nil {

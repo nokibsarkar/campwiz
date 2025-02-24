@@ -75,3 +75,9 @@ func (r *CampaignRoundRepository) FindAll(conn *gorm.DB, filter *RoundFilter) ([
 	result := stmt.Find(&rounds)
 	return rounds, result.Error
 }
+func (r *CampaignRoundRepository) FindByID(conn *gorm.DB, id string) (*CampaignRound, error) {
+	round := &CampaignRound{}
+	where := &CampaignRound{ID: id}
+	result := conn.First(round, where)
+	return round, result.Error
+}
