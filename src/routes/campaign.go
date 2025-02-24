@@ -64,7 +64,7 @@ func CreateCampaign(c *gin.Context, sess *cache.Session) {
 		c.JSON(400, ResponseError{Detail: "Invalid request : " + err.Error()})
 		return
 	}
-	createRequest.CreatedBy = sess.UserID
+	createRequest.CreatedByID = sess.UserID
 	camapign_service := services.NewCampaignService()
 	campaign, err := camapign_service.CreateCampaign(createRequest)
 	if err != nil {
@@ -84,10 +84,24 @@ func CreateCampaign(c *gin.Context, sess *cache.Session) {
 // @Param id path string true "The campaign ID"
 // @Param campaignRequest body services.CampaignUpdateRequest true "The campaign request"
 
-func UpdateCampaign(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"message": "Hello, World!",
-	})
+func UpdateCampaign(c *gin.Context, sess *cache.Session) {
+	campaignId := c.Param("id")
+	if campaignId == "" {
+		c.JSON(400, ResponseError{Detail: "Invalid request : Campaign ID is required"})
+	}
+	updateRequest := &services.CampaignUpdateRequest{}
+	err := c.ShouldBindBodyWithJSON(updateRequest)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Invalid request : " + err.Error()})
+		return
+	}
+	campaign_service := services.NewCampaignService()
+	campaign, err := campaign_service.UpdateCampaign(campaignId, updateRequest)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Failed to update campaign : " + err.Error()})
+		return
+	}
+	c.JSON(200, ResponseSingle[*database.Campaign]{Data: campaign})
 }
 func GetCampaignResult(c *gin.Context) {
 	c.JSON(200, gin.H{
@@ -126,7 +140,7 @@ func NewCampaignRoutes(parent *gin.RouterGroup) {
 	r.GET("/:id", GetSingleCampaign)
 	r.GET("/jury", ListAllJury)
 	r.POST("/", WithPermission(consts.PermissionCreateCampaign, CreateCampaign))
-	r.POST("/:id", UpdateCampaign)
+	r.POST("/:id", WithPermission(consts.PermissionUpdateCampaign, UpdateCampaign))
 	r.GET("/:id/result", GetCampaignResult)
 	r.GET("/:id/submissions", GetCampaignSubmissions)
 	r.GET("/:id/next", GetNextSubmission)

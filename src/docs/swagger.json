@@ -24,6 +24,254 @@
     "host": "localhost:8080",
     "basePath": "/api/v2",
     "paths": {
+        "/batch/": {
+            "get": {
+                "description": "List batches",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "List batches",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseList-database_Batch"
+                        }
+                    }
+                }
+            }
+        },
+        "/batch/create/commons": {
+            "post": {
+                "description": "The user would provide a list of commons categories and the system would create a batch from the images in those categories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Create a batch of images from commons category",
+                "parameters": [
+                    {
+                        "description": "The batch creation request",
+                        "name": "CreateFromCommons",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CreateFromCommons"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/batch/create/csv": {
+            "post": {
+                "description": "The user would provide a CSV file with a list of image names and the system would create a batch from the images in those URLs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Create a batch of images from a CSV file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "The CSV file",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/batch/create/pagepile/{pagepileId}": {
+            "post": {
+                "description": "The user would provide a pagepile ID and the system would create a batch from the images in that pagepile",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Create a batch of images from a pagepile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The pagepile ID",
+                        "name": "pagepileId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/batch/create/round/{roundId}": {
+            "post": {
+                "description": "The user would provide a round ID and the system would create a batch from the images in that round",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Create a batch of images from another round output",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The round ID",
+                        "name": "roundId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/batch/create/wikipage": {
+            "post": {
+                "description": "The user would provide a wikipage and the system would create a batch from the images listed in that wikipage",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Create a batch of images from a list of wikipages",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The wikipage",
+                        "name": "wikipage",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "The language of the wikipage",
+                        "name": "language",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/batch/{batchId}": {
+            "get": {
+                "description": "Get a batch",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Get a batch",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The batch ID",
+                        "name": "batchId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-database_Batch"
+                        }
+                    }
+                }
+            }
+        },
+        "/batch/{batchId}/images": {
+            "get": {
+                "description": "Get images of a batch",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Batch"
+                ],
+                "summary": "Get images of a batch",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The batch ID",
+                        "name": "batchId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseList-database_Image"
+                        }
+                    }
+                }
+            }
+        },
         "/campaign/": {
             "get": {
                 "description": "get all campaigns",
@@ -200,13 +448,126 @@
         "consts.Language": {
             "type": "string",
             "enum": [
+                "am",
+                "ar",
+                "as",
+                "af",
+                "bn",
+                "zh",
+                "da",
+                "nl",
                 "en",
-                "bn"
+                "fi",
+                "fr",
+                "de",
+                "el",
+                "gu",
+                "ha",
+                "hi",
+                "ig",
+                "it",
+                "ja",
+                "kn",
+                "ko",
+                "ml",
+                "mr",
+                "ne",
+                "no",
+                "or",
+                "om",
+                "fa",
+                "pt",
+                "pa",
+                "ru",
+                "sa",
+                "st",
+                "sn",
+                "sd",
+                "so",
+                "es",
+                "sw",
+                "sv",
+                "ta",
+                "te",
+                "ts",
+                "tn",
+                "tr",
+                "ur",
+                "-",
+                "ve",
+                "xh",
+                "yo",
+                "zu"
             ],
             "x-enum-varnames": [
+                "Amharic",
+                "Arabic",
+                "Assamese",
+                "Afrikaans",
+                "Bangla",
+                "Chinese",
+                "Danish",
+                "Dutch",
                 "English",
-                "Bangla"
+                "Finnish",
+                "French",
+                "German",
+                "Greek",
+                "Gujarati",
+                "Hausa",
+                "Hindi",
+                "Igbo",
+                "Italian",
+                "Japanese",
+                "Kannada",
+                "Korean",
+                "Malayalam",
+                "Marathi",
+                "Nepali",
+                "Norwegian",
+                "Odia",
+                "Oromo",
+                "Persian",
+                "Portuguese",
+                "Punjabi",
+                "Russian",
+                "Sanskrit",
+                "Sesotho",
+                "Shona",
+                "Sindhi",
+                "Somali",
+                "Spanish",
+                "Swahili",
+                "Swedish",
+                "Tamil",
+                "Telugu",
+                "Tsonga",
+                "Tswana",
+                "Turkish",
+                "Urdu",
+                "Undefined",
+                "Venda",
+                "Xhosa",
+                "Yoruba",
+                "Zulu"
             ]
+        },
+        "database.Batch": {
+            "type": "object",
+            "properties": {
+                "batchId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdById": {
+                    "type": "string"
+                },
+                "totalSubmissions": {
+                    "type": "integer"
+                }
+            }
         },
         "database.Campaign": {
             "type": "object",
@@ -326,6 +687,28 @@
                 }
             }
         },
+        "database.Image": {
+            "type": "object",
+            "properties": {
+                "pageid": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.ResponseList-database_Batch": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.Batch"
+                    }
+                }
+            }
+        },
         "routes.ResponseList-database_Campaign": {
             "type": "object",
             "properties": {
@@ -345,6 +728,62 @@
                     "items": {
                         "$ref": "#/definitions/database.CampaignRound"
                     }
+                }
+            }
+        },
+        "routes.ResponseList-database_Image": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.Image"
+                    }
+                }
+            }
+        },
+        "routes.ResponseSingle-database_Batch": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/database.Batch"
+                }
+            }
+        },
+        "routes.ResponseSingle-services_BatchCreationResult": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/services.BatchCreationResult"
+                }
+            }
+        },
+        "services.BatchCreationResult": {
+            "type": "object",
+            "properties": {
+                "batchId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdById": {
+                    "type": "string"
+                },
+                "failedCount": {
+                    "type": "integer"
+                },
+                "failedIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "successCount": {
+                    "type": "integer"
+                },
+                "totalSubmissions": {
+                    "type": "integer"
                 }
             }
         },
@@ -383,9 +822,6 @@
         "services.CampaignUpdateRequest": {
             "type": "object",
             "properties": {
-                "campaignId": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
@@ -411,6 +847,22 @@
                     "type": "string"
                 },
                 "startDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.CreateFromCommons": {
+            "type": "object",
+            "properties": {
+                "categories": {
+                    "description": "Categories from which images will be fetched",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "roundId": {
+                    "description": "Round ID to which the batch belongs",
                     "type": "string"
                 }
             }

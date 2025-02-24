@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"nokib/campwiz/consts"
+	"strings"
 	"time"
 )
 
@@ -89,7 +91,7 @@ func (c *CommonsRepository) Get(values url.Values) (_ io.ReadCloser, err error) 
 }
 
 // returns images from commons categories
-func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) []Image {
+func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) ([]Image, []string) {
 	// Get images from commons category
 	// Create batch from commons category
 	paginator := NewPaginator[ImageInfoPage](c)
@@ -98,7 +100,7 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 		"format":    {"json"},
 		"prop":      {"imageinfo"},
 		"generator": {"categorymembers"},
-		"gcmtitle":  {"Category:Bangladesh"},
+		"gcmtitle":  {strings.Join(categories, "|")},
 		"gcmtype":   {"file"},
 		"iiprop":    {"timestamp|user|url|size|userid|mediatype|metadata|extmetadata|dimensions|commonmetadata|canonicaltitle"},
 		"limit":     {"max"},
@@ -106,17 +108,20 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 	images, err := paginator.Query(params)
 	if err != nil {
 		fmt.Println("Error: ", err)
-		return []Image{}
+		return nil, nil
 	}
 	result := []Image{}
 	for image := range images {
 		// Append images to result
+		if image == nil {
+			break
+		}
 		result = append(result, Image{
 			ID:   uint64(image.Pageid),
 			Name: image.Title,
 		})
 	}
-	return result
+	return result, []string{}
 }
 func (c *CommonsRepository) GetImageDetails() {
 	// Get image details
@@ -150,10 +155,10 @@ type QueryResponse[PageType any, ContinueType map[string]string] struct {
 }
 
 // NewCommonsRepository returns a new instance of CommonsRepository
-func NewCommonsRepository(accessToken string) *CommonsRepository {
+func NewCommonsRepository() *CommonsRepository {
 	return &CommonsRepository{
 		endpoint:    COMMONS_API,
-		accessToken: accessToken,
+		accessToken: consts.Config.Auth.AccessToken,
 		cl:          &http.Client{},
 	}
 }

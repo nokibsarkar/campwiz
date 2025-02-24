@@ -2,12 +2,119 @@ basePath: /api/v2
 definitions:
   consts.Language:
     enum:
-    - en
+    - am
+    - ar
+    - as
+    - af
     - bn
+    - zh
+    - da
+    - nl
+    - en
+    - fi
+    - fr
+    - de
+    - el
+    - gu
+    - ha
+    - hi
+    - ig
+    - it
+    - ja
+    - kn
+    - ko
+    - ml
+    - mr
+    - ne
+    - "no"
+    - or
+    - om
+    - fa
+    - pt
+    - pa
+    - ru
+    - sa
+    - st
+    - sn
+    - sd
+    - so
+    - es
+    - sw
+    - sv
+    - ta
+    - te
+    - ts
+    - tn
+    - tr
+    - ur
+    - '-'
+    - ve
+    - xh
+    - yo
+    - zu
     type: string
     x-enum-varnames:
-    - English
+    - Amharic
+    - Arabic
+    - Assamese
+    - Afrikaans
     - Bangla
+    - Chinese
+    - Danish
+    - Dutch
+    - English
+    - Finnish
+    - French
+    - German
+    - Greek
+    - Gujarati
+    - Hausa
+    - Hindi
+    - Igbo
+    - Italian
+    - Japanese
+    - Kannada
+    - Korean
+    - Malayalam
+    - Marathi
+    - Nepali
+    - Norwegian
+    - Odia
+    - Oromo
+    - Persian
+    - Portuguese
+    - Punjabi
+    - Russian
+    - Sanskrit
+    - Sesotho
+    - Shona
+    - Sindhi
+    - Somali
+    - Spanish
+    - Swahili
+    - Swedish
+    - Tamil
+    - Telugu
+    - Tsonga
+    - Tswana
+    - Turkish
+    - Urdu
+    - Undefined
+    - Venda
+    - Xhosa
+    - Yoruba
+    - Zulu
+  database.Batch:
+    properties:
+      batchId:
+        type: string
+      createdAt:
+        type: string
+      createdById:
+        type: string
+      totalSubmissions:
+        type: integer
+    type: object
   database.Campaign:
     properties:
       createdAt:
@@ -86,6 +193,20 @@ definitions:
       startDate:
         type: string
     type: object
+  database.Image:
+    properties:
+      pageid:
+        type: integer
+      title:
+        type: string
+    type: object
+  routes.ResponseList-database_Batch:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/database.Batch'
+        type: array
+    type: object
   routes.ResponseList-database_Campaign:
     properties:
       data:
@@ -99,6 +220,42 @@ definitions:
         items:
           $ref: '#/definitions/database.CampaignRound'
         type: array
+    type: object
+  routes.ResponseList-database_Image:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/database.Image'
+        type: array
+    type: object
+  routes.ResponseSingle-database_Batch:
+    properties:
+      data:
+        $ref: '#/definitions/database.Batch'
+    type: object
+  routes.ResponseSingle-services_BatchCreationResult:
+    properties:
+      data:
+        $ref: '#/definitions/services.BatchCreationResult'
+    type: object
+  services.BatchCreationResult:
+    properties:
+      batchId:
+        type: string
+      createdAt:
+        type: string
+      createdById:
+        type: string
+      failedCount:
+        type: integer
+      failedIds:
+        items:
+          type: string
+        type: array
+      successCount:
+        type: integer
+      totalSubmissions:
+        type: integer
     type: object
   services.CampaignCreateRequest:
     properties:
@@ -123,8 +280,6 @@ definitions:
     type: object
   services.CampaignUpdateRequest:
     properties:
-      campaignId:
-        type: string
       description:
         type: string
       endDate:
@@ -142,6 +297,17 @@ definitions:
       rules:
         type: string
       startDate:
+        type: string
+    type: object
+  services.CreateFromCommons:
+    properties:
+      categories:
+        description: Categories from which images will be fetched
+        items:
+          type: string
+        type: array
+      roundId:
+        description: Round ID to which the batch belongs
         type: string
     type: object
   services.RoundRequest:
@@ -166,6 +332,173 @@ info:
   title: Campwiz API
   version: "1"
 paths:
+  /batch/:
+    get:
+      description: List batches
+      parameters:
+      - collectionFormat: csv
+        in: query
+        items:
+          type: string
+        name: ids
+        type: array
+      - in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseList-database_Batch'
+      summary: List batches
+      tags:
+      - Batch
+  /batch/{batchId}:
+    get:
+      description: Get a batch
+      parameters:
+      - description: The batch ID
+        in: path
+        name: batchId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-database_Batch'
+      summary: Get a batch
+      tags:
+      - Batch
+  /batch/{batchId}/images:
+    get:
+      description: Get images of a batch
+      parameters:
+      - description: The batch ID
+        in: path
+        name: batchId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseList-database_Image'
+      summary: Get images of a batch
+      tags:
+      - Batch
+  /batch/create/commons:
+    post:
+      description: The user would provide a list of commons categories and the system
+        would create a batch from the images in those categories
+      parameters:
+      - description: The batch creation request
+        in: body
+        name: CreateFromCommons
+        required: true
+        schema:
+          $ref: '#/definitions/services.CreateFromCommons'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-services_BatchCreationResult'
+      summary: Create a batch of images from commons category
+      tags:
+      - Batch
+  /batch/create/csv:
+    post:
+      description: The user would provide a CSV file with a list of image names and
+        the system would create a batch from the images in those URLs
+      parameters:
+      - description: The CSV file
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-services_BatchCreationResult'
+      summary: Create a batch of images from a CSV file
+      tags:
+      - Batch
+  /batch/create/pagepile/{pagepileId}:
+    post:
+      description: The user would provide a pagepile ID and the system would create
+        a batch from the images in that pagepile
+      parameters:
+      - description: The pagepile ID
+        in: path
+        name: pagepileId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-services_BatchCreationResult'
+      summary: Create a batch of images from a pagepile
+      tags:
+      - Batch
+  /batch/create/round/{roundId}:
+    post:
+      description: The user would provide a round ID and the system would create a
+        batch from the images in that round
+      parameters:
+      - description: The round ID
+        in: path
+        name: roundId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-services_BatchCreationResult'
+      summary: Create a batch of images from another round output
+      tags:
+      - Batch
+  /batch/create/wikipage:
+    post:
+      description: The user would provide a wikipage and the system would create a
+        batch from the images listed in that wikipage
+      parameters:
+      - description: The wikipage
+        in: formData
+        name: wikipage
+        required: true
+        type: string
+      - description: The language of the wikipage
+        in: formData
+        name: language
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-services_BatchCreationResult'
+      summary: Create a batch of images from a list of wikipages
+      tags:
+      - Batch
   /campaign/:
     get:
       description: get all campaigns

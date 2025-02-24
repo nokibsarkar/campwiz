@@ -32,7 +32,7 @@ func (s *RoundService) CreateRound(request *RoundRequest) ([]database.CampaignRo
 		rounds[i] = database.CampaignRound{
 			ID:                    GenerateID(),
 			CreatedByID:           request.CreatedByID,
-			CampaignID:            campaign.ID,
+			CampaignID:            campaign.CampaignID,
 			CampaignRoundWritable: round,
 		}
 	}

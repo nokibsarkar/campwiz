@@ -48,6 +48,7 @@ const (
 	Tswana     Language = "tn"
 	Turkish    Language = "tr"
 	Urdu       Language = "ur"
+	Undefined  Language = "-"
 	Venda      Language = "ve"
 	Xhosa      Language = "xh"
 	Yoruba     Language = "yo"

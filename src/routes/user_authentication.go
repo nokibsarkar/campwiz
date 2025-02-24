@@ -51,7 +51,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 		if err == gorm.ErrRecordNotFound {
 			// Create the user
 			db_user = &database.User{
-				ID:           user.CentralID,
+				UserID:       user.CentralID,
 				RegisteredAt: user.Registered,
 				Username:     user.Name,
 				Permission:   consts.PermissionGroupADMIN,
@@ -83,7 +83,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 		Name:       db_user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Audience:  jwt.ClaimStrings{"campwiz"},
-			Subject:   db_user.ID,
+			Subject:   db_user.UserID,
 			Issuer:    consts.Config.Auth.Issuer,
 			ExpiresAt: jwt.NewNumericDate(nextExpiry),
 		},

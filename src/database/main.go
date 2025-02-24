@@ -12,7 +12,7 @@ import (
 func GetDB() (db *gorm.DB, close func()) {
 	dsn := consts.Config.Database.Main.DSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Warn),
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		panic("failed to connect database")
@@ -26,8 +26,9 @@ func GetDB() (db *gorm.DB, close func()) {
 	}
 }
 func InitDB() {
-	db, close := GetDB()
+	conn, close := GetDB()
 	defer close()
+	db := conn.Begin()
 	db.AutoMigrate(&Campaign{})
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&CampaignRound{})
@@ -37,4 +38,5 @@ func InitDB() {
 	db.AutoMigrate(&Participant{})
 	db.AutoMigrate(&Submission{})
 	fmt.Println((db))
+	db.Commit()
 }

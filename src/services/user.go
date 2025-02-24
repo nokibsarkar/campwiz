@@ -14,7 +14,7 @@ func NewUserService() *UserService {
 }
 
 func (u *UserService) GetUserByID(conn *gorm.DB, id string) (*database.User, error) {
-	userFilter := &database.User{ID: id}
+	userFilter := &database.User{UserID: id}
 	user := &database.User{}
 	result := conn.First(user, userFilter)
 	if result.Error != nil {

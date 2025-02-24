@@ -8,12 +8,11 @@ import (
 type CampaignService struct{}
 type CampaignCreateRequest struct {
 	database.CampaignWithWriteableFields
-	CreatedBy string `json:"-"`
-	Jury      []uint `json:"jury"`
+	CreatedByID string `json:"-"`
+	Jury        []uint `json:"jury"`
 }
 type CampaignUpdateRequest struct {
 	CampaignCreateRequest
-	ID string `json:"campaignId"`
 }
 
 func NewCampaignService() *CampaignService {
@@ -23,7 +22,7 @@ func NewCampaignService() *CampaignService {
 func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRequest) (*database.Campaign, error) {
 	// Create a new campaign
 	campaign := &database.Campaign{
-		ID: GenerateID(),
+		CampaignID: GenerateID(),
 		CampaignWithWriteableFields: database.CampaignWithWriteableFields{
 			Name:        campaignRequest.Name,
 			Description: campaignRequest.Description,
@@ -33,7 +32,7 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 			Rules:       campaignRequest.Rules,
 			Image:       campaignRequest.Image,
 		},
-		CreatedBy: campaignRequest.CreatedBy,
+		CreatedByID: campaignRequest.CreatedByID,
 	}
 	campaign_repo := database.NewCampaignRepository()
 	round_repo := database.NewCampaignRoundRepository()
@@ -47,8 +46,8 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 	}
 	round := []database.CampaignRound{
 		{
-			CreatedByID: campaign.CreatedBy,
-			CampaignID:  campaign.ID,
+			CreatedByID: campaign.CreatedByID,
+			CampaignID:  campaign.CampaignID,
 			ID:          GenerateID(),
 			CampaignRoundWritable: database.CampaignRoundWritable{
 				Name:             "Round 0",
@@ -109,11 +108,11 @@ func (service *CampaignService) GetCampaignByID(id string) (*database.Campaign, 
 // @produce json
 // @success 200 {object} database.Campaign
 // @router /campaign/{id} [post]
-func (service *CampaignService) UpdateCampaign(campaignRequest *CampaignUpdateRequest) (*database.Campaign, error) {
+func (service *CampaignService) UpdateCampaign(ID string, campaignRequest *CampaignUpdateRequest) (*database.Campaign, error) {
 	conn, close := database.GetDB()
 	defer close()
 	campaign_repo := database.NewCampaignRepository()
-	campaign, err := campaign_repo.FindByID(conn, campaignRequest.ID)
+	campaign, err := campaign_repo.FindByID(conn, ID)
 	if err != nil {
 		return nil, err
 	}
@@ -121,10 +120,9 @@ func (service *CampaignService) UpdateCampaign(campaignRequest *CampaignUpdateRe
 	campaign.Description = campaignRequest.Description
 	campaign.StartDate = campaignRequest.StartDate
 	campaign.EndDate = campaignRequest.EndDate
-	campaign.Language = campaignRequest.Language
+	// campaign.Language = campaignRequest.Language
 	campaign.Rules = campaignRequest.Rules
 	campaign.Image = campaignRequest.Image
-
 	err = campaign_repo.Update(conn, campaign)
 	if err != nil {
 		return nil, err

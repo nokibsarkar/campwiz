@@ -36,13 +36,16 @@ type CampaignWithWriteableFields struct {
 	Language    consts.Language `json:"language"`
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
+	ArticleCampaignRestrictions
+	MediaCampaignRestrictions
 }
 type Campaign struct {
-	ID string `gorm:"primaryKey" json:"id"`
+	CampaignID string `gorm:"primaryKey;type:varchar(255)" json:"campaignId"`
 	// read only
-	CreatedAt *time.Time `json:"createdAt" gorm:"-<-:create"`
-	CreatedBy string     `json:"createdBy"`
+	CreatedAt   *time.Time `json:"createdAt" gorm:"-<-:create"`
+	CreatedByID string     `json:"createdById" gorm:"type:varchar(255)"`
 	CampaignWithWriteableFields
+	CreatedBy *User `json:"-" gorm:"foreignKey:CreatedByID"`
 }
 type CampaignFilter struct {
 	IDs       []string `form:"ids,omitEmpty"`
@@ -60,7 +63,7 @@ func (c *CampaignRepository) Create(conn *gorm.DB, campaign *Campaign) error {
 }
 func (c *CampaignRepository) FindByID(conn *gorm.DB, id string) (*Campaign, error) {
 	campaign := &Campaign{}
-	where := &Campaign{ID: id}
+	where := &Campaign{CampaignID: id}
 	result := conn.First(campaign, where)
 	return campaign, result.Error
 }
