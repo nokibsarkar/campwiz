@@ -45,13 +45,13 @@ func HandleOAuth2Callback(c *gin.Context) {
 	conn, close := database.GetDB()
 	defer close()
 	user_service := services.NewUserService()
-	db_user, err := user_service.GetUserByID(conn, user.CentralID)
+	db_user, err := user_service.GetUserByUsername(conn, user.Name)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		if err == gorm.ErrRecordNotFound {
 			// Create the user
 			db_user = &database.User{
-				UserID:       services.GenerateID(),
+				UserID:       user.CentralID,
 				RegisteredAt: user.Registered,
 				Username:     user.Name,
 				Permission:   consts.PermissionGroupADMIN,

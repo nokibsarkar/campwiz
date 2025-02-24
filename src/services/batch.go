@@ -89,6 +89,7 @@ func (b *BatchService) CreateBatchFromCommonsCategory(req *CreateFromCommons) (*
 	submissions := []database.Submission{}
 	for _, image := range images {
 		uploaderId := username2IdMap[image.UploaderUsername]
+		fmt.Println(image.MediaType)
 		submission := database.Submission{
 			SubmissionID:  GenerateID(),
 			Name:          image.Name,
@@ -98,6 +99,24 @@ func (b *BatchService) CreateBatchFromCommonsCategory(req *CreateFromCommons) (*
 			SubmittedByID: uploaderId,
 			ParticipantID: uploaderId,
 			SubmittedAt:   image.SubmittedAt,
+			MediaSubmission: database.MediaSubmission{
+				MediaType:   database.MediaType(image.MediaType),
+				ThumbURL:    image.URL,
+				ThumbWidth:  image.Width,
+				ThumbHeight: image.Height,
+				BatchID:     &batch.BatchID,
+				Batch:       batch,
+				License:     "CC BY-SA 4.0",
+				AudioVideoSubmission: database.AudioVideoSubmission{
+					Duration: image.Duration,
+					Size:     image.Size,
+					Bitrate:  0,
+				},
+				ImageSubmission: database.ImageSubmission{
+					Width:  image.Width,
+					Height: image.Height,
+				},
+			},
 		}
 		submissions = append(submissions, submission)
 	}

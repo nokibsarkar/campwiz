@@ -6,6 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
+type MediaType string
+
+const (
+	MediaTypeImage MediaType = "BITMAP"
+	MediaTypeAudio MediaType = "AUDIO"
+	MediaTypeVideo MediaType = "VIDEO"
+	MediaTypePDF   MediaType = "PDF"
+)
+
 type ArticleSubmission struct {
 	Language   string `json:"language"`
 	TotalBytes uint64 `json:"totalbytes" gorm:"default:0"`
@@ -23,13 +32,13 @@ type AudioVideoSubmission struct {
 	Size     uint64 `json:"size"`     // in bytes
 }
 type MediaSubmission struct {
-	MediaType   string  `json:"mediatype"`
-	ThumbURL    string  `json:"thumburl"`
-	ThumbWidth  uint64  `json:"thumbwidth"`
-	ThumbHeight uint64  `json:"thumbheight"`
-	License     string  `json:"license"`
-	BatchID     *string `json:"batchId" gorm:"null;varchar(255)"`
-	Batch       *Batch  `json:"-" gorm:"foreignKey:BatchID"`
+	MediaType   MediaType `json:"mediatype" gorm:"type:varchar(255);not null;default:'BITMAP'"`
+	ThumbURL    string    `json:"thumburl"`
+	ThumbWidth  uint64    `json:"thumbwidth"`
+	ThumbHeight uint64    `json:"thumbheight"`
+	License     string    `json:"license"`
+	BatchID     *string   `json:"batchId" gorm:"null;varchar(255)"`
+	Batch       *Batch    `json:"-" gorm:"foreignKey:BatchID"`
 	ImageSubmission
 	AudioVideoSubmission
 }

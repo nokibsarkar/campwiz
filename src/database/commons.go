@@ -22,9 +22,13 @@ type ImageResult struct {
 	ID               uint64 `json:"pageid"`
 	Name             string `json:"title"`
 	URL              string
-	UploaderID       string
 	SubmittedAt      time.Time
 	UploaderUsername string
+	Height           uint64
+	Width            uint64
+	Size             uint64
+	MediaType        string
+	Duration         uint64
 }
 type GContinue struct {
 	Gcmcontinue string `json:"gcmcontinue"`
@@ -67,17 +71,17 @@ type KeyValue struct {
 }
 type ImageInfo struct {
 	Info []struct {
-		Timestamp           time.Time  `json:"timestamp"`
-		User                string     `json:"user"`
-		UserID              uint64     `json:"userid"`
-		Size                uint64     `json:"size"`
-		Width               uint64     `json:"width"`
-		Height              uint64     `json:"height"`
-		Title               string     `json:"canonicaltitle"`
-		URL                 string     `json:"url"`
-		DescriptionURL      string     `json:"descriptionurl"`
-		DescriptionShortURL string     `json:"descriptionshorturl"`
-		Metadata            []KeyValue `json:"metadata"`
+		Timestamp      time.Time   `json:"timestamp"`
+		User           string      `json:"user"`
+		Size           uint64      `json:"size"`
+		Width          uint64      `json:"width"`
+		Height         uint64      `json:"height"`
+		Title          string      `json:"canonicaltitle"`
+		URL            string      `json:"url"`
+		DescriptionURL string      `json:"descriptionurl"`
+		MediaType      string      `json:"mediatype"`
+		Metadata       *[]KeyValue `json:"metadata"`
+		Duration       float64     `json:"duration"`
 	} `json:"imageinfo"`
 }
 type Page struct {
@@ -116,7 +120,7 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 		"generator": {"categorymembers"},
 		"gcmtitle":  {strings.Join(categories, "|")},
 		"gcmtype":   {"file"},
-		"iiprop":    {"timestamp|user|url|size|userid|mediatype|metadata|extmetadata|dimensions|commonmetadata|canonicaltitle"},
+		"iiprop":    {"timestamp|user|url|size|mediatype|dimensions|commonmetadata|canonicaltitle"},
 		"limit":     {"max"},
 	}
 	images, err := paginator.Query(params)
@@ -135,14 +139,19 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 			continue
 		}
 		info := image.Info[0]
-		result = append(result, ImageResult{
+		img := ImageResult{
 			ID:               uint64(image.Pageid),
 			Name:             image.Title,
 			URL:              info.URL,
-			UploaderID:       fmt.Sprintf("%d", info.UserID),
 			UploaderUsername: info.User,
 			SubmittedAt:      info.Timestamp,
-		})
+			Height:           info.Height,
+			Width:            info.Width,
+			Size:             info.Size,
+			MediaType:        info.MediaType,
+			Duration:         uint64(info.Duration * 1e3), // Convert to milliseconds
+		}
+		result = append(result, img)
 	}
 	return result, []string{}
 }
