@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"nokib/campwiz/database"
 	"nokib/campwiz/database/cache"
 	"nokib/campwiz/routes"
@@ -34,14 +35,19 @@ func postRun() {
 // @authorizationurl https://meta.wikimedia.org/w/rest.php/oauth2/authorize
 // @tokenurl https://meta.wikimedia.org/w/rest.php/oauth2/access_token
 
-// @license.name LGPL-3.0
-// @license.url http://www.gnu.org/licenses/lgpl-3.0.html
+// @license.name GPL-3.0
+// @license.url https://www.gnu.org/licenses/gpl-3.0.html
+// @contact.name Nokib Sarkar
+// @contact.email nokibsarkar@gmail.com
+// @contact.url https://github.com/nokibsarkar
 func main() {
 	// batch_service := services.NewBatchService()
 	// batch_service.CreateBatchFromCommonsCategory()
 	preRun()
 	r := gin.Default()
+	r.LoadHTMLGlob("templates/*.html")
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	r.StaticFS("/static", http.Dir("static"))
 	routes.NewRoutes(r.Group("/"))
 	r.Run()
 	postRun()

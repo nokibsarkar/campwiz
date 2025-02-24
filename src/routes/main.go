@@ -36,6 +36,7 @@ func NewRoutes(nonAPIParent *gin.RouterGroup) {
 	r := nonAPIParent.Group("/api/v2")
 	authenticatorService := NewAuthenticationService()
 	r.Use(authenticatorService.Authenticate)
+	NewStaticRouter(nonAPIParent)
 	NewUserAuthenticationRoutes(nonAPIParent)
 	NewCampaignRoutes(r)
 	NewSubmissionRoutes(r)

@@ -160,11 +160,14 @@ definitions:
     type: object
 host: localhost:8080
 info:
-  contact: {}
+  contact:
+    email: nokibsarkar@gmail.com
+    name: Nokib Sarkar
+    url: https://github.com/nokibsarkar
   description: This is the API documentation for Campwiz
   license:
-    name: LGPL-3.0
-    url: http://www.gnu.org/licenses/lgpl-3.0.html
+    name: GPL-3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.html
   title: Campwiz API
   version: "1"
 paths:

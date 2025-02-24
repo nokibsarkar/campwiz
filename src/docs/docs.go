@@ -12,10 +12,14 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "Nokib Sarkar",
+            "url": "https://github.com/nokibsarkar",
+            "email": "nokibsarkar@gmail.com"
+        },
         "license": {
-            "name": "LGPL-3.0",
-            "url": "http://www.gnu.org/licenses/lgpl-3.0.html"
+            "name": "GPL-3.0",
+            "url": "https://www.gnu.org/licenses/gpl-3.0.html"
         },
         "version": "{{.Version}}"
     },
