@@ -5,6 +5,7 @@ import (
 	"math/rand/v2"
 	"nokib/campwiz/database"
 	"slices"
+	"strings"
 )
 
 type BatchService struct{}
@@ -106,7 +107,9 @@ func (b *BatchService) CreateBatchFromCommonsCategory(req *CreateFromCommons) (*
 				ThumbHeight: image.Height,
 				BatchID:     &batch.BatchID,
 				Batch:       batch,
-				License:     "CC BY-SA 4.0",
+				License:     strings.ToUpper(image.License),
+				CreditHTML:  image.CreditHTML,
+				Description: image.Description,
 				AudioVideoSubmission: database.AudioVideoSubmission{
 					Duration: image.Duration,
 					Size:     image.Size,

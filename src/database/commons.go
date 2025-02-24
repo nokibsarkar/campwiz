@@ -29,6 +29,9 @@ type ImageResult struct {
 	Size             uint64
 	MediaType        string
 	Duration         uint64
+	License          string
+	Description      string
+	CreditHTML       string
 }
 type GContinue struct {
 	Gcmcontinue string `json:"gcmcontinue"`
@@ -69,19 +72,20 @@ type KeyValue struct {
 	Name  string `json:"name"`
 	Value any    `json:"value"`
 }
+
 type ImageInfo struct {
 	Info []struct {
-		Timestamp      time.Time   `json:"timestamp"`
-		User           string      `json:"user"`
-		Size           uint64      `json:"size"`
-		Width          uint64      `json:"width"`
-		Height         uint64      `json:"height"`
-		Title          string      `json:"canonicaltitle"`
-		URL            string      `json:"url"`
-		DescriptionURL string      `json:"descriptionurl"`
-		MediaType      string      `json:"mediatype"`
-		Metadata       *[]KeyValue `json:"metadata"`
-		Duration       float64     `json:"duration"`
+		Timestamp      time.Time    `json:"timestamp"`
+		User           string       `json:"user"`
+		Size           uint64       `json:"size"`
+		Width          uint64       `json:"width"`
+		Height         uint64       `json:"height"`
+		Title          string       `json:"canonicaltitle"`
+		URL            string       `json:"url"`
+		DescriptionURL string       `json:"descriptionurl"`
+		MediaType      string       `json:"mediatype"`
+		Duration       float64      `json:"duration"`
+		ExtMetadata    *ExtMetadata `json:"extmetadata"`
 	} `json:"imageinfo"`
 }
 type Page struct {
@@ -120,7 +124,7 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 		"generator": {"categorymembers"},
 		"gcmtitle":  {strings.Join(categories, "|")},
 		"gcmtype":   {"file"},
-		"iiprop":    {"timestamp|user|url|size|mediatype|dimensions|commonmetadata|canonicaltitle"},
+		"iiprop":    {"timestamp|user|url|size|mediatype|dimensions|extmetadata|canonicaltitle"},
 		"limit":     {"max"},
 	}
 	images, err := paginator.Query(params)
@@ -150,6 +154,12 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 			Size:             info.Size,
 			MediaType:        info.MediaType,
 			Duration:         uint64(info.Duration * 1e3), // Convert to milliseconds
+
+		}
+		if info.ExtMetadata != nil {
+			img.License = info.ExtMetadata.GetLicense()
+			img.Description = info.ExtMetadata.GetImageDescription()
+			img.CreditHTML = info.ExtMetadata.GetCredit()
 		}
 		result = append(result, img)
 	}

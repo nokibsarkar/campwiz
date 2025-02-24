@@ -12,8 +12,8 @@ import (
 func GetDB() (db *gorm.DB, close func()) {
 	dsn := consts.Config.Database.Main.DSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		// Logger: logger.Default.LogMode(logger.Warn),
-		Logger: logger.Default.LogMode(logger.Info),
+		Logger: logger.Default.LogMode(logger.Warn),
+		// Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		panic("failed to connect database")

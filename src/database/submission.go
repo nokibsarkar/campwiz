@@ -3,6 +3,7 @@ package database
 import (
 	"time"
 
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -32,13 +33,16 @@ type AudioVideoSubmission struct {
 	Size     uint64 `json:"size"`     // in bytes
 }
 type MediaSubmission struct {
-	MediaType   MediaType `json:"mediatype" gorm:"type:varchar(255);not null;default:'BITMAP'"`
-	ThumbURL    string    `json:"thumburl"`
-	ThumbWidth  uint64    `json:"thumbwidth"`
-	ThumbHeight uint64    `json:"thumbheight"`
-	License     string    `json:"license"`
-	BatchID     *string   `json:"batchId" gorm:"null;varchar(255)"`
-	Batch       *Batch    `json:"-" gorm:"foreignKey:BatchID"`
+	MediaType   MediaType      `json:"mediatype" gorm:"type:varchar(255);not null;default:'BITMAP'"`
+	ThumbURL    string         `json:"thumburl"`
+	ThumbWidth  uint64         `json:"thumbwidth"`
+	ThumbHeight uint64         `json:"thumbheight"`
+	License     string         `json:"license"`
+	Description string         `json:"description"`
+	CreditHTML  string         `json:"creditHTML"`
+	BatchID     *string        `json:"batchId" gorm:"null;varchar(255)"`
+	Batch       *Batch         `json:"-" gorm:"foreignKey:BatchID"`
+	Metadata    datatypes.JSON `json:"metadata" gorm:"type:json"`
 	ImageSubmission
 	AudioVideoSubmission
 }
