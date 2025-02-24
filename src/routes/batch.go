@@ -130,7 +130,7 @@ func GetBatch(c *gin.Context) {
 // @Summary Get images of a batch
 // @Description Get images of a batch
 // @Produce  json
-// @Success 200 {object} ResponseList[database.Image]
+// @Success 200 {object} ResponseList[database.ImageResult]
 // @Router /batch/{batchId}/images [get]
 // @Param batchId path string true "The batch ID"
 // @Tags Batch

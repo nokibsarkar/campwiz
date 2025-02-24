@@ -75,18 +75,36 @@ func (b *BatchService) CreateBatchFromCommonsCategory(req *CreateFromCommons) (*
 		tx.Rollback()
 		return nil, err
 	}
-	submission_repo := database.NewSubmissionRepository()
+	// submission_repo := database.NewSubmissionRepository()
+	participants := map[string]string{}
 	for _, image := range images {
-		submission := &database.Submission{
-			SubmissionID: GenerateID(),
-			Name:         image.Name,
-			CampaignID:   round.CampaignID,
+		participants[image.UploaderUsername] = GenerateID()
+	}
+	part_repo := database.NewParticipantRepository()
+	username2IdMap, err := part_repo.EnsureExists(tx, participants)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	submissions := []database.Submission{}
+	for _, image := range images {
+		uploaderId := username2IdMap[image.UploaderUsername]
+		submission := database.Submission{
+			SubmissionID:  GenerateID(),
+			Name:          image.Name,
+			CampaignID:    round.CampaignID,
+			URL:           image.URL,
+			Author:        image.UploaderUsername,
+			SubmittedByID: uploaderId,
+			ParticipantID: uploaderId,
+			SubmittedAt:   image.SubmittedAt,
 		}
-		err = submission_repo.CreateSubmission(tx, submission)
-		if err != nil {
-			tx.Rollback()
-			return nil, err
-		}
+		submissions = append(submissions, submission)
+	}
+	res := tx.Create(submissions)
+	if res.Error != nil {
+		tx.Rollback()
+		return nil, res.Error
 	}
 	tx.Commit()
 	return &BatchCreationResult{
@@ -97,7 +115,7 @@ func (b *BatchService) CreateBatchFromCommonsCategory(req *CreateFromCommons) (*
 	}, nil
 
 }
-func (b *BatchService) distributeTaskAmongExistingJuries(images []database.Image) {
+func (b *BatchService) distributeTaskAmongExistingJuries(images []database.ImageResult) {
 	juries := []*Jury{}
 	for i := 1; i <= 100; i++ {
 		juries = append(juries, &Jury{ID: uint64(i), totalAssigned: rand.IntN(100)})

@@ -39,7 +39,6 @@ type Submission struct {
 	CampaignID    string      `json:"campaignId" gorm:"null;index;type:varchar(255)"`
 	URL           string      `json:"url"`
 	Author        string      `json:"author"`                                 // The Actual Author in the Wikimedia
-	AuthorID      string      `json:"authorId" gorm:"type:varchar(255)"`      // The Actual Author ID in the Wikimedia
 	SubmittedByID string      `json:"submittedById" gorm:"type:varchar(255)"` // The User who submitted the article on behalf of the participant
 	ParticipantID string      `json:"participantId" gorm:"type:varchar(255)"`
 	SubmittedAt   time.Time   `json:"submittedAt"`

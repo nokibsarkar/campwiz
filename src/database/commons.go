@@ -18,15 +18,29 @@ type CommonsRepository struct {
 	accessToken string
 	cl          *http.Client
 }
-type Image struct {
-	ID   uint64 `json:"pageid"`
-	Name string `json:"title"`
+type ImageResult struct {
+	ID               uint64 `json:"pageid"`
+	Name             string `json:"title"`
+	URL              string
+	UploaderID       string
+	SubmittedAt      time.Time
+	UploaderUsername string
 }
 type GContinue struct {
 	Gcmcontinue string `json:"gcmcontinue"`
 }
 type Paginator[PageType any] struct {
 	repo *CommonsRepository
+}
+type WikimediaUser struct {
+	Name       string    `json:"name"`
+	Registered time.Time `json:"registration"`
+	CentralIds *struct {
+		CentralAuth uint64 `json:"CentralAuth"`
+	} `json:"centralids"`
+}
+type UserList struct {
+	Users map[string]WikimediaUser `json:"users"`
 }
 
 /*
@@ -91,7 +105,7 @@ func (c *CommonsRepository) Get(values url.Values) (_ io.ReadCloser, err error) 
 }
 
 // returns images from commons categories
-func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) ([]Image, []string) {
+func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) ([]ImageResult, []string) {
 	// Get images from commons category
 	// Create batch from commons category
 	paginator := NewPaginator[ImageInfoPage](c)
@@ -110,7 +124,7 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 		fmt.Println("Error: ", err)
 		return nil, nil
 	}
-	result := []Image{}
+	result := []ImageResult{}
 	for image := range images {
 		// Append images to result
 		if image == nil {
@@ -121,16 +135,45 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 			continue
 		}
 		info := image.Info[0]
-		submission := &Submission{
-			URL: info.URL,
-		}
-		fmt.Println("Creating submission with URL: ", submission.URL)
-		result = append(result, Image{
-			ID:   uint64(image.Pageid),
-			Name: image.Title,
+		result = append(result, ImageResult{
+			ID:               uint64(image.Pageid),
+			Name:             image.Title,
+			URL:              info.URL,
+			UploaderID:       fmt.Sprintf("%d", info.UserID),
+			UploaderUsername: info.User,
+			SubmittedAt:      info.Timestamp,
 		})
 	}
 	return result, []string{}
+}
+
+// returns images from commons categories
+func (c *CommonsRepository) GeUsersFromUsernames(usernames []string) ([]WikimediaUser, error) {
+	// Get images from commons category
+	// Create batch from commons category
+	paginator := NewPaginator[WikimediaUser](c)
+	params := url.Values{
+		"action":  {"query"},
+		"format":  {"json"},
+		"list":    {"users"},
+		"ususers": {strings.Join(usernames, "|")},
+		"usprop":  {"centralids|registration"},
+		"limit":   {"max"},
+	}
+	users, err := paginator.UserList(params)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return nil, nil
+	}
+	result := []WikimediaUser{}
+	for user := range users {
+		// Append images to result
+		if user == nil {
+			break
+		}
+		result = append(result, *user)
+	}
+	return result, nil
 }
 func (c *CommonsRepository) GetImageDetails() {
 	// Get image details
@@ -151,17 +194,22 @@ func (c *CommonsRepository) GetUserInfo() {
 	// Get user info
 }
 
-type QueryResponse[PageType any, ContinueType map[string]string] struct {
+type BaseQueryResponse[QueryType any, ContinueType map[string]string] struct {
 	BatchComplete string        `json:"batchcomplete"`
 	Next          *ContinueType `json:"continue"`
-	Query         struct {
-		Normalized []struct {
-			From string `json:"from"`
-			To   string `json:"to"`
-		} `json:"normalized"`
-		Pages map[string]PageType `json:"pages"`
-	} `json:"query"`
+	Query         QueryType     `json:"query"`
 }
+type PageQueryResponse[PageType any] = BaseQueryResponse[struct {
+	Normalized []struct {
+		From string `json:"from"`
+		To   string `json:"to"`
+	} `json:"normalized"`
+	Pages map[string]PageType `json:"pages"`
+}, map[string]string]
+
+type UserListQueryResponse = BaseQueryResponse[struct {
+	Users []WikimediaUser `json:"users"`
+}, map[string]string]
 
 // NewCommonsRepository returns a new instance of CommonsRepository
 func NewCommonsRepository() *CommonsRepository {

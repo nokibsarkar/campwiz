@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"fmt"
-
 	"nokib/campwiz/database/cache"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +15,6 @@ func WithSession(callback func(*gin.Context, *cache.Session)) gin.HandlerFunc {
 			})
 			return
 		}
-		fmt.Println("Session: ", session)
 		callback(c, session)
 	}
 }
