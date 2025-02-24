@@ -86,25 +86,6 @@ definitions:
       startDate:
         type: string
     type: object
-  database.CampaignWithWriteableFields:
-    properties:
-      description:
-        type: string
-      endDate:
-        type: string
-      id:
-        type: string
-      image:
-        type: string
-      language:
-        $ref: '#/definitions/consts.Language'
-      name:
-        type: string
-      rules:
-        type: string
-      startDate:
-        type: string
-    type: object
   routes.ResponseList-database_Campaign:
     properties:
       data:
@@ -119,20 +100,34 @@ definitions:
           $ref: '#/definitions/database.CampaignRound'
         type: array
     type: object
-  routes.ResponseSingle-database_Campaign:
+  services.CampaignCreateRequest:
     properties:
-      data:
-        $ref: '#/definitions/database.Campaign'
-    type: object
-  services.CampaignRequest:
-    properties:
-      createdBy:
-        type: string
       description:
         type: string
       endDate:
         type: string
-      id:
+      image:
+        type: string
+      jury:
+        items:
+          type: integer
+        type: array
+      language:
+        $ref: '#/definitions/consts.Language'
+      name:
+        type: string
+      rules:
+        type: string
+      startDate:
+        type: string
+    type: object
+  services.CampaignUpdateRequest:
+    properties:
+      campaignId:
+        type: string
+      description:
+        type: string
+      endDate:
         type: string
       image:
         type: string
@@ -178,7 +173,7 @@ paths:
       - collectionFormat: csv
         in: query
         items:
-          type: integer
+          type: string
         name: ids
         type: array
       - in: query
@@ -205,7 +200,7 @@ paths:
         name: campaignRequest
         required: true
         schema:
-          $ref: '#/definitions/services.CampaignRequest'
+          $ref: '#/definitions/services.CampaignCreateRequest'
       produces:
       - application/json
       responses:
@@ -214,6 +209,31 @@ paths:
           schema:
             $ref: '#/definitions/database.Campaign'
       summary: Create a new campaign
+      tags:
+      - Campaign
+  /campaign/{id}:
+    post:
+      description: Update a campaign
+      parameters:
+      - description: The campaign ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: The campaign request
+        in: body
+        name: campaignRequest
+        required: true
+        schema:
+          $ref: '#/definitions/services.CampaignUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/database.Campaign'
+      summary: Update a campaign
       tags:
       - Campaign
   /round/:

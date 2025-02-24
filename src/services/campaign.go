@@ -6,31 +6,27 @@ import (
 )
 
 type CampaignService struct{}
-type CampaignRequest struct {
+type CampaignCreateRequest struct {
 	database.CampaignWithWriteableFields
-	CreatedBy string `json:"createdBy"`
+	CreatedBy string `json:"-"`
 	Jury      []uint `json:"jury"`
+}
+type CampaignUpdateRequest struct {
+	CampaignCreateRequest
+	ID string `json:"campaignId"`
 }
 
 func NewCampaignService() *CampaignService {
 	return &CampaignService{}
 }
 
-// CreateCampaign creates a new campaign
-// @summary Create a new campaign
-// @description Create a new campaign
-// @tags Campaign
-// @param campaignRequest body CampaignRequest true "The campaign request"
-// @produce json
-// @success 200 {object} database.Campaign
-// @router /campaign/ [post]
-func (service *CampaignService) CreateCampaign(campaignRequest *CampaignRequest) (*database.Campaign, error) {
+func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRequest) (*database.Campaign, error) {
 	// Create a new campaign
 	campaign := &database.Campaign{
+		ID: GenerateID(),
 		CampaignWithWriteableFields: database.CampaignWithWriteableFields{
 			Name:        campaignRequest.Name,
 			Description: campaignRequest.Description,
-			ID:          GenerateID(),
 			StartDate:   campaignRequest.StartDate,
 			EndDate:     campaignRequest.EndDate,
 			Language:    campaignRequest.Language,
@@ -91,4 +87,47 @@ func (service *CampaignService) GetAllCampaigns(query *database.CampaignFilter) 
 		return []database.Campaign{}
 	}
 	return campaigns
+}
+func (service *CampaignService) GetCampaignByID(id string) (*database.Campaign, error) {
+	conn, close := database.GetDB()
+	defer close()
+	campaign_repo := database.NewCampaignRepository()
+	campaign, err := campaign_repo.FindByID(conn, id)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return nil, err
+	}
+	return campaign, nil
+}
+
+// UpdateCampaign updates a campaign
+// @summary Update a campaign
+// @description Update a campaign
+// @tags Campaign
+// @param id path string true "The campaign ID"
+// @param campaignRequest body CampaignUpdateRequest true "The campaign request"
+// @produce json
+// @success 200 {object} database.Campaign
+// @router /campaign/{id} [post]
+func (service *CampaignService) UpdateCampaign(campaignRequest *CampaignUpdateRequest) (*database.Campaign, error) {
+	conn, close := database.GetDB()
+	defer close()
+	campaign_repo := database.NewCampaignRepository()
+	campaign, err := campaign_repo.FindByID(conn, campaignRequest.ID)
+	if err != nil {
+		return nil, err
+	}
+	campaign.Name = campaignRequest.Name
+	campaign.Description = campaignRequest.Description
+	campaign.StartDate = campaignRequest.StartDate
+	campaign.EndDate = campaignRequest.EndDate
+	campaign.Language = campaignRequest.Language
+	campaign.Rules = campaignRequest.Rules
+	campaign.Image = campaignRequest.Image
+
+	err = campaign_repo.Update(conn, campaign)
+	if err != nil {
+		return nil, err
+	}
+	return campaign, nil
 }

@@ -40,7 +40,7 @@ const docTemplate = `{
                     {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "string"
                         },
                         "collectionFormat": "csv",
                         "name": "ids",
@@ -82,7 +82,45 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/services.CampaignRequest"
+                            "$ref": "#/definitions/services.CampaignCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/database.Campaign"
+                        }
+                    }
+                }
+            }
+        },
+        "/campaign/{id}": {
+            "post": {
+                "description": "Update a campaign",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Campaign"
+                ],
+                "summary": "Update a campaign",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The campaign ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The campaign request",
+                        "name": "campaignRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.CampaignUpdateRequest"
                         }
                     }
                 ],
@@ -290,35 +328,6 @@ const docTemplate = `{
                 }
             }
         },
-        "database.CampaignWithWriteableFields": {
-            "type": "object",
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "endDate": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "language": {
-                    "$ref": "#/definitions/consts.Language"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "rules": {
-                    "type": "string"
-                },
-                "startDate": {
-                    "type": "string"
-                }
-            }
-        },
         "routes.ResponseList-database_Campaign": {
             "type": "object",
             "properties": {
@@ -341,27 +350,48 @@ const docTemplate = `{
                 }
             }
         },
-        "routes.ResponseSingle-database_Campaign": {
+        "services.CampaignCreateRequest": {
             "type": "object",
             "properties": {
-                "data": {
-                    "$ref": "#/definitions/database.Campaign"
-                }
-            }
-        },
-        "services.CampaignRequest": {
-            "type": "object",
-            "properties": {
-                "createdBy": {
-                    "type": "string"
-                },
                 "description": {
                     "type": "string"
                 },
                 "endDate": {
                     "type": "string"
                 },
-                "id": {
+                "image": {
+                    "type": "string"
+                },
+                "jury": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "language": {
+                    "$ref": "#/definitions/consts.Language"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "rules": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.CampaignUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "campaignId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endDate": {
                     "type": "string"
                 },
                 "image": {

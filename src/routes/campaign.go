@@ -49,16 +49,16 @@ func ListAllJury(c *gin.Context) {
 	})
 }
 
-// CreateCampaign godoc
-// @Summary Create a new campaign
-// @Description Create a new campaign
-// @Produce  json
-// @Success 200 {object} ResponseSingle[database.Campaign]
-// @Router /campaign/ [post]
-// @Tags Campaign
-// @Param campaignRequest body database.CampaignWithWriteableFields true "The campaign request"
+// CreateCampaign creates a new campaign
+// @summary Create a new campaign
+// @description Create a new campaign
+// @tags Campaign
+// @param campaignRequest body services.CampaignCreateRequest true "The campaign request"
+// @produce json
+// @success 200 {object} database.Campaign
+// @router /campaign/ [post]
 func CreateCampaign(c *gin.Context, sess *cache.Session) {
-	createRequest := &services.CampaignRequest{}
+	createRequest := &services.CampaignCreateRequest{}
 	err := c.ShouldBindBodyWithJSON(createRequest)
 	if err != nil {
 		c.JSON(400, ResponseError{Detail: "Invalid request : " + err.Error()})
@@ -73,6 +73,17 @@ func CreateCampaign(c *gin.Context, sess *cache.Session) {
 	}
 	c.JSON(200, ResponseSingle[*database.Campaign]{Data: campaign})
 }
+
+// UpdateCampaign godoc
+// @Summary Update a campaign
+// @Description Update a campaign
+// @Produce  json
+// @Success 200 {object} ResponseSingle[database.Campaign]
+// @Router /campaign/{id} [post]
+// @Tags Campaign
+// @Param id path string true "The campaign ID"
+// @Param campaignRequest body services.CampaignUpdateRequest true "The campaign request"
+
 func UpdateCampaign(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"message": "Hello, World!",
@@ -121,5 +132,4 @@ func NewCampaignRoutes(parent *gin.RouterGroup) {
 	r.GET("/:id/next", GetNextSubmission)
 	r.POST("/:id/status", ApproveCampaign)
 	r.POST("/:id/fountain", ImportEvaluationFromFountain)
-
 }
