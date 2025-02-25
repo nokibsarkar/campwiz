@@ -8,26 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type ArticleCampaignRestrictions struct {
-	MaximumSubmissionOfSameArticle int    `json:"maximumSubmissionOfSameArticle"`
-	AllowExpansions                bool   `json:"allowExpansions"`
-	AllowCreations                 bool   `json:"allowCreations"`
-	MinimumTotalBytes              int    `json:"minimumTotalBytes"`
-	MinimumTotalWords              int    `json:"minimumTotalWords"`
-	MinimumAddedBytes              int    `json:"minimumAddedBytes"`
-	MinimumAddedWords              int    `json:"minimumAddedWords"`
-	SecretBallot                   bool   `json:"secretBallot"`
-	AllowJuryToParticipate         bool   `json:"allowJuryToParticipate"`
-	AllowMultipleJudgement         bool   `json:"allowMultipleJudgement"`
-	Blacklist                      string `json:"blacklist"`
-}
-type ImageCampaignRestrictions struct {
-	MaximumSubmissionOfSameImage int `json:"maximumSubmissionOfSameImage"`
-	MinimumTotalImageSize        int `json:"minimumTotalImageSize"`
-}
-type MediaCampaignRestrictions struct {
-	ImageCampaignRestrictions
-}
 type CampaignWithWriteableFields struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
@@ -36,8 +16,6 @@ type CampaignWithWriteableFields struct {
 	Language    consts.Language `json:"language"`
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
-	ArticleCampaignRestrictions
-	MediaCampaignRestrictions
 }
 type Campaign struct {
 	CampaignID string `gorm:"primaryKey;type:varchar(255)" json:"campaignId"`

@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"nokib/campwiz/consts"
@@ -113,16 +114,17 @@ func (c *CommonsRepository) Get(values url.Values) (_ io.ReadCloser, err error) 
 }
 
 // returns images from commons categories
-func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) ([]ImageResult, []string) {
+func (c *CommonsRepository) GetImagesFromCommonsCategories(category string) ([]ImageResult, []string) {
 	// Get images from commons category
 	// Create batch from commons category
+	log.Println("Getting images from commons category: ", category)
 	paginator := NewPaginator[ImageInfoPage](c)
 	params := url.Values{
 		"action":    {"query"},
 		"format":    {"json"},
 		"prop":      {"imageinfo"},
 		"generator": {"categorymembers"},
-		"gcmtitle":  {strings.Join(categories, "|")},
+		"gcmtitle":  {category},
 		"gcmtype":   {"file"},
 		"iiprop":    {"timestamp|user|url|size|mediatype|dimensions|extmetadata|canonicaltitle"},
 		"limit":     {"max"},
@@ -138,6 +140,7 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(categories []string) 
 		if image == nil {
 			break
 		}
+		log.Println("Processing image: ", image.Title)
 		if len(image.Info) == 0 {
 			fmt.Println("No image info found. Skipping")
 			continue

@@ -51,7 +51,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 		if err == gorm.ErrRecordNotFound {
 			// Create the user
 			db_user = &database.User{
-				UserID:       user.CentralID,
+				UserID:       services.GenerateID("usr"),
 				RegisteredAt: user.Registered,
 				Username:     user.Name,
 				Permission:   consts.PermissionGroupADMIN,

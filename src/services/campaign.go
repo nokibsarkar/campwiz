@@ -5,11 +5,13 @@ import (
 	"nokib/campwiz/database"
 )
 
+type JuryUserName string
 type CampaignService struct{}
 type CampaignCreateRequest struct {
 	database.CampaignWithWriteableFields
-	CreatedByID string `json:"-"`
-	Jury        []uint `json:"jury"`
+	CreatedByID string         `json:"-"`
+	Jury        []JuryUserName `json:"jury"`
+	database.CampaignRoundRestrictions
 }
 type CampaignUpdateRequest struct {
 	CampaignCreateRequest
@@ -22,7 +24,7 @@ func NewCampaignService() *CampaignService {
 func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRequest) (*database.Campaign, error) {
 	// Create a new campaign
 	campaign := &database.Campaign{
-		CampaignID: GenerateID(),
+		CampaignID: GenerateID("c"),
 		CampaignWithWriteableFields: database.CampaignWithWriteableFields{
 			Name:        campaignRequest.Name,
 			Description: campaignRequest.Description,
@@ -35,7 +37,6 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 		CreatedByID: campaignRequest.CreatedByID,
 	}
 	campaign_repo := database.NewCampaignRepository()
-	round_repo := database.NewCampaignRoundRepository()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
@@ -44,34 +45,7 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 		tx.Rollback()
 		return nil, err
 	}
-	round := []database.CampaignRound{
-		{
-			CreatedByID: campaign.CreatedByID,
-			CampaignID:  campaign.CampaignID,
-			ID:          GenerateID(),
-			CampaignRoundWritable: database.CampaignRoundWritable{
-				Name:             "Round 0",
-				Description:      "The system round of the campaign",
-				StartDate:        campaign.StartDate,
-				EndDate:          campaign.EndDate,
-				IsOpen:           true,
-				IsPublic:         false,
-				Serial:           0,
-				DependsOnRoundID: nil,
-				MediaCampaignRestrictions: database.MediaCampaignRestrictions{
-					ImageCampaignRestrictions: database.ImageCampaignRestrictions{
-						MaximumSubmissionOfSameImage: 1,
-						MinimumTotalImageSize:        1024,
-					},
-				},
-			},
-		},
-	}
-	err = round_repo.Create(tx, round)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
+
 	tx.Commit()
 	return campaign, nil
 }

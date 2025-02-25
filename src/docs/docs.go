@@ -26,254 +26,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/batch/": {
-            "get": {
-                "description": "List batches",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Batch"
-                ],
-                "summary": "List batches",
-                "parameters": [
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "name": "ids",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "limit",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseList-database_Batch"
-                        }
-                    }
-                }
-            }
-        },
-        "/batch/create/commons": {
-            "post": {
-                "description": "The user would provide a list of commons categories and the system would create a batch from the images in those categories",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Batch"
-                ],
-                "summary": "Create a batch of images from commons category",
-                "parameters": [
-                    {
-                        "description": "The batch creation request",
-                        "name": "CreateFromCommons",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/services.CreateFromCommons"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
-                        }
-                    }
-                }
-            }
-        },
-        "/batch/create/csv": {
-            "post": {
-                "description": "The user would provide a CSV file with a list of image names and the system would create a batch from the images in those URLs",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Batch"
-                ],
-                "summary": "Create a batch of images from a CSV file",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "The CSV file",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
-                        }
-                    }
-                }
-            }
-        },
-        "/batch/create/pagepile/{pagepileId}": {
-            "post": {
-                "description": "The user would provide a pagepile ID and the system would create a batch from the images in that pagepile",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Batch"
-                ],
-                "summary": "Create a batch of images from a pagepile",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The pagepile ID",
-                        "name": "pagepileId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
-                        }
-                    }
-                }
-            }
-        },
-        "/batch/create/round/{roundId}": {
-            "post": {
-                "description": "The user would provide a round ID and the system would create a batch from the images in that round",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Batch"
-                ],
-                "summary": "Create a batch of images from another round output",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The round ID",
-                        "name": "roundId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
-                        }
-                    }
-                }
-            }
-        },
-        "/batch/create/wikipage": {
-            "post": {
-                "description": "The user would provide a wikipage and the system would create a batch from the images listed in that wikipage",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Batch"
-                ],
-                "summary": "Create a batch of images from a list of wikipages",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The wikipage",
-                        "name": "wikipage",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "The language of the wikipage",
-                        "name": "language",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-services_BatchCreationResult"
-                        }
-                    }
-                }
-            }
-        },
-        "/batch/{batchId}": {
-            "get": {
-                "description": "Get a batch",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Batch"
-                ],
-                "summary": "Get a batch",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The batch ID",
-                        "name": "batchId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-database_Batch"
-                        }
-                    }
-                }
-            }
-        },
-        "/batch/{batchId}/images": {
-            "get": {
-                "description": "Get images of a batch",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Batch"
-                ],
-                "summary": "Get images of a batch",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The batch ID",
-                        "name": "batchId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseList-database_Image"
-                        }
-                    }
-                }
-            }
-        },
         "/campaign/": {
             "get": {
                 "description": "get all campaigns",
@@ -389,7 +141,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "CampaignRound"
+                    "Round"
                 ],
                 "summary": "List all rounds",
                 "parameters": [
@@ -412,18 +164,16 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/round/bulk-add": {
+            },
             "post": {
-                "description": "Add multiple rounds to a campaign",
+                "description": "Create a new round for a campaign",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "CampaignRound"
+                    "Round"
                 ],
-                "summary": "Add multiple rounds to a campaign",
+                "summary": "Create a new round",
                 "parameters": [
                     {
                         "description": "The round request",
@@ -439,7 +189,72 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/routes.ResponseList-database_CampaignRound"
+                            "$ref": "#/definitions/routes.ResponseSingle-database_CampaignRound"
+                        }
+                    }
+                }
+            }
+        },
+        "/round/import/{roundId}": {
+            "get": {
+                "description": "It would be used as a server sent event stream to broadcast on the frontend about current status of the round",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Round"
+                ],
+                "summary": "Get the import status about a round",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The round ID",
+                        "name": "roundId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-services_RoundImportSummary"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "The user would provide a round ID and a list of commons categories and the system would import images from those categories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Round"
+                ],
+                "summary": "Import images from commons",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The round ID",
+                        "name": "roundId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The import from commons request",
+                        "name": "ImportFromCommons",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.ImportFromCommonsPayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-services_RoundImportSummary"
                         }
                     }
                 }
@@ -554,40 +369,23 @@ const docTemplate = `{
                 "Zulu"
             ]
         },
-        "database.Batch": {
-            "type": "object",
-            "properties": {
-                "batchId": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "createdById": {
-                    "type": "string"
-                },
-                "totalSubmissions": {
-                    "type": "integer"
-                }
-            }
-        },
         "database.Campaign": {
             "type": "object",
             "properties": {
+                "campaignId": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "description": "read only",
                     "type": "string"
                 },
-                "createdBy": {
+                "createdById": {
                     "type": "string"
                 },
                 "description": {
                     "type": "string"
                 },
                 "endDate": {
-                    "type": "string"
-                },
-                "id": {
                     "type": "string"
                 },
                 "image": {
@@ -610,6 +408,27 @@ const docTemplate = `{
         "database.CampaignRound": {
             "type": "object",
             "properties": {
+                "allowCreations": {
+                    "type": "boolean"
+                },
+                "allowExpansions": {
+                    "type": "boolean"
+                },
+                "allowJuryToParticipate": {
+                    "type": "boolean"
+                },
+                "allowMultipleJudgement": {
+                    "type": "boolean"
+                },
+                "allowedMediaTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.MediaType"
+                    }
+                },
+                "blacklist": {
+                    "type": "string"
+                },
                 "campaignId": {
                     "type": "string"
                 },
@@ -628,88 +447,75 @@ const docTemplate = `{
                 "endDate": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "isOpen": {
                     "type": "boolean"
                 },
                 "isPublic": {
                     "type": "boolean"
                 },
-                "maximumSubmissionOfSameImage": {
+                "maximumSubmissionOfSameArticle": {
                     "type": "integer"
                 },
-                "minimumTotalImageSize": {
+                "minimumAddedBytes": {
+                    "type": "integer"
+                },
+                "minimumAddedWords": {
+                    "type": "integer"
+                },
+                "minimumDurationMilliseconds": {
+                    "type": "integer"
+                },
+                "minimumHeight": {
+                    "type": "integer"
+                },
+                "minimumResolution": {
+                    "type": "integer"
+                },
+                "minimumTotalBytes": {
+                    "type": "integer"
+                },
+                "minimumTotalWords": {
+                    "type": "integer"
+                },
+                "minimumWidth": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
+                },
+                "roundId": {
+                    "type": "string"
+                },
+                "secretBallot": {
+                    "type": "boolean"
                 },
                 "serial": {
                     "type": "integer"
                 },
                 "startDate": {
                     "type": "string"
+                },
+                "totalSubmissions": {
+                    "type": "integer"
                 }
             }
         },
-        "database.CampaignRoundWritable": {
-            "type": "object",
-            "properties": {
-                "dependsOnRoundId": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "endDate": {
-                    "type": "string"
-                },
-                "isOpen": {
-                    "type": "boolean"
-                },
-                "isPublic": {
-                    "type": "boolean"
-                },
-                "maximumSubmissionOfSameImage": {
-                    "type": "integer"
-                },
-                "minimumTotalImageSize": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "serial": {
-                    "type": "integer"
-                },
-                "startDate": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.Image": {
-            "type": "object",
-            "properties": {
-                "pageid": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                }
-            }
-        },
-        "routes.ResponseList-database_Batch": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.Batch"
-                    }
-                }
-            }
+        "database.MediaType": {
+            "type": "string",
+            "enum": [
+                "ARTICLE",
+                "BITMAP",
+                "AUDIO",
+                "VIDEO",
+                "PDF"
+            ],
+            "x-enum-varnames": [
+                "MediaTypeArticle",
+                "MediaTypeImage",
+                "MediaTypeAudio",
+                "MediaTypeVideo",
+                "MediaTypePDF"
+            ]
         },
         "routes.ResponseList-database_Campaign": {
             "type": "object",
@@ -733,65 +539,46 @@ const docTemplate = `{
                 }
             }
         },
-        "routes.ResponseList-database_Image": {
+        "routes.ResponseSingle-database_CampaignRound": {
             "type": "object",
             "properties": {
                 "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.Image"
-                    }
+                    "$ref": "#/definitions/database.CampaignRound"
                 }
             }
         },
-        "routes.ResponseSingle-database_Batch": {
+        "routes.ResponseSingle-services_RoundImportSummary": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/database.Batch"
-                }
-            }
-        },
-        "routes.ResponseSingle-services_BatchCreationResult": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/services.BatchCreationResult"
-                }
-            }
-        },
-        "services.BatchCreationResult": {
-            "type": "object",
-            "properties": {
-                "batchId": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "createdById": {
-                    "type": "string"
-                },
-                "failedCount": {
-                    "type": "integer"
-                },
-                "failedIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "successCount": {
-                    "type": "integer"
-                },
-                "totalSubmissions": {
-                    "type": "integer"
+                    "$ref": "#/definitions/services.RoundImportSummary"
                 }
             }
         },
         "services.CampaignCreateRequest": {
             "type": "object",
             "properties": {
+                "allowCreations": {
+                    "type": "boolean"
+                },
+                "allowExpansions": {
+                    "type": "boolean"
+                },
+                "allowJuryToParticipate": {
+                    "type": "boolean"
+                },
+                "allowMultipleJudgement": {
+                    "type": "boolean"
+                },
+                "allowedMediaTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.MediaType"
+                    }
+                },
+                "blacklist": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -804,17 +591,47 @@ const docTemplate = `{
                 "jury": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "type": "string"
                     }
                 },
                 "language": {
                     "$ref": "#/definitions/consts.Language"
+                },
+                "maximumSubmissionOfSameArticle": {
+                    "type": "integer"
+                },
+                "minimumAddedBytes": {
+                    "type": "integer"
+                },
+                "minimumAddedWords": {
+                    "type": "integer"
+                },
+                "minimumDurationMilliseconds": {
+                    "type": "integer"
+                },
+                "minimumHeight": {
+                    "type": "integer"
+                },
+                "minimumResolution": {
+                    "type": "integer"
+                },
+                "minimumTotalBytes": {
+                    "type": "integer"
+                },
+                "minimumTotalWords": {
+                    "type": "integer"
+                },
+                "minimumWidth": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
                 },
                 "rules": {
                     "type": "string"
+                },
+                "secretBallot": {
+                    "type": "boolean"
                 },
                 "startDate": {
                     "type": "string"
@@ -824,6 +641,27 @@ const docTemplate = `{
         "services.CampaignUpdateRequest": {
             "type": "object",
             "properties": {
+                "allowCreations": {
+                    "type": "boolean"
+                },
+                "allowExpansions": {
+                    "type": "boolean"
+                },
+                "allowJuryToParticipate": {
+                    "type": "boolean"
+                },
+                "allowMultipleJudgement": {
+                    "type": "boolean"
+                },
+                "allowedMediaTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.MediaType"
+                    }
+                },
+                "blacklist": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -836,11 +674,38 @@ const docTemplate = `{
                 "jury": {
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "type": "string"
                     }
                 },
                 "language": {
                     "$ref": "#/definitions/consts.Language"
+                },
+                "maximumSubmissionOfSameArticle": {
+                    "type": "integer"
+                },
+                "minimumAddedBytes": {
+                    "type": "integer"
+                },
+                "minimumAddedWords": {
+                    "type": "integer"
+                },
+                "minimumDurationMilliseconds": {
+                    "type": "integer"
+                },
+                "minimumHeight": {
+                    "type": "integer"
+                },
+                "minimumResolution": {
+                    "type": "integer"
+                },
+                "minimumTotalBytes": {
+                    "type": "integer"
+                },
+                "minimumTotalWords": {
+                    "type": "integer"
+                },
+                "minimumWidth": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
@@ -848,12 +713,15 @@ const docTemplate = `{
                 "rules": {
                     "type": "string"
                 },
+                "secretBallot": {
+                    "type": "boolean"
+                },
                 "startDate": {
                     "type": "string"
                 }
             }
         },
-        "services.CreateFromCommons": {
+        "services.ImportFromCommonsPayload": {
             "type": "object",
             "properties": {
                 "categories": {
@@ -862,24 +730,122 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "services.ImportStatus": {
+            "type": "string",
+            "enum": [
+                "success",
+                "failed",
+                "pending"
+            ],
+            "x-enum-varnames": [
+                "ImportStatusSuccess",
+                "ImportStatusFailed",
+                "ImportStatusPending"
+            ]
+        },
+        "services.RoundImportSummary": {
+            "type": "object",
+            "properties": {
+                "failedCount": {
+                    "type": "integer"
                 },
-                "roundId": {
-                    "description": "Round ID to which the batch belongs",
-                    "type": "string"
+                "failedIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "$ref": "#/definitions/services.ImportStatus"
+                },
+                "successCount": {
+                    "type": "integer"
                 }
             }
         },
         "services.RoundRequest": {
             "type": "object",
             "properties": {
+                "allowCreations": {
+                    "type": "boolean"
+                },
+                "allowExpansions": {
+                    "type": "boolean"
+                },
+                "allowJuryToParticipate": {
+                    "type": "boolean"
+                },
+                "allowMultipleJudgement": {
+                    "type": "boolean"
+                },
+                "allowedMediaTypes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.MediaType"
+                    }
+                },
+                "blacklist": {
+                    "type": "string"
+                },
                 "campaignId": {
                     "type": "string"
                 },
-                "rounds": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/database.CampaignRoundWritable"
-                    }
+                "dependsOnRoundId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "endDate": {
+                    "type": "string"
+                },
+                "isOpen": {
+                    "type": "boolean"
+                },
+                "isPublic": {
+                    "type": "boolean"
+                },
+                "maximumSubmissionOfSameArticle": {
+                    "type": "integer"
+                },
+                "minimumAddedBytes": {
+                    "type": "integer"
+                },
+                "minimumAddedWords": {
+                    "type": "integer"
+                },
+                "minimumDurationMilliseconds": {
+                    "type": "integer"
+                },
+                "minimumHeight": {
+                    "type": "integer"
+                },
+                "minimumResolution": {
+                    "type": "integer"
+                },
+                "minimumTotalBytes": {
+                    "type": "integer"
+                },
+                "minimumTotalWords": {
+                    "type": "integer"
+                },
+                "minimumWidth": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "secretBallot": {
+                    "type": "boolean"
+                },
+                "serial": {
+                    "type": "integer"
+                },
+                "startDate": {
+                    "type": "string"
                 }
             }
         }

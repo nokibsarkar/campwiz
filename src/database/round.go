@@ -7,7 +7,10 @@ import (
 )
 
 // These are the restrictions that are applied to the articles that are submitted to the campaign
-type CampaignRoundCommonRestrictions struct{}
+type CampaignRoundCommonRestrictions struct {
+	AllowJuryToParticipate bool `json:"allowJuryToParticipate"`
+	AllowMultipleJudgement bool `json:"allowMultipleJudgement"`
+}
 
 // These are the restrictions that are applied to the audio and video that are submitted to the campaign
 type CampaignRoundAudioVideoRestrictions struct {
@@ -20,12 +23,28 @@ type CampaignRoundImageRestrictions struct {
 	MinimumWidth      int `json:"minimumWidth" gorm:"default:0"`
 	MinimumResolution int `json:"minimumResolution" gorm:"default:0"`
 }
+type CampaignRoundArticleRestrictions struct {
+	MaximumSubmissionOfSameArticle int    `json:"maximumSubmissionOfSameArticle"`
+	AllowExpansions                bool   `json:"allowExpansions"`
+	AllowCreations                 bool   `json:"allowCreations"`
+	MinimumTotalBytes              int    `json:"minimumTotalBytes"`
+	MinimumTotalWords              int    `json:"minimumTotalWords"`
+	MinimumAddedBytes              int    `json:"minimumAddedBytes"`
+	MinimumAddedWords              int    `json:"minimumAddedWords"`
+	SecretBallot                   bool   `json:"secretBallot"`
+	Blacklist                      string `json:"blacklist"`
+}
+type CampaignRoundMediaRestrictions struct {
+	CampaignRoundImageRestrictions
+	CampaignRoundAudioVideoRestrictions
+}
 
 // these are the restrictions that are applied to
 type CampaignRoundRestrictions struct {
 	CampaignRoundCommonRestrictions
-	CampaignRoundAudioVideoRestrictions
-	CampaignRoundImageRestrictions
+	CampaignRoundMediaRestrictions
+	CampaignRoundArticleRestrictions
+	AllowedMediaTypes MediaTypeSet `json:"allowedMediaTypes" gore:"type:text;not null;default:'ARTICLE'"`
 }
 type CampaignRoundWritable struct {
 	Name             string         `json:"name"`
@@ -38,13 +57,14 @@ type CampaignRoundWritable struct {
 	DependsOnRound   *CampaignRound `json:"-" gorm:"foreignKey:DependsOnRoundID"`
 	Campaign         *Campaign      `json:"-" gorm:"foreignKey:CampaignID"`
 	Serial           int            `json:"serial" gorm:"default:0"`
-	MediaCampaignRestrictions
+	CampaignRoundRestrictions
 }
 type CampaignRound struct {
-	CampaignID  string     `json:"campaignId" gorm:"index"`
-	ID          string     `json:"id" gorm:"primaryKey"`
-	CreatedAt   *time.Time `json:"createdAt" gorm:"-<-:create"`
-	CreatedByID string     `json:"createdById"`
+	RoundID          string     `json:"roundId" gorm:"primaryKey"`
+	CampaignID       string     `json:"campaignId" gorm:"index"`
+	CreatedAt        *time.Time `json:"createdAt" gorm:"-<-:create"`
+	CreatedByID      string     `json:"createdById"`
+	TotalSubmissions int        `json:"totalSubmissions" gorm:"default:0"`
 	CampaignRoundWritable
 }
 type RoundFilter struct {
@@ -56,9 +76,12 @@ type CampaignRoundRepository struct{}
 func NewCampaignRoundRepository() *CampaignRoundRepository {
 	return &CampaignRoundRepository{}
 }
-func (r *CampaignRoundRepository) Create(conn *gorm.DB, rounds []CampaignRound) error {
-	result := conn.Create(rounds)
-	return result.Error
+func (r *CampaignRoundRepository) Create(conn *gorm.DB, round *CampaignRound) (*CampaignRound, error) {
+	result := conn.Create(round)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return round, nil
 }
 func (r *CampaignRoundRepository) FindAll(conn *gorm.DB, filter *RoundFilter) ([]CampaignRound, error) {
 	var rounds []CampaignRound
@@ -77,7 +100,7 @@ func (r *CampaignRoundRepository) FindAll(conn *gorm.DB, filter *RoundFilter) ([
 }
 func (r *CampaignRoundRepository) FindByID(conn *gorm.DB, id string) (*CampaignRound, error) {
 	round := &CampaignRound{}
-	where := &CampaignRound{ID: id}
+	where := &CampaignRound{RoundID: id}
 	result := conn.First(round, where)
 	return round, result.Error
 }

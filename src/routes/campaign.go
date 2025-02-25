@@ -140,7 +140,7 @@ func NewCampaignRoutes(parent *gin.RouterGroup) {
 	r.GET("/:id", GetSingleCampaign)
 	r.GET("/jury", ListAllJury)
 	r.POST("/", WithPermission(consts.PermissionCreateCampaign, CreateCampaign))
-	r.POST("/:id", WithPermission(consts.PermissionUpdateCampaign, UpdateCampaign))
+	r.POST("/:id", WithPermission(consts.PermissionUpdateCampaignDetails, UpdateCampaign))
 	r.GET("/:id/result", GetCampaignResult)
 	r.GET("/:id/submissions", GetCampaignSubmissions)
 	r.GET("/:id/next", GetNextSubmission)

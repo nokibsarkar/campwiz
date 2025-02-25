@@ -45,7 +45,7 @@ func (a *AuthenticationService) VerifyToken(cacheDB *gorm.DB, tokenMap *SessionC
 }
 func (a *AuthenticationService) NewSession(tx *gorm.DB, tokenMap *SessionClaims) (string, *cache.Session, error) {
 	session := &cache.Session{
-		ID:         GenerateID(),
+		ID:         GenerateID("ses"),
 		UserID:     tokenMap.Subject,
 		Username:   tokenMap.Name,
 		Permission: tokenMap.Permission,

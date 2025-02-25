@@ -1,4 +1,35 @@
 {{define "index.html"}}
-{{.}}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampWiz</title>
+</head>
+<body>
+    <div id="result"></div>
 <a href="/user/login">Login</a>
+</body>
+<script>
+    function useSSE(){
+        var source = new EventSource("/api/v2/sse/sse");
+        source.onmessage = function(event){
+            var result = document.getElementById("result");
+            result.innerHTML += event.data + "<br>";
+        }
+        source.onerror = function(event){
+            console.log("Error: ", event);
+            event.target.close();
+        }
+        source.onopen = function(event){
+            console.log("Connection opened");
+        }
+        source.onclose = function(event){
+            console.log("Connection closed");
+        }
+    }
+</script>
+</html>
 {{end}}
