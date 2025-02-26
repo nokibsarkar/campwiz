@@ -86,7 +86,7 @@ func (s *RoundService) ListAllRounds(filter *database.RoundFilter) ([]database.R
 	return rounds, nil
 }
 func importImagesFromCommons(taskId database.IDType, categories []string) {
-	submissions := []database.Submission{}
+
 	successCount := 0
 	failedCount := 0
 	failedimages := []string{}
@@ -113,25 +113,23 @@ func importImagesFromCommons(taskId database.IDType, categories []string) {
 		conn.Save(task)
 	}()
 	for _, category := range categories {
-		images, failedImages := commons_repo.GetImagesFromCommonsCategories(category)
+		images, currentfailedImages := commons_repo.GetImagesFromCommonsCategories(category)
 		if images == nil {
 			log.Println("No images found in the category: ", category)
 			continue
 		}
-		if failedImages != nil {
-			failedCount += len(failedImages)
+		if currentfailedImages != nil {
+			failedCount += len(currentfailedImages)
+			failedimages = append(failedimages, currentfailedImages...)
 		}
-		failedimages = append(failedimages, failedImages...)
 		successCount += len(images)
-		// submission_repo := database.NewSubmissionRepository()
 		participants := map[string]database.IDType{}
 		for _, image := range images {
-			participants[image.UploaderUsername] = GenerateID("user")
+			participants[image.UploaderUsername] = GenerateID("u")
 		}
 		part_repo := database.NewUserRepository()
 		perCategoryTx := conn.Begin()
 		username2IdMap, err := part_repo.EnsureExists(perCategoryTx, participants)
-		fmt.Println("Username to ID map: ", username2IdMap)
 		if err != nil {
 			log.Println("Error ensuring users exist: ", err)
 			perCategoryTx.Rollback()
@@ -139,6 +137,7 @@ func importImagesFromCommons(taskId database.IDType, categories []string) {
 			return
 		}
 		submissionCount := 0
+		submissions := []database.Submission{}
 		for _, image := range images {
 			uploaderId := username2IdMap[image.UploaderUsername]
 			submission := database.Submission{
@@ -173,10 +172,22 @@ func importImagesFromCommons(taskId database.IDType, categories []string) {
 			submissions = append(submissions, submission)
 			submissionCount++
 		}
+		if len(submissions) == 0 {
+			task.Status = database.TaskStatusFailed
+			return
+		}
+
+		res := perCategoryTx.Create(submissions)
+		if res.Error != nil {
+			task.Status = database.TaskStatusFailed
+			log.Println("Error saving submissions: ", res.Error)
+			perCategoryTx.Rollback()
+			return
+		}
 		task.SuccessCount = successCount
 		task.FailedCount = failedCount
 		*task.FailedIds = datatypes.JSONSlice[string](failedimages)
-		res := perCategoryTx.Save(task)
+		res = perCategoryTx.Save(task)
 		if res.Error != nil {
 			log.Println("Error saving task: ", res.Error)
 			task.Status = database.TaskStatusFailed
@@ -185,22 +196,10 @@ func importImagesFromCommons(taskId database.IDType, categories []string) {
 		}
 		perCategoryTx.Commit()
 	}
-	if len(submissions) == 0 {
-		task.Status = database.TaskStatusFailed
-		return
-	}
 	tx := conn.Begin()
-	res := tx.Create(submissions)
-	if res.Error != nil {
-		task.Status = database.TaskStatusFailed
-		log.Println("Error saving submissions: ", res.Error)
-		tx.Rollback()
-		return
-	}
 	round.Status = database.RoundStatusCompleted
 	task.Status = database.TaskStatusSuccess
 	round.TotalSubmissions += successCount
-	tx.Save(task)
 	tx.Save(round)
 	tx.Commit()
 }
