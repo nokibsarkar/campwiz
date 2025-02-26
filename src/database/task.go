@@ -8,10 +8,24 @@ import (
 	"gorm.io/gorm"
 )
 
+type TaskStatus string
+type TaskType string
+
+const (
+	TaskTypeImportFromCommons     TaskType = "import.commons"
+	TaskTypeDistributeEvaluations TaskType = "distribute.evaluations"
+)
+const (
+	TaskStatusPending TaskStatus = "pending"
+	TaskStatusRunning TaskStatus = "running"
+	TaskStatusSuccess TaskStatus = "success"
+	TaskStatusFailed  TaskStatus = "failed"
+)
+
 type Task struct {
 	TaskID               IDType                       `json:"taskId" gorm:"primaryKey"`
-	Type                 string                       `json:"type"`
-	Status               string                       `json:"status"`
+	Type                 TaskType                     `json:"type"`
+	Status               TaskStatus                   `json:"status"`
 	AssociatedRoundID    *IDType                      `json:"roundId" gorm:"index;null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	AssociatedCampaignID *IDType                      `json:"campaignId" gorm:"index;null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	AssociatedUserID     *IDType                      `json:"userId" gorm:"index;null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`

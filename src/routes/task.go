@@ -67,7 +67,8 @@ func GetTaskByIDStream(c *gin.Context, sess *cache.Session) {
 			return false
 		}
 		c.SSEvent("task", task)
-		if task.Status == "completed" || task.Status == "failed" {
+		if task.Status == database.TaskStatusSuccess || task.Status == database.TaskStatusFailed {
+			// No need to stream anymore
 			return false
 		}
 		return true

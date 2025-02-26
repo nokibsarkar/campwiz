@@ -51,24 +51,6 @@ type UserList struct {
 	Users map[string]WikimediaUser `json:"users"`
 }
 
-/*
-"timestamp": "2024-02-18T18:54:46Z",
-
-	"user": "Sakil302",
-	"userid": 7229062,
-	"size": 6294651,
-	"width": 3120,
-	"height": 3900,
-	"canonicaltitle": "File:Farmer's joy.jpg",
-	"url": "https://upload.wikimedia.org/wikipedia/commons/8/87/Farmer%27s_joy.jpg",
-	"descriptionurl": "https://commons.wikimedia.org/wiki/File:Farmer%27s_joy.jpg",
-	"descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=145519602",
-	"metadata": [
-	    {
-	        "name": "ImageDescription",
-	        "value": null
-	    },
-*/
 type KeyValue struct {
 	Name  string `json:"name"`
 	Value any    `json:"value"`
@@ -106,6 +88,7 @@ func (c *CommonsRepository) Get(values url.Values) (_ io.ReadCloser, err error) 
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.accessToken))
 	resp, err := c.cl.Do(req)
 	if err != nil {
 		return nil, err

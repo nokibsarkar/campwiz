@@ -21,8 +21,26 @@ func (i *IDType) GormDataType() string {
 func GetDB() (db *gorm.DB, close func()) {
 	dsn := consts.Config.Database.Main.DSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Warn),
-		// Logger: logger.Default.LogMode(logger.Info),
+		// Logger: logger.Default.LogMode(logger.Warn),
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	return db, func() {
+		raw_db, err := db.DB()
+		if err != nil {
+			panic("failed to connect database")
+		}
+		raw_db.Close()
+	}
+}
+func GetDbWithoutDefaultTransaction() (db *gorm.DB, close func()) {
+	dsn := consts.Config.Database.Main.DSN
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		// Logger: logger.Default.LogMode(logger.Warn),
+		Logger:                 logger.Default.LogMode(logger.Info),
+		SkipDefaultTransaction: true,
 	})
 	if err != nil {
 		panic("failed to connect database")

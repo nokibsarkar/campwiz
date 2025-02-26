@@ -80,6 +80,5 @@ func (u *UserRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[str
 		return userName2Id, nil
 	}
 	result := tx.Create(new_users)
-	tx.Commit()
 	return userName2Id, result.Error
 }
