@@ -59,10 +59,10 @@ func (u *UserRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[str
 	for nonExistingUsername := range usernameToRandomIdMap {
 		nonExistentUsers = append(nonExistentUsers, nonExistingUsername)
 	}
-	log.Println("Non existent users: ", nonExistentUsers)
 	commons_repo := NewCommonsRepository()
 	users, err := commons_repo.GeUsersFromUsernames(nonExistentUsers)
 	if err != nil {
+		log.Printf("Error fetching users: %v\n", err)
 		return nil, err
 	}
 	new_users := []User{}

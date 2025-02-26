@@ -157,26 +157,36 @@ func (c *CommonsRepository) GeUsersFromUsernames(usernames []string) ([]Wikimedi
 	// Get images from commons category
 	// Create batch from commons category
 	paginator := NewPaginator[WikimediaUser](c)
-	params := url.Values{
-		"action":  {"query"},
-		"format":  {"json"},
-		"list":    {"users"},
-		"ususers": {strings.Join(usernames, "|")},
-		"usprop":  {"centralids|registration"},
-		"limit":   {"max"},
-	}
-	users, err := paginator.UserList(params)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		return nil, nil
+	batchSize := 40
+	batchCount := len(usernames) / batchSize
+	if len(usernames)%batchSize != 0 {
+		batchCount++
 	}
 	result := []WikimediaUser{}
-	for user := range users {
-		// Append images to result
-		if user == nil {
-			break
+	for i := range batchCount {
+		start := i * batchSize
+		end := min((i+1)*batchSize, len(usernames))
+		batch := usernames[start:end]
+		params := url.Values{
+			"action":  {"query"},
+			"format":  {"json"},
+			"list":    {"users"},
+			"ususers": {strings.Join(batch, "|")},
+			"usprop":  {"centralids|registration"},
+			"limit":   {"max"},
 		}
-		result = append(result, *user)
+		users, err := paginator.UserList(params)
+		if err != nil {
+			fmt.Println("Error: ", err)
+			return nil, nil
+		}
+		for user := range users {
+			// Append images to result
+			if user == nil {
+				break
+			}
+			result = append(result, *user)
+		}
 	}
 	return result, nil
 }
@@ -203,6 +213,11 @@ type BaseQueryResponse[QueryType any, ContinueType map[string]string] struct {
 	BatchComplete string        `json:"batchcomplete"`
 	Next          *ContinueType `json:"continue"`
 	Query         QueryType     `json:"query"`
+	Error         *struct {
+		Code    string `json:"code"`
+		Info    string `json:"info"`
+		Details string `json:"details"`
+	} `json:"error"`
 }
 type PageQueryResponse[PageType any] = BaseQueryResponse[struct {
 	Normalized []struct {

@@ -53,6 +53,7 @@ func (p *Paginator[PageType]) UserList(params url.Values) (chan *WikimediaUser, 
 	streamChanel := make(chan *WikimediaUser)
 	go func() {
 		defer close(streamChanel)
+		defer func() { streamChanel <- nil }()
 		for {
 			stream, err := p.repo.Get(params)
 			if err != nil {
@@ -62,14 +63,18 @@ func (p *Paginator[PageType]) UserList(params url.Values) (chan *WikimediaUser, 
 			resp := &UserListQueryResponse{}
 			err = json.NewDecoder(stream).Decode(resp)
 			if err != nil {
-				log.Fatal(err)
+				log.Println(err)
+				break
+			}
+			if resp.Error != nil {
+				log.Println(resp.Error)
+				break
 			}
 			for _, page := range resp.Query.Users {
 				streamChanel <- &page
 			}
 			Continue := resp.Next
 			if Continue == nil {
-				streamChanel <- nil
 				break
 			}
 			// Convert to map
