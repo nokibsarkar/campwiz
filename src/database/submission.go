@@ -94,9 +94,9 @@ func (r *SubmissionRepository) ListAllSubmissions(tx *gorm.DB, filter *Submissio
 		where = where.Where("submission_id > ?", filter.ContinueToken)
 	}
 
-	stmt := where.Order("submission_id")
+	stmt := where //.Order("submission_id")
 	if filter.Limit > 0 {
-		stmt = stmt.Limit(filter.Limit)
+		stmt = stmt.Limit(max(100, filter.Limit))
 	}
 	result := stmt.Find(&submissions)
 	return submissions, result.Error
