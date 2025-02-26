@@ -37,9 +37,11 @@ func (t *TaskService) CreateTask(TaskRequest, handlerFunc func(c ...any)) (*Task
 
 	return nil, nil
 }
-func (t *TaskService) GetTask(taskId string) (*database.Task, error) {
-
-	return nil, nil
+func (t *TaskService) GetTask(taskId database.IDType) (*database.Task, error) {
+	task_repo := database.NewTaskRepository()
+	conn, close := database.GetDB()
+	defer close()
+	return task_repo.FindByID(conn, taskId)
 }
 func (t *TaskService) ListTasks(filter *TaskFilter) ([]database.Task, error) {
 	return nil, nil
