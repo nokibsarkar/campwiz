@@ -85,7 +85,7 @@ func (s *RoundService) ListAllRounds(filter *database.RoundFilter) ([]database.R
 	}
 	return rounds, nil
 }
-func importImages(taskId database.IDType, categories []string) {
+func importImagesFromCommons(taskId database.IDType, categories []string) {
 	submissions := []database.Submission{}
 	successCount := 0
 	failedCount := 0
@@ -107,6 +107,9 @@ func importImages(taskId database.IDType, categories []string) {
 	}
 	task.Status = string(database.RoundStatusImporting)
 	conn.Save(task)
+	defer func() {
+		conn.Save(task)
+	}()
 	for _, category := range categories {
 		images, failedImages := commons_repo.GetImagesFromCommonsCategories(category)
 		if images == nil {
@@ -127,6 +130,7 @@ func importImages(taskId database.IDType, categories []string) {
 		tx := conn.Begin()
 		username2IdMap, err := part_repo.EnsureExists(tx, participants)
 		if err != nil {
+			log.Println("Error ensuring users exist: ", err)
 			tx.Rollback()
 			return
 		}
@@ -134,7 +138,7 @@ func importImages(taskId database.IDType, categories []string) {
 		for _, image := range images {
 			uploaderId := username2IdMap[image.UploaderUsername]
 			submission := database.Submission{
-				SubmissionID:   GenerateID("sub"),
+				SubmissionID:   GenerateID("s"),
 				Name:           image.Name,
 				CampaignID:     *task.AssociatedCampaignID,
 				URL:            image.URL,
@@ -187,7 +191,7 @@ func importImages(taskId database.IDType, categories []string) {
 	tx.Save(round)
 	tx.Commit()
 }
-func (b *RoundService) ImportFromCommons(roundId database.IDType, categories []string) (*RoundImportSummary, error) {
+func (b *RoundService) ImportFromCommons(roundId database.IDType, categories []string) (*database.Task, error) {
 	round_repo := database.NewRoundRepository()
 	task_repo := database.NewTaskRepository()
 	conn, close := database.GetDB()
@@ -221,10 +225,8 @@ func (b *RoundService) ImportFromCommons(roundId database.IDType, categories []s
 	}
 	tx.Commit()
 	fmt.Println("Task created with ID: ", task.TaskID)
-	go importImages(task.TaskID, categories)
-	return &RoundImportSummary{
-		SuccessCount: round.TotalSubmissions,
-	}, nil
+	go importImagesFromCommons(task.TaskID, categories)
+	return task, nil
 }
 func (b *RoundService) GetById(roundId database.IDType) (*database.Round, error) {
 	round_repo := database.NewRoundRepository()

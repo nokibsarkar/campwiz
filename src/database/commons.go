@@ -140,7 +140,6 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(category string) ([]I
 		if image == nil {
 			break
 		}
-		log.Println("Processing image: ", image.Title)
 		if len(image.Info) == 0 {
 			fmt.Println("No image info found. Skipping")
 			continue
@@ -166,6 +165,7 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(category string) ([]I
 		}
 		result = append(result, img)
 	}
+	log.Println("Found images: ", len(result))
 	return result, []string{}
 }
 

@@ -12,9 +12,9 @@ type Task struct {
 	TaskID               IDType                       `json:"taskId" gorm:"primaryKey"`
 	Type                 string                       `json:"type"`
 	Status               string                       `json:"status"`
-	AssociatedRoundID    *IDType                      `json:"roundId" gorm:"index;null"`
-	AssociatedCampaignID *IDType                      `json:"campaignId" gorm:"index;null"`
-	AssociatedUserID     *IDType                      `json:"userId" gorm:"index;null"`
+	AssociatedRoundID    *IDType                      `json:"roundId" gorm:"index;null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	AssociatedCampaignID *IDType                      `json:"campaignId" gorm:"index;null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	AssociatedUserID     *IDType                      `json:"userId" gorm:"index;null;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Data                 *datatypes.JSON              `json:"data"`
 	CreatedAt            time.Time                    `json:"createdAt" gorm:"autoCreateTime"`
 	UpdatedAt            time.Time                    `json:"updatedAt" gorm:"autoUpdateTime"`
@@ -22,7 +22,7 @@ type Task struct {
 	FailedCount          int                          `json:"failedCount"`
 	FailedIds            *datatypes.JSONSlice[string] `json:"failedIds"`
 	RemainingCount       int                          `json:"remainingCount"`
-	CreatedByID          IDType                       `json:"createdById"`
+	CreatedByID          IDType                       `json:"createdById" gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Submittor            User                         `json:"-" gorm:"foreignKey:CreatedByID;references:UserID"`
 }
 

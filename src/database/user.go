@@ -1,6 +1,7 @@
 package database
 
 import (
+	"log"
 	"nokib/campwiz/consts"
 	"time"
 
@@ -58,6 +59,7 @@ func (u *UserRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[str
 	for nonExistingUsername := range usernameToRandomIdMap {
 		nonExistentUsers = append(nonExistentUsers, nonExistingUsername)
 	}
+	log.Println("Non existent users: ", nonExistentUsers)
 	commons_repo := NewCommonsRepository()
 	users, err := commons_repo.GeUsersFromUsernames(nonExistentUsers)
 	if err != nil {

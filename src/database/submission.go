@@ -36,20 +36,22 @@ type MediaSubmission struct {
 	AudioVideoSubmission
 }
 type Submission struct {
-	SubmissionID    IDType     `json:"pageid" gorm:"primaryKey"`
-	Name            string     `json:"title"`
-	CampaignID      IDType     `json:"campaignId" gorm:"null;index"`
-	URL             string     `json:"url"`
-	Author          string     `json:"author"`        // The Actual Author in the Wikimedia
-	SubmittedByID   IDType     `json:"submittedById"` // The User who submitted the article on behalf of the participant
-	ParticipantID   IDType     `json:"participantId"`
-	CurrentRoundID  IDType     `json:"currentRoundId"`
-	SubmittedAt     time.Time  `json:"submittedAt"`
-	Participant     User       `json:"-" gorm:"foreignKey:ParticipantID"`
-	Submitter       User       `json:"-" gorm:"foreignKey:SubmittedByID"`
-	Campaign        *Campaign  `json:"-"`
-	CreatedAtServer *time.Time `json:"createdAtServer"`
-	CurrentRound    *Round     `json:"-" gorm:"foreignKey:CurrentRoundID"`
+	SubmissionID IDType `json:"pageid" gorm:"primaryKey"`
+	Name         string `json:"title"`
+	CampaignID   IDType `json:"campaignId" gorm:"null;index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	URL          string `json:"url"`
+	// The Actual Author in the Wikimedia
+	Author string `json:"author"`
+	// The User who submitted the article on behalf of the participant
+	SubmittedByID  IDType    `json:"submittedById" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	ParticipantID  IDType    `json:"participantId" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	CurrentRoundID IDType    `json:"currentRoundId" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	SubmittedAt    time.Time `json:"submittedAt" gorm:"type:datetime"`
+	Participant    User      `json:"-" gorm:"foreignKey:ParticipantID"`
+	Submitter      User      `json:"-" gorm:"foreignKey:SubmittedByID"`
+	// Campaign          *Campaign  `json:"-" gorm:"foreignKey:CampaignID"`
+	CreatedAtExternal *time.Time `json:"createdAtServer"`
+	CurrentRound      *Round     `json:"-" gorm:"foreignKey:CurrentRoundID"`
 	MediaSubmission
 }
 type SubmissionRepository struct{}

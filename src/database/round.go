@@ -79,17 +79,18 @@ type RoundWritable struct {
 	IsPublic         bool      `json:"isPublic" gorm:"default:false"`
 	DependsOnRoundID *string   `json:"dependsOnRoundId" gorm:"default:null"`
 	DependsOnRound   *Round    `json:"-" gorm:"foreignKey:DependsOnRoundID"`
-	Campaign         *Campaign `json:"-" gorm:"foreignKey:CampaignID"`
 	Serial           int       `json:"serial" gorm:"default:0"`
 	RoundRestrictions
 }
 type Round struct {
 	RoundID          IDType      `json:"roundId" gorm:"primaryKey"`
-	CampaignID       IDType      `json:"campaignId" gorm:"index"`
+	CampaignID       IDType      `json:"campaignId" gorm:"index;cascade:OnUpdate,OnDelete"`
 	CreatedAt        *time.Time  `json:"createdAt" gorm:"-<-:create"`
-	CreatedByID      IDType      `json:"createdById"`
+	CreatedByID      IDType      `json:"createdById" gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	TotalSubmissions int         `json:"totalSubmissions" gorm:"default:0"`
 	Status           RoundStatus `json:"status"`
+	Campaign         *Campaign   `json:"-"`
+	Creator          *User       `json:"-" gorm:"foreignKey:CreatedByID"`
 	RoundWritable
 }
 type RoundFilter struct {

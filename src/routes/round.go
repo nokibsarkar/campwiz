@@ -35,7 +35,6 @@ func CreateRound(c *gin.Context, sess *cache.Session) {
 		return
 	}
 	c.JSON(200, ResponseSingle[database.Round]{Data: *round})
-
 }
 
 // ListAllRounds godoc
@@ -68,7 +67,7 @@ func ListAllRounds(c *gin.Context, sess *cache.Session) {
 // @Summary Import images from commons
 // @Description The user would provide a round ID and a list of commons categories and the system would import images from those categories
 // @Produce  json
-// @Success 200 {object} ResponseSingle[services.RoundImportSummary]
+// @Success 200 {object} ResponseSingle[database.Task]
 // @Router /round/import/{roundId}/commons [post]
 // @Param roundId path string true "The round ID"
 // @Param ImportFromCommons body services.ImportFromCommonsPayload true "The import from commons request"
@@ -90,12 +89,12 @@ func ImportFromCommons(c *gin.Context, sess *cache.Session) {
 		c.JSON(400, ResponseError{Detail: "Invalid request : No categories provided"})
 		return
 	}
-	round, err := round_service.ImportFromCommons(database.IDType(roundId), req.Categories)
+	task, err := round_service.ImportFromCommons(database.IDType(roundId), req.Categories)
 	if err != nil {
 		c.JSON(400, ResponseError{Detail: "Failed to import images : " + err.Error()})
 		return
 	}
-	c.JSON(200, ResponseSingle[*services.RoundImportSummary]{Data: round})
+	c.JSON(200, ResponseSingle[*database.Task]{Data: task})
 }
 
 // GetImportStatus godoc

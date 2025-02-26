@@ -21,7 +21,7 @@ type Campaign struct {
 	CampaignID IDType `gorm:"primaryKey" json:"campaignId"`
 	// read only
 	CreatedAt   *time.Time `json:"createdAt" gorm:"-<-:create"`
-	CreatedByID IDType     `json:"createdById"`
+	CreatedByID IDType     `json:"createdById" gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	CampaignWithWriteableFields
 	CreatedBy *User `json:"-" gorm:"foreignKey:CreatedByID"`
 }

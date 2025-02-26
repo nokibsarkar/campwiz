@@ -256,7 +256,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-services_RoundImportSummary"
+                            "$ref": "#/definitions/routes.ResponseSingle-database_Task"
                         }
                     }
                 }
@@ -600,6 +600,59 @@ const docTemplate = `{
                 "RoundStatusCompleted"
             ]
         },
+        "database.Task": {
+            "type": "object",
+            "properties": {
+                "campaignId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdById": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "failedCount": {
+                    "type": "integer"
+                },
+                "failedIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "remainingCount": {
+                    "type": "integer"
+                },
+                "roundId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "successCount": {
+                    "type": "integer"
+                },
+                "taskId": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
         "routes.ResponseList-database_Campaign": {
             "type": "object",
             "properties": {
@@ -627,6 +680,14 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/database.Round"
+                }
+            }
+        },
+        "routes.ResponseSingle-database_Task": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/database.Task"
                 }
             }
         },
