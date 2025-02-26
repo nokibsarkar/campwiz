@@ -24,27 +24,19 @@ const (
 
 // Scan implements the sql.Scanner interface
 func (m *MediaTypeSet) Scan(value any) error {
-	var mediatypesetSlice []MediaType
 	if value == nil {
 		*m = nil
 		return nil
 	}
-	// check if already a slice of MediaType
-	mediatypesetSlice, ok := value.([]MediaType)
+
+	mediaTypeBytes, ok := value.([]byte)
 	if !ok {
-		// check if an array of strings
-		mediaTypeStringSet, ok := value.([]string)
-		if !ok {
-			// check if a single string
-			mediaTypeString, ok := value.(string)
-			if !ok {
-				return errors.New("invalid media type")
-			}
-			mediaTypeStringSet = strings.Split(mediaTypeString, ",")
-		}
-		for _, mediaTypeString := range mediaTypeStringSet {
-			mediatypesetSlice = append(mediatypesetSlice, MediaType(mediaTypeString))
-		}
+		return errors.New("invalid media type")
+	}
+	mediatypesetSlice := []MediaType{}
+	mediaTypeString := string(mediaTypeBytes)
+	for _, mediaTypeString := range strings.Split(mediaTypeString, ",") {
+		mediatypesetSlice = append(mediatypesetSlice, MediaType(mediaTypeString))
 	}
 	*m = mediatypesetSlice
 	return nil

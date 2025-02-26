@@ -13,12 +13,12 @@ type Task struct {
 	AssociatedRoundID    *IDType                      `json:"roundId" gorm:"index;null"`
 	AssociatedCampaignID *IDType                      `json:"campaignId" gorm:"index;null"`
 	AssociatedUserID     *IDType                      `json:"userId" gorm:"index;null"`
-	Data                 *datatypes.JSON              `json:"data" gorm:"type:json"`
+	Data                 *datatypes.JSON              `json:"data"`
 	CreatedAt            string                       `json:"createdAt" gorm:"autoCreateTime"`
 	UpdatedAt            string                       `json:"updatedAt" gorm:"autoUpdateTime"`
 	SuccessCount         int                          `json:"successCount"`
 	FailedCount          int                          `json:"failedCount"`
-	FailedIds            *datatypes.JSONSlice[string] `json:"failedIds" gorm:"type:json"`
+	FailedIds            *datatypes.JSONSlice[string] `json:"failedIds"`
 	RemainingCount       int                          `json:"remainingCount"`
 	CreatedByID          IDType                       `json:"createdById"`
 	Submittor            User                         `json:"-" gorm:"foreignKey:CreatedByID;references:UserID"`

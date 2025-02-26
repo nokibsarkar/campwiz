@@ -128,6 +128,20 @@ definitions:
       startDate:
         type: string
     type: object
+  database.MediaType:
+    enum:
+    - ARTICLE
+    - BITMAP
+    - AUDIO
+    - VIDEO
+    - PDF
+    type: string
+    x-enum-varnames:
+    - MediaTypeArticle
+    - MediaTypeImage
+    - MediaTypeAudio
+    - MediaTypeVideo
+    - MediaTypePDF
   database.Round:
     properties:
       allowCreations:
@@ -191,20 +205,6 @@ definitions:
       totalSubmissions:
         type: integer
     type: object
-  database.MediaType:
-    enum:
-    - ARTICLE
-    - BITMAP
-    - AUDIO
-    - VIDEO
-    - PDF
-    type: string
-    x-enum-varnames:
-    - MediaTypeArticle
-    - MediaTypeImage
-    - MediaTypeAudio
-    - MediaTypeVideo
-    - MediaTypePDF
   routes.ResponseList-database_Campaign:
     properties:
       data:
@@ -446,7 +446,37 @@ definitions:
     - RoundStatusCompleted
   services.TaskResponse:
     properties:
+      campaignId:
+        type: string
+      createdAt:
+        type: string
+      createdById:
+        type: string
+      data:
+        items:
+          type: integer
+        type: array
+      failedCount:
+        type: integer
+      failedIds:
+        items:
+          type: string
+        type: array
+      remainingCount:
+        type: integer
+      roundId:
+        type: string
+      status:
+        type: string
+      successCount:
+        type: integer
       taskId:
+        type: string
+      type:
+        type: string
+      updatedAt:
+        type: string
+      userId:
         type: string
     type: object
 host: localhost:8080

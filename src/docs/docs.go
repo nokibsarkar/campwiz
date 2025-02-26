@@ -456,6 +456,23 @@ const docTemplate = `{
                 }
             }
         },
+        "database.MediaType": {
+            "type": "string",
+            "enum": [
+                "ARTICLE",
+                "BITMAP",
+                "AUDIO",
+                "VIDEO",
+                "PDF"
+            ],
+            "x-enum-varnames": [
+                "MediaTypeArticle",
+                "MediaTypeImage",
+                "MediaTypeAudio",
+                "MediaTypeVideo",
+                "MediaTypePDF"
+            ]
+        },
         "database.Round": {
             "type": "object",
             "properties": {
@@ -550,23 +567,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "database.MediaType": {
-            "type": "string",
-            "enum": [
-                "ARTICLE",
-                "BITMAP",
-                "AUDIO",
-                "VIDEO",
-                "PDF"
-            ],
-            "x-enum-varnames": [
-                "MediaTypeArticle",
-                "MediaTypeImage",
-                "MediaTypeAudio",
-                "MediaTypeVideo",
-                "MediaTypePDF"
-            ]
         },
         "routes.ResponseList-database_Campaign": {
             "type": "object",
@@ -925,7 +925,52 @@ const docTemplate = `{
         "services.TaskResponse": {
             "type": "object",
             "properties": {
+                "campaignId": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "createdById": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "failedCount": {
+                    "type": "integer"
+                },
+                "failedIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "remainingCount": {
+                    "type": "integer"
+                },
+                "roundId": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "successCount": {
+                    "type": "integer"
+                },
                 "taskId": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "userId": {
                     "type": "string"
                 }
             }

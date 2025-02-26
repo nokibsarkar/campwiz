@@ -127,7 +127,7 @@ func GetImportStatus(c *gin.Context, sess *cache.Session) {
 
 func NewRoundRoutes(parent *gin.RouterGroup) {
 	r := parent.Group("/round")
-	r.POST("/", WithPermission(consts.PermissionCreateRound, CreateRound))
+	r.POST("/", WithPermission(consts.PermissionCreateCampaign, CreateRound))
 	r.GET("/", WithSession(ListAllRounds))
 	r.GET("/import/:roundId", SSEHeadersMiddleware(), WithPermission(consts.PermissionCreateRound, GetImportStatus))
 	r.POST("/import/:roundId/commons", WithPermission(consts.PermissionCreateRound, ImportFromCommons))
