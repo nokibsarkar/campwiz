@@ -87,7 +87,6 @@ func (s *RoundService) ListAllRounds(filter *database.RoundFilter) ([]database.R
 	return rounds, nil
 }
 func importImagesFromCommons(taskId database.IDType, categories []string) {
-
 	successCount := 0
 	failedCount := 0
 	failedimages := []string{}
@@ -150,15 +149,16 @@ func importImagesFromCommons(taskId database.IDType, categories []string) {
 		for _, image := range images {
 			uploaderId := username2IdMap[image.UploaderUsername]
 			submission := database.Submission{
-				SubmissionID:   GenerateID("s"),
-				Name:           image.Name,
-				CampaignID:     *task.AssociatedCampaignID,
-				URL:            image.URL,
-				Author:         image.UploaderUsername,
-				SubmittedByID:  uploaderId,
-				ParticipantID:  uploaderId,
-				SubmittedAt:    image.SubmittedAt,
-				CurrentRoundID: round.RoundID,
+				SubmissionID:      GenerateID("s"),
+				Name:              image.Name,
+				CampaignID:        *task.AssociatedCampaignID,
+				URL:               image.URL,
+				Author:            image.UploaderUsername,
+				SubmittedByID:     uploaderId,
+				ParticipantID:     uploaderId,
+				SubmittedAt:       image.SubmittedAt,
+				CreatedAtExternal: &image.SubmittedAt,
+				CurrentRoundID:    round.RoundID,
 				MediaSubmission: database.MediaSubmission{
 					MediaType:   database.MediaType(image.MediaType),
 					ThumbURL:    image.URL,

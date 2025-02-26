@@ -231,6 +231,63 @@ definitions:
     - RoundStatusScheduled
     - RoundStatusActive
     - RoundStatusCompleted
+  database.Submission:
+    properties:
+      author:
+        description: The Actual Author in the Wikimedia
+        type: string
+      bitrate:
+        description: in kbps
+        type: integer
+      campaignId:
+        type: string
+      createdAtServer:
+        description: Campaign          *Campaign  `json:"-" gorm:"foreignKey:CampaignID"`
+        type: string
+      creditHTML:
+        type: string
+      currentRoundId:
+        type: string
+      description:
+        type: string
+      duration:
+        description: in milliseconds
+        type: integer
+      height:
+        type: integer
+      license:
+        type: string
+      mediatype:
+        $ref: '#/definitions/database.MediaType'
+      metadata:
+        items:
+          type: integer
+        type: array
+      pageid:
+        type: string
+      participantId:
+        type: string
+      size:
+        description: in bytes
+        type: integer
+      submittedAt:
+        type: string
+      submittedById:
+        description: The User who submitted the article on behalf of the participant
+        type: string
+      thumbheight:
+        type: integer
+      thumburl:
+        type: string
+      thumbwidth:
+        type: integer
+      title:
+        type: string
+      url:
+        type: string
+      width:
+        type: integer
+    type: object
   database.Task:
     properties:
       campaignId:
@@ -254,18 +311,38 @@ definitions:
       roundId:
         type: string
       status:
-        type: string
+        $ref: '#/definitions/database.TaskStatus'
       successCount:
         type: integer
       taskId:
         type: string
       type:
-        type: string
+        $ref: '#/definitions/database.TaskType'
       updatedAt:
         type: string
       userId:
         type: string
     type: object
+  database.TaskStatus:
+    enum:
+    - pending
+    - running
+    - success
+    - failed
+    type: string
+    x-enum-varnames:
+    - TaskStatusPending
+    - TaskStatusRunning
+    - TaskStatusSuccess
+    - TaskStatusFailed
+  database.TaskType:
+    enum:
+    - import.commons
+    - distribute.evaluations
+    type: string
+    x-enum-varnames:
+    - TaskTypeImportFromCommons
+    - TaskTypeDistributeEvaluations
   routes.ResponseList-database_Campaign:
     properties:
       data:
@@ -278,6 +355,13 @@ definitions:
       data:
         items:
           $ref: '#/definitions/database.Round'
+        type: array
+    type: object
+  routes.ResponseList-database_Submission:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/database.Submission'
         type: array
     type: object
   routes.ResponseSingle-database_Round:
@@ -509,13 +593,13 @@ definitions:
       roundId:
         type: string
       status:
-        type: string
+        $ref: '#/definitions/database.TaskStatus'
       successCount:
         type: integer
       taskId:
         type: string
       type:
-        type: string
+        $ref: '#/definitions/database.TaskType'
       updatedAt:
         type: string
       userId:
@@ -689,6 +773,35 @@ paths:
       summary: Import images from commons
       tags:
       - Round
+  /submission/:
+    get:
+      description: get all submissions
+      parameters:
+      - in: query
+        name: campaignId
+        type: string
+      - in: query
+        name: continueToken
+        type: string
+      - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: participantId
+        type: string
+      - in: query
+        name: roundId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseList-database_Submission'
+      summary: List all submissions
+      tags:
+      - Submission
   /task/{taskId}:
     get:
       description: The task represents a background job that can be run by the system

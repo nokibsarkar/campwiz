@@ -7,6 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
+type SubmissionListFilter struct {
+	CampaignID    IDType `form:"campaignId"`
+	RoundID       IDType `form:"roundId"`
+	ParticipantID IDType `form:"participantId"`
+	Limit         int    `form:"limit"`
+	ContinueToken string `form:"continueToken"`
+}
 type ArticleSubmission struct {
 	Language   string `json:"language"`
 	TotalBytes uint64 `json:"totalbytes" gorm:"default:0"`
@@ -62,4 +69,35 @@ func NewSubmissionRepository() *SubmissionRepository {
 func (r *SubmissionRepository) CreateSubmission(tx *gorm.DB, submission *Submission) error {
 	result := tx.Create(submission)
 	return result.Error
+}
+func (r *SubmissionRepository) FindSubmissionByID(tx *gorm.DB, submissionID IDType) (*Submission, error) {
+	submission := &Submission{}
+	result := tx.First(submission, &Submission{SubmissionID: submissionID})
+	return submission, result.Error
+}
+func (r *SubmissionRepository) ListAllSubmissions(tx *gorm.DB, filter *SubmissionListFilter) ([]Submission, error) {
+	var submissions []Submission
+	condition := &Submission{}
+	if filter != nil {
+		if filter.CampaignID != "" {
+			condition.CampaignID = filter.CampaignID
+		}
+		if filter.RoundID != "" {
+			condition.CurrentRoundID = filter.RoundID
+		}
+		if filter.ParticipantID != "" {
+			condition.ParticipantID = filter.ParticipantID
+		}
+	}
+	where := tx.Where(condition)
+	if filter.ContinueToken != "" {
+		where = where.Where("submission_id > ?", filter.ContinueToken)
+	}
+
+	stmt := where.Order("submission_id")
+	if filter.Limit > 0 {
+		stmt = stmt.Limit(filter.Limit)
+	}
+	result := stmt.Find(&submissions)
+	return submissions, result.Error
 }

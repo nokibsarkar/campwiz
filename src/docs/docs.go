@@ -262,6 +262,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/submission/": {
+            "get": {
+                "description": "get all submissions",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Submission"
+                ],
+                "summary": "List all submissions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "campaignId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "continueToken",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "participantId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "roundId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseList-database_Submission"
+                        }
+                    }
+                }
+            }
+        },
         "/task/{taskId}": {
             "get": {
                 "description": "The task represents a background job that can be run by the system",
@@ -600,6 +647,89 @@ const docTemplate = `{
                 "RoundStatusCompleted"
             ]
         },
+        "database.Submission": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "description": "The Actual Author in the Wikimedia",
+                    "type": "string"
+                },
+                "bitrate": {
+                    "description": "in kbps",
+                    "type": "integer"
+                },
+                "campaignId": {
+                    "type": "string"
+                },
+                "createdAtServer": {
+                    "description": "Campaign          *Campaign  ` + "`" + `json:\"-\" gorm:\"foreignKey:CampaignID\"` + "`" + `",
+                    "type": "string"
+                },
+                "creditHTML": {
+                    "type": "string"
+                },
+                "currentRoundId": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "in milliseconds",
+                    "type": "integer"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "license": {
+                    "type": "string"
+                },
+                "mediatype": {
+                    "$ref": "#/definitions/database.MediaType"
+                },
+                "metadata": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "pageid": {
+                    "type": "string"
+                },
+                "participantId": {
+                    "type": "string"
+                },
+                "size": {
+                    "description": "in bytes",
+                    "type": "integer"
+                },
+                "submittedAt": {
+                    "type": "string"
+                },
+                "submittedById": {
+                    "description": "The User who submitted the article on behalf of the participant",
+                    "type": "string"
+                },
+                "thumbheight": {
+                    "type": "integer"
+                },
+                "thumburl": {
+                    "type": "string"
+                },
+                "thumbwidth": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                }
+            }
+        },
         "database.Task": {
             "type": "object",
             "properties": {
@@ -634,7 +764,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "$ref": "#/definitions/database.TaskStatus"
                 },
                 "successCount": {
                     "type": "integer"
@@ -643,7 +773,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "string"
+                    "$ref": "#/definitions/database.TaskType"
                 },
                 "updatedAt": {
                     "type": "string"
@@ -652,6 +782,32 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "database.TaskStatus": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "running",
+                "success",
+                "failed"
+            ],
+            "x-enum-varnames": [
+                "TaskStatusPending",
+                "TaskStatusRunning",
+                "TaskStatusSuccess",
+                "TaskStatusFailed"
+            ]
+        },
+        "database.TaskType": {
+            "type": "string",
+            "enum": [
+                "import.commons",
+                "distribute.evaluations"
+            ],
+            "x-enum-varnames": [
+                "TaskTypeImportFromCommons",
+                "TaskTypeDistributeEvaluations"
+            ]
         },
         "routes.ResponseList-database_Campaign": {
             "type": "object",
@@ -671,6 +827,17 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Round"
+                    }
+                }
+            }
+        },
+        "routes.ResponseList-database_Submission": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.Submission"
                     }
                 }
             }
@@ -1022,7 +1189,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string"
+                    "$ref": "#/definitions/database.TaskStatus"
                 },
                 "successCount": {
                     "type": "integer"
@@ -1031,7 +1198,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "string"
+                    "$ref": "#/definitions/database.TaskType"
                 },
                 "updatedAt": {
                     "type": "string"
