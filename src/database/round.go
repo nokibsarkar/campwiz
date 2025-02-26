@@ -11,6 +11,30 @@ type RoundCommonRestrictions struct {
 	AllowJuryToParticipate bool `json:"allowJuryToParticipate"`
 	AllowMultipleJudgement bool `json:"allowMultipleJudgement"`
 }
+type RoundStatus string
+
+const (
+	// RoundStatusPending is the status when the round is created but not yet approved by the admin
+	RoundStatusPending RoundStatus = "PENDING"
+	// RoundStatusImporting is the status when the round is approved and importing images from commons is in progress
+	RoundStatusImporting RoundStatus = "IMPORTING"
+	// RoundStatusDistributing is the status when the images are imported and being distributed among juries
+	RoundStatusDistributing RoundStatus = "DISTRIBUTING"
+	// RoundStatusEvaluating is the status when the images are distributed and juries are evaluating the images.
+	RoundStatusEvaluating RoundStatus = "EVALUATING"
+	// RoundStatusRejected is the status when the round is rejected by the admin
+	RoundStatusRejected RoundStatus = "REJECTED"
+	// RoundStatusCancelled is the status when the round is cancelled by the admin or the creator
+	RoundStatusCancelled RoundStatus = "CANCELLED"
+	// RoundStatusPaused is the status when the round is paused by the admin
+	RoundStatusPaused RoundStatus = "PAUSED"
+	// RoundStatusScheduled is the status when the round is scheduled to start at a later time
+	RoundStatusScheduled RoundStatus = "SCHEDULED"
+	// RoundStatusActive is the status when the round is active and juries are evaluating the images
+	RoundStatusActive RoundStatus = "ACTIVE"
+	// RoundStatusCompleted is the status when the round is completed and the results are ready
+	RoundStatusCompleted RoundStatus = "COMPLETED"
+)
 
 // These are the restrictions that are applied to the audio and video that are submitted to the campaign
 type RoundAudioVideoRestrictions struct {
@@ -60,11 +84,12 @@ type RoundWritable struct {
 	RoundRestrictions
 }
 type Round struct {
-	RoundID          IDType     `json:"roundId" gorm:"primaryKey"`
-	CampaignID       IDType     `json:"campaignId" gorm:"index"`
-	CreatedAt        *time.Time `json:"createdAt" gorm:"-<-:create"`
-	CreatedByID      IDType     `json:"createdById"`
-	TotalSubmissions int        `json:"totalSubmissions" gorm:"default:0"`
+	RoundID          IDType      `json:"roundId" gorm:"primaryKey"`
+	CampaignID       IDType      `json:"campaignId" gorm:"index"`
+	CreatedAt        *time.Time  `json:"createdAt" gorm:"-<-:create"`
+	CreatedByID      IDType      `json:"createdById"`
+	TotalSubmissions int         `json:"totalSubmissions" gorm:"default:0"`
+	Status           RoundStatus `json:"status"`
 	RoundWritable
 }
 type RoundFilter struct {

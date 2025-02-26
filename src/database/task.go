@@ -2,6 +2,8 @@
 package database
 
 import (
+	"time"
+
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
@@ -14,8 +16,8 @@ type Task struct {
 	AssociatedCampaignID *IDType                      `json:"campaignId" gorm:"index;null"`
 	AssociatedUserID     *IDType                      `json:"userId" gorm:"index;null"`
 	Data                 *datatypes.JSON              `json:"data"`
-	CreatedAt            string                       `json:"createdAt" gorm:"autoCreateTime"`
-	UpdatedAt            string                       `json:"updatedAt" gorm:"autoUpdateTime"`
+	CreatedAt            time.Time                    `json:"createdAt" gorm:"autoCreateTime"`
+	UpdatedAt            time.Time                    `json:"updatedAt" gorm:"autoUpdateTime"`
 	SuccessCount         int                          `json:"successCount"`
 	FailedCount          int                          `json:"failedCount"`
 	FailedIds            *datatypes.JSONSlice[string] `json:"failedIds"`
@@ -38,8 +40,8 @@ func (r *TaskRepository) Create(tx *gorm.DB, task *Task) (*Task, error) {
 	return task, nil
 }
 func (r *TaskRepository) FindByID(tx *gorm.DB, taskId IDType) (*Task, error) {
-	task := &Task{TaskID: taskId}
-	err := tx.Where(task).First(task).Error
+	task := &Task{}
+	err := tx.Find(task, &Task{TaskID: taskId}).First(task).Error
 	if err != nil {
 		return nil, err
 	}

@@ -69,7 +69,7 @@ func ListAllRounds(c *gin.Context, sess *cache.Session) {
 // @Description The user would provide a round ID and a list of commons categories and the system would import images from those categories
 // @Produce  json
 // @Success 200 {object} ResponseSingle[services.RoundImportSummary]
-// @Router /round/import/{roundId} [post]
+// @Router /round/import/{roundId}/commons [post]
 // @Param roundId path string true "The round ID"
 // @Param ImportFromCommons body services.ImportFromCommonsPayload true "The import from commons request"
 // @Tags Round
@@ -130,5 +130,5 @@ func NewRoundRoutes(parent *gin.RouterGroup) {
 	r.POST("/", WithPermission(consts.PermissionCreateCampaign, CreateRound))
 	r.GET("/", WithSession(ListAllRounds))
 	r.GET("/import/:roundId", SSEHeadersMiddleware(), WithPermission(consts.PermissionCreateRound, GetImportStatus))
-	r.POST("/import/:roundId/commons", WithPermission(consts.PermissionCreateRound, ImportFromCommons))
+	r.POST("/import/:roundId/commons", WithPermission(consts.PermissionCreateCampaign, ImportFromCommons))
 }

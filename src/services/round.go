@@ -19,36 +19,12 @@ type RoundRequest struct {
 	CreatedByID database.IDType `json:"-"`
 	database.RoundWritable
 }
-type RoundStatus string
-
-const (
-	// RoundStatusPending is the status when the round is created but not yet approved by the admin
-	RoundStatusPending RoundStatus = "PENDING"
-	// RoundStatusImporting is the status when the round is approved and importing images from commons is in progress
-	RoundStatusImporting RoundStatus = "IMPORTING"
-	// RoundStatusDistributing is the status when the images are imported and being distributed among juries
-	RoundStatusDistributing RoundStatus = "DISTRIBUTING"
-	// RoundStatusEvaluating is the status when the images are distributed and juries are evaluating the images.
-	RoundStatusEvaluating RoundStatus = "EVALUATING"
-	// RoundStatusRejected is the status when the round is rejected by the admin
-	RoundStatusRejected RoundStatus = "REJECTED"
-	// RoundStatusCancelled is the status when the round is cancelled by the admin or the creator
-	RoundStatusCancelled RoundStatus = "CANCELLED"
-	// RoundStatusPaused is the status when the round is paused by the admin
-	RoundStatusPaused RoundStatus = "PAUSED"
-	// RoundStatusScheduled is the status when the round is scheduled to start at a later time
-	RoundStatusScheduled RoundStatus = "SCHEDULED"
-	// RoundStatusActive is the status when the round is active and juries are evaluating the images
-	RoundStatusActive RoundStatus = "ACTIVE"
-	// RoundStatusCompleted is the status when the round is completed and the results are ready
-	RoundStatusCompleted RoundStatus = "COMPLETED"
-)
 
 type RoundImportSummary struct {
-	Status       RoundStatus `json:"status"`
-	SuccessCount int         `json:"successCount"`
-	FailedCount  int         `json:"failedCount"`
-	FailedIds    []string    `json:"failedIds"`
+	Status       database.RoundStatus `json:"status"`
+	SuccessCount int                  `json:"successCount"`
+	FailedCount  int                  `json:"failedCount"`
+	FailedIds    []string             `json:"failedIds"`
 }
 type ImportFromCommonsPayload struct {
 	// Categories from which images will be fetched
@@ -125,7 +101,12 @@ func importImages(taskId database.IDType, categories []string) {
 	} else if task == nil {
 		return
 	}
-
+	round, err := round_repo.FindByID(conn, *task.AssociatedRoundID)
+	if err != nil {
+		return
+	}
+	task.Status = string(database.RoundStatusImporting)
+	conn.Save(task)
 	for _, category := range categories {
 		images, failedImages := commons_repo.GetImagesFromCommonsCategories(category)
 		if images == nil {
@@ -150,17 +131,19 @@ func importImages(taskId database.IDType, categories []string) {
 			tx.Rollback()
 			return
 		}
+		submissionCount := 0
 		for _, image := range images {
 			uploaderId := username2IdMap[image.UploaderUsername]
 			submission := database.Submission{
-				SubmissionID:  GenerateID("sub"),
-				Name:          image.Name,
-				CampaignID:    *task.AssociatedCampaignID,
-				URL:           image.URL,
-				Author:        image.UploaderUsername,
-				SubmittedByID: uploaderId,
-				ParticipantID: uploaderId,
-				SubmittedAt:   image.SubmittedAt,
+				SubmissionID:   GenerateID("sub"),
+				Name:           image.Name,
+				CampaignID:     *task.AssociatedCampaignID,
+				URL:            image.URL,
+				Author:         image.UploaderUsername,
+				SubmittedByID:  uploaderId,
+				ParticipantID:  uploaderId,
+				SubmittedAt:    image.SubmittedAt,
+				CurrentRoundID: round.RoundID,
 				MediaSubmission: database.MediaSubmission{
 					MediaType:   database.MediaType(image.MediaType),
 					ThumbURL:    image.URL,
@@ -181,11 +164,16 @@ func importImages(taskId database.IDType, categories []string) {
 				},
 			}
 			submissions = append(submissions, submission)
+			submissionCount++
 		}
 		task.SuccessCount = successCount
 		task.FailedCount = failedCount
 		*task.FailedIds = datatypes.JSONSlice[string](failedimages)
 		tx.Save(task)
+		tx.Commit()
+	}
+	if len(submissions) == 0 {
+		return
 	}
 	tx := conn.Begin()
 	res := tx.Create(submissions)
@@ -193,12 +181,10 @@ func importImages(taskId database.IDType, categories []string) {
 		tx.Rollback()
 		return
 	}
-	round, err := round_repo.FindByID(tx, *task.AssociatedRoundID)
-	if err != nil {
-		tx.Rollback()
-		return
-	}
+	round.Status = database.RoundStatusCompleted
+	task.Status = string(database.RoundStatusCompleted)
 	round.TotalSubmissions += successCount
+	tx.Save(task)
 	tx.Save(round)
 	tx.Commit()
 }
@@ -236,7 +222,7 @@ func (b *RoundService) ImportFromCommons(roundId database.IDType, categories []s
 	}
 	tx.Commit()
 	fmt.Println("Task created with ID: ", task.TaskID)
-	go importImages(roundId, categories)
+	go importImages(task.TaskID, categories)
 	return &RoundImportSummary{
 		SuccessCount: round.TotalSubmissions,
 	}, nil

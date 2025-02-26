@@ -202,9 +202,35 @@ definitions:
         type: integer
       startDate:
         type: string
+      status:
+        $ref: '#/definitions/database.RoundStatus'
       totalSubmissions:
         type: integer
     type: object
+  database.RoundStatus:
+    enum:
+    - PENDING
+    - IMPORTING
+    - DISTRIBUTING
+    - EVALUATING
+    - REJECTED
+    - CANCELLED
+    - PAUSED
+    - SCHEDULED
+    - ACTIVE
+    - COMPLETED
+    type: string
+    x-enum-varnames:
+    - RoundStatusPending
+    - RoundStatusImporting
+    - RoundStatusDistributing
+    - RoundStatusEvaluating
+    - RoundStatusRejected
+    - RoundStatusCancelled
+    - RoundStatusPaused
+    - RoundStatusScheduled
+    - RoundStatusActive
+    - RoundStatusCompleted
   routes.ResponseList-database_Campaign:
     properties:
       data:
@@ -361,7 +387,7 @@ definitions:
           type: string
         type: array
       status:
-        $ref: '#/definitions/services.RoundStatus'
+        $ref: '#/definitions/database.RoundStatus'
       successCount:
         type: integer
     type: object
@@ -420,30 +446,6 @@ definitions:
       startDate:
         type: string
     type: object
-  services.RoundStatus:
-    enum:
-    - PENDING
-    - IMPORTING
-    - DISTRIBUTING
-    - EVALUATING
-    - REJECTED
-    - CANCELLED
-    - PAUSED
-    - SCHEDULED
-    - ACTIVE
-    - COMPLETED
-    type: string
-    x-enum-varnames:
-    - RoundStatusPending
-    - RoundStatusImporting
-    - RoundStatusDistributing
-    - RoundStatusEvaluating
-    - RoundStatusRejected
-    - RoundStatusCancelled
-    - RoundStatusPaused
-    - RoundStatusScheduled
-    - RoundStatusActive
-    - RoundStatusCompleted
   services.TaskResponse:
     properties:
       campaignId:
@@ -621,6 +623,7 @@ paths:
       summary: Get the import status about a round
       tags:
       - Round
+  /round/import/{roundId}/commons:
     post:
       description: The user would provide a round ID and a list of commons categories
         and the system would import images from those categories

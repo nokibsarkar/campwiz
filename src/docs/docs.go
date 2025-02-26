@@ -222,7 +222,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
+            }
+        },
+        "/round/import/{roundId}/commons": {
             "post": {
                 "description": "The user would provide a round ID and a list of commons categories and the system would import images from those categories",
                 "produces": [
@@ -563,10 +565,40 @@ const docTemplate = `{
                 "startDate": {
                     "type": "string"
                 },
+                "status": {
+                    "$ref": "#/definitions/database.RoundStatus"
+                },
                 "totalSubmissions": {
                     "type": "integer"
                 }
             }
+        },
+        "database.RoundStatus": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "IMPORTING",
+                "DISTRIBUTING",
+                "EVALUATING",
+                "REJECTED",
+                "CANCELLED",
+                "PAUSED",
+                "SCHEDULED",
+                "ACTIVE",
+                "COMPLETED"
+            ],
+            "x-enum-varnames": [
+                "RoundStatusPending",
+                "RoundStatusImporting",
+                "RoundStatusDistributing",
+                "RoundStatusEvaluating",
+                "RoundStatusRejected",
+                "RoundStatusCancelled",
+                "RoundStatusPaused",
+                "RoundStatusScheduled",
+                "RoundStatusActive",
+                "RoundStatusCompleted"
+            ]
         },
         "routes.ResponseList-database_Campaign": {
             "type": "object",
@@ -805,7 +837,7 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/services.RoundStatus"
+                    "$ref": "#/definitions/database.RoundStatus"
                 },
                 "successCount": {
                     "type": "integer"
@@ -894,33 +926,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "services.RoundStatus": {
-            "type": "string",
-            "enum": [
-                "PENDING",
-                "IMPORTING",
-                "DISTRIBUTING",
-                "EVALUATING",
-                "REJECTED",
-                "CANCELLED",
-                "PAUSED",
-                "SCHEDULED",
-                "ACTIVE",
-                "COMPLETED"
-            ],
-            "x-enum-varnames": [
-                "RoundStatusPending",
-                "RoundStatusImporting",
-                "RoundStatusDistributing",
-                "RoundStatusEvaluating",
-                "RoundStatusRejected",
-                "RoundStatusCancelled",
-                "RoundStatusPaused",
-                "RoundStatusScheduled",
-                "RoundStatusActive",
-                "RoundStatusCompleted"
-            ]
         },
         "services.TaskResponse": {
             "type": "object",
