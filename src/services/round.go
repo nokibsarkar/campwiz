@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand/v2"
 	"nokib/campwiz/database"
+	rnd "nokib/campwiz/services/round"
 	"slices"
 	"strings"
 
@@ -107,20 +108,28 @@ func importImagesFromCommons(taskId database.IDType, categories []string) {
 		log.Printf("Error finding round with ID: %s\n", *task.AssociatedRoundID)
 		return
 	}
+	technicalJudge := rnd.NewTechnicalJudgeService(round)
 	task.Status = database.TaskStatusRunning
 	conn.Save(task)
 	defer func() {
 		conn.Save(task)
 	}()
 	for _, category := range categories {
-		images, currentfailedImages := commons_repo.GetImagesFromCommonsCategories(category)
-		if images == nil {
+		Rawimages, currentfailedImages := commons_repo.GetImagesFromCommonsCategories(category)
+		if Rawimages == nil {
 			log.Println("No images found in the category: ", category)
 			continue
 		}
 		if currentfailedImages != nil {
 			failedCount += len(currentfailedImages)
 			failedimages = append(failedimages, currentfailedImages...)
+		}
+
+		images := []database.ImageResult{}
+		for _, image := range Rawimages {
+			if technicalJudge.IsMediaAllowed(image) {
+				images = append(images, image)
+			}
 		}
 		successCount += len(images)
 		participants := map[string]database.IDType{}

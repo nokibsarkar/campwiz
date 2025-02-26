@@ -40,6 +40,9 @@ func (u *UserRepository) FetchExistingUsernames(conn *gorm.DB, usernames []strin
 }
 func (u *UserRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[string]IDType) (map[string]IDType, error) {
 	usernames := []string{}
+	if len(usernameToRandomIdMap) == 0 {
+		return nil, nil
+	}
 	for username := range usernameToRandomIdMap {
 		usernames = append(usernames, username)
 	}
