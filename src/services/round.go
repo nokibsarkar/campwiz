@@ -123,8 +123,7 @@ func importImages(taskId database.IDType, categories []string) {
 		for _, image := range images {
 			participants[image.UploaderUsername] = GenerateID("user")
 		}
-		part_repo := database.NewParticipantRepository()
-
+		part_repo := database.NewUserRepository()
 		tx := conn.Begin()
 		username2IdMap, err := part_repo.EnsureExists(tx, participants)
 		if err != nil {

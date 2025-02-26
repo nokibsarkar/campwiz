@@ -37,3 +37,47 @@ func (u *UserRepository) FetchExistingUsernames(conn *gorm.DB, usernames []strin
 	return userName2IDMap, nil
 
 }
+func (u *UserRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[string]IDType) (map[string]IDType, error) {
+	usernames := []string{}
+	for username := range usernameToRandomIdMap {
+		usernames = append(usernames, username)
+	}
+	userName2Id, err := u.FetchExistingUsernames(tx, usernames)
+	if err != nil {
+		return nil, err
+	}
+	if len(userName2Id) > 0 {
+		for username := range userName2Id {
+			delete(usernameToRandomIdMap, username)
+		}
+	}
+	if len(usernameToRandomIdMap) == 0 {
+		return userName2Id, nil
+	}
+	nonExistentUsers := make([]string, 0, len(usernameToRandomIdMap))
+	for nonExistingUsername := range usernameToRandomIdMap {
+		nonExistentUsers = append(nonExistentUsers, nonExistingUsername)
+	}
+	commons_repo := NewCommonsRepository()
+	users, err := commons_repo.GeUsersFromUsernames(nonExistentUsers)
+	if err != nil {
+		return nil, err
+	}
+	new_users := []User{}
+	for _, u := range users {
+		new_user := User{
+			UserID:       usernameToRandomIdMap[u.Name],
+			RegisteredAt: u.Registered,
+			Username:     u.Name,
+			Permission:   consts.PermissionGroupUSER,
+		}
+		new_users = append(new_users, new_user)
+		userName2Id[new_user.Username] = new_user.UserID
+	}
+	if len(new_users) == 0 {
+		return userName2Id, nil
+	}
+	result := tx.Create(new_users)
+	tx.Commit()
+	return userName2Id, result.Error
+}
