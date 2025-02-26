@@ -96,7 +96,7 @@ func UpdateCampaign(c *gin.Context, sess *cache.Session) {
 		return
 	}
 	campaign_service := services.NewCampaignService()
-	campaign, err := campaign_service.UpdateCampaign(campaignId, updateRequest)
+	campaign, err := campaign_service.UpdateCampaign(database.IDType(campaignId), updateRequest)
 	if err != nil {
 		c.JSON(400, ResponseError{Detail: "Failed to update campaign : " + err.Error()})
 		return

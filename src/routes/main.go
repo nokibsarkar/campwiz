@@ -36,8 +36,8 @@ func NewRoutes(nonAPIParent *gin.RouterGroup) {
 	NewStaticRouter(nonAPIParent)
 	NewUserAuthenticationRoutes(nonAPIParent)
 	NewCampaignRoutes(r)
+	NewRoundRoutes(r)
 	NewSubmissionRoutes(r)
 	NewUserRoutes(r)
-	NewRoundRoutes(r)
-	NewSseRoutes(r)
+	NewTaskRoutes(r)
 }

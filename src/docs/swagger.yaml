@@ -128,7 +128,7 @@ definitions:
       startDate:
         type: string
     type: object
-  database.CampaignRound:
+  database.Round:
     properties:
       allowCreations:
         type: boolean
@@ -212,22 +212,27 @@ definitions:
           $ref: '#/definitions/database.Campaign'
         type: array
     type: object
-  routes.ResponseList-database_CampaignRound:
+  routes.ResponseList-database_Round:
     properties:
       data:
         items:
-          $ref: '#/definitions/database.CampaignRound'
+          $ref: '#/definitions/database.Round'
         type: array
     type: object
-  routes.ResponseSingle-database_CampaignRound:
+  routes.ResponseSingle-database_Round:
     properties:
       data:
-        $ref: '#/definitions/database.CampaignRound'
+        $ref: '#/definitions/database.Round'
     type: object
   routes.ResponseSingle-services_RoundImportSummary:
     properties:
       data:
         $ref: '#/definitions/services.RoundImportSummary'
+    type: object
+  routes.ResponseSingle-services_TaskResponse:
+    properties:
+      data:
+        $ref: '#/definitions/services.TaskResponse'
     type: object
   services.CampaignCreateRequest:
     properties:
@@ -347,16 +352,6 @@ definitions:
           type: string
         type: array
     type: object
-  services.ImportStatus:
-    enum:
-    - success
-    - failed
-    - pending
-    type: string
-    x-enum-varnames:
-    - ImportStatusSuccess
-    - ImportStatusFailed
-    - ImportStatusPending
   services.RoundImportSummary:
     properties:
       failedCount:
@@ -366,7 +361,7 @@ definitions:
           type: string
         type: array
       status:
-        $ref: '#/definitions/services.ImportStatus'
+        $ref: '#/definitions/services.RoundStatus'
       successCount:
         type: integer
     type: object
@@ -423,6 +418,35 @@ definitions:
       serial:
         type: integer
       startDate:
+        type: string
+    type: object
+  services.RoundStatus:
+    enum:
+    - PENDING
+    - IMPORTING
+    - DISTRIBUTING
+    - EVALUATING
+    - REJECTED
+    - CANCELLED
+    - PAUSED
+    - SCHEDULED
+    - ACTIVE
+    - COMPLETED
+    type: string
+    x-enum-varnames:
+    - RoundStatusPending
+    - RoundStatusImporting
+    - RoundStatusDistributing
+    - RoundStatusEvaluating
+    - RoundStatusRejected
+    - RoundStatusCancelled
+    - RoundStatusPaused
+    - RoundStatusScheduled
+    - RoundStatusActive
+    - RoundStatusCompleted
+  services.TaskResponse:
+    properties:
+      taskId:
         type: string
     type: object
 host: localhost:8080
@@ -524,7 +548,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/routes.ResponseList-database_CampaignRound'
+            $ref: '#/definitions/routes.ResponseList-database_Round'
       summary: List all rounds
       tags:
       - Round
@@ -543,7 +567,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/routes.ResponseSingle-database_CampaignRound'
+            $ref: '#/definitions/routes.ResponseSingle-database_Round'
       summary: Create a new round
       tags:
       - Round
@@ -592,6 +616,41 @@ paths:
       summary: Import images from commons
       tags:
       - Round
+  /task/{taskId}:
+    get:
+      description: The task represents a background job that can be run by the system
+      parameters:
+      - description: The task ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-services_TaskResponse'
+      summary: Get a task by ID
+      tags:
+      - Task
+  /task/{taskId}/stream:
+    get:
+      description: The task represents a background job that can be run by the system.
+        This endpoint streams the response
+      parameters:
+      - description: The task ID
+        in: path
+        name: taskId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Get a task by ID but stream the response
+      tags:
+      - Task
 produces:
 - application/json
 schemes:

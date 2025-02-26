@@ -24,7 +24,7 @@ type AudioVideoSubmission struct {
 	Size     uint64 `json:"size"`     // in bytes
 }
 type MediaSubmission struct {
-	MediaType   MediaType      `json:"mediatype" gorm:"type:varchar(255);not null;default:'BITMAP'"`
+	MediaType   MediaType      `json:"mediatype" gorm:"not null;default:'BITMAP'"`
 	ThumbURL    string         `json:"thumburl"`
 	ThumbWidth  uint64         `json:"thumbwidth"`
 	ThumbHeight uint64         `json:"thumbheight"`
@@ -36,20 +36,20 @@ type MediaSubmission struct {
 	AudioVideoSubmission
 }
 type Submission struct {
-	SubmissionID    string         `json:"pageid" gorm:"primaryKey;type:varchar(255)"`
-	Name            string         `json:"title"`
-	CampaignID      string         `json:"campaignId" gorm:"null;index;type:varchar(255)"`
-	URL             string         `json:"url"`
-	Author          string         `json:"author"`                                 // The Actual Author in the Wikimedia
-	SubmittedByID   string         `json:"submittedById" gorm:"type:varchar(255)"` // The User who submitted the article on behalf of the participant
-	ParticipantID   string         `json:"participantId" gorm:"type:varchar(255)"`
-	CurrentRoundID  string         `json:"currentRoundId" gorm:"type:varchar(255)"`
-	SubmittedAt     time.Time      `json:"submittedAt"`
-	Participant     Participant    `json:"-"`
-	Submitter       User           `json:"-" gorm:"foreignKey:SubmittedByID"`
-	Campaign        *Campaign      `json:"-"`
-	CreatedAtServer *time.Time     `json:"createdAtServer"`
-	CurrentRound    *CampaignRound `json:"-" gorm:"foreignKey:CurrentRoundID"`
+	SubmissionID    IDType      `json:"pageid" gorm:"primaryKey"`
+	Name            string      `json:"title"`
+	CampaignID      IDType      `json:"campaignId" gorm:"null;index"`
+	URL             string      `json:"url"`
+	Author          string      `json:"author"`        // The Actual Author in the Wikimedia
+	SubmittedByID   IDType      `json:"submittedById"` // The User who submitted the article on behalf of the participant
+	ParticipantID   IDType      `json:"participantId"`
+	CurrentRoundID  IDType      `json:"currentRoundId"`
+	SubmittedAt     time.Time   `json:"submittedAt"`
+	Participant     Participant `json:"-"`
+	Submitter       User        `json:"-" gorm:"foreignKey:SubmittedByID"`
+	Campaign        *Campaign   `json:"-"`
+	CreatedAtServer *time.Time  `json:"createdAtServer"`
+	CurrentRound    *Round      `json:"-" gorm:"foreignKey:CurrentRoundID"`
 	MediaSubmission
 }
 type SubmissionRepository struct{}

@@ -9,6 +9,15 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+type IDType string
+
+func (i *IDType) String() string {
+	return string(*i)
+}
+func (i *IDType) GormDataType() string {
+	return "varchar(255)"
+}
+
 func GetDB() (db *gorm.DB, close func()) {
 	dsn := consts.Config.Database.Main.DSN
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -35,10 +44,11 @@ func InitDB() {
 	db.AutoMigrate(&User{})
 	db.AutoMigrate(&Participant{})
 	db.AutoMigrate(&Campaign{})
-	db.AutoMigrate(&CampaignRound{})
+	db.AutoMigrate(&Round{})
+	db.AutoMigrate(&Task{})
 	db.AutoMigrate(&Jury{})
-	db.AutoMigrate(&Evaluation{})
 	db.AutoMigrate(&Submission{})
+	db.AutoMigrate(&Evaluation{})
 	fmt.Println((db))
 	db.Commit()
 }

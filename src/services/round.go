@@ -8,32 +8,47 @@ import (
 	"nokib/campwiz/database"
 	"slices"
 	"strings"
+
+	"gorm.io/datatypes"
 )
 
 type RoundService struct {
 }
 type RoundRequest struct {
-	CampaignID  string `json:"campaignId"`
-	CreatedByID string `json:"-"`
-	database.CampaignRoundWritable
+	CampaignID  database.IDType `json:"campaignId"`
+	CreatedByID database.IDType `json:"-"`
+	database.RoundWritable
 }
-type ImportStatus string
+type RoundStatus string
 
 const (
-	ImportStatusSuccess ImportStatus = "success"
-	ImportStatusFailed  ImportStatus = "failed"
-	ImportStatusPending ImportStatus = "pending"
+	// RoundStatusPending is the status when the round is created but not yet approved by the admin
+	RoundStatusPending RoundStatus = "PENDING"
+	// RoundStatusImporting is the status when the round is approved and importing images from commons is in progress
+	RoundStatusImporting RoundStatus = "IMPORTING"
+	// RoundStatusDistributing is the status when the images are imported and being distributed among juries
+	RoundStatusDistributing RoundStatus = "DISTRIBUTING"
+	// RoundStatusEvaluating is the status when the images are distributed and juries are evaluating the images.
+	RoundStatusEvaluating RoundStatus = "EVALUATING"
+	// RoundStatusRejected is the status when the round is rejected by the admin
+	RoundStatusRejected RoundStatus = "REJECTED"
+	// RoundStatusCancelled is the status when the round is cancelled by the admin or the creator
+	RoundStatusCancelled RoundStatus = "CANCELLED"
+	// RoundStatusPaused is the status when the round is paused by the admin
+	RoundStatusPaused RoundStatus = "PAUSED"
+	// RoundStatusScheduled is the status when the round is scheduled to start at a later time
+	RoundStatusScheduled RoundStatus = "SCHEDULED"
+	// RoundStatusActive is the status when the round is active and juries are evaluating the images
+	RoundStatusActive RoundStatus = "ACTIVE"
+	// RoundStatusCompleted is the status when the round is completed and the results are ready
+	RoundStatusCompleted RoundStatus = "COMPLETED"
 )
 
 type RoundImportSummary struct {
-	Status       ImportStatus `json:"status"`
-	SuccessCount int          `json:"successCount"`
-	FailedCount  int          `json:"failedCount"`
-	FailedIds    []string     `json:"failedIds"`
-}
-type RoundCreateRequest struct {
-	CreatedBy string `json:"-"`       // User ID who created the batch
-	RoundId   string `json:"roundId"` // Round ID to which the batch belongs
+	Status       RoundStatus `json:"status"`
+	SuccessCount int         `json:"successCount"`
+	FailedCount  int         `json:"failedCount"`
+	FailedIds    []string    `json:"failedIds"`
 }
 type ImportFromCommonsPayload struct {
 	// Categories from which images will be fetched
@@ -59,8 +74,8 @@ func (a ByAssigned) Less(i, j int) bool { return a[i].totalAssigned < a[j].total
 func NewRoundService() *RoundService {
 	return &RoundService{}
 }
-func (s *RoundService) CreateRound(request *RoundRequest) (*database.CampaignRound, error) {
-	round_repo := database.NewCampaignRoundRepository()
+func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, error) {
+	round_repo := database.NewRoundRepository()
 	campaign_repo := database.NewCampaignRepository()
 	conn, close := database.GetDB()
 	defer close()
@@ -70,11 +85,11 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.CampaignRou
 		tx.Rollback()
 		return nil, errors.New("campaign not found")
 	}
-	round := &database.CampaignRound{
-		RoundID:               GenerateID("r"),
-		CreatedByID:           request.CreatedByID,
-		CampaignID:            campaign.CampaignID,
-		CampaignRoundWritable: request.CampaignRoundWritable,
+	round := &database.Round{
+		RoundID:       GenerateID("r"),
+		CreatedByID:   request.CreatedByID,
+		CampaignID:    campaign.CampaignID,
+		RoundWritable: request.RoundWritable,
 	}
 	round, err = round_repo.Create(tx, round)
 	if err != nil {
@@ -84,8 +99,8 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.CampaignRou
 	tx.Commit()
 	return round, nil
 }
-func (s *RoundService) ListAllRounds(filter *database.RoundFilter) ([]database.CampaignRound, error) {
-	round_repo := database.NewCampaignRoundRepository()
+func (s *RoundService) ListAllRounds(filter *database.RoundFilter) ([]database.Round, error) {
+	round_repo := database.NewRoundRepository()
 	conn, close := database.GetDB()
 	defer close()
 	rounds, err := round_repo.FindAll(conn, filter)
@@ -94,30 +109,28 @@ func (s *RoundService) ListAllRounds(filter *database.RoundFilter) ([]database.C
 	}
 	return rounds, nil
 }
-
-func (b *RoundService) ImportFromCommons(roundId string, categories []string) (*RoundImportSummary, error) {
-	commons_repo := database.NewCommonsRepository()
-	round_repo := database.NewCampaignRoundRepository()
-	conn, close := database.GetDB()
-	defer close()
-	tx := conn.Begin()
-	round, err := round_repo.FindByID(tx, roundId)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	} else if round == nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("round not found")
-	}
+func importImages(taskId database.IDType, categories []string) {
 	submissions := []database.Submission{}
 	successCount := 0
 	failedCount := 0
 	failedimages := []string{}
+	commons_repo := database.NewCommonsRepository()
+	round_repo := database.NewRoundRepository()
+	task_repo := database.NewTaskRepository()
+	conn, close := database.GetDB()
+	defer close()
+	task, err := task_repo.FindByID(conn, taskId)
+	if err != nil {
+		return
+	} else if task == nil {
+		return
+	}
+
 	for _, category := range categories {
 		images, failedImages := commons_repo.GetImagesFromCommonsCategories(category)
 		if images == nil {
 			log.Println("No images found in the category: ", category)
-			return nil, fmt.Errorf("no images found in the categories")
+			return
 		}
 		if failedImages != nil {
 			failedCount += len(failedImages)
@@ -125,22 +138,24 @@ func (b *RoundService) ImportFromCommons(roundId string, categories []string) (*
 		failedimages = append(failedimages, failedImages...)
 		successCount += len(images)
 		// submission_repo := database.NewSubmissionRepository()
-		participants := map[string]string{}
+		participants := map[string]database.IDType{}
 		for _, image := range images {
 			participants[image.UploaderUsername] = GenerateID("user")
 		}
 		part_repo := database.NewParticipantRepository()
+
+		tx := conn.Begin()
 		username2IdMap, err := part_repo.EnsureExists(tx, participants)
 		if err != nil {
 			tx.Rollback()
-			return nil, err
+			return
 		}
 		for _, image := range images {
 			uploaderId := username2IdMap[image.UploaderUsername]
 			submission := database.Submission{
 				SubmissionID:  GenerateID("sub"),
 				Name:          image.Name,
-				CampaignID:    round.CampaignID,
+				CampaignID:    *task.AssociatedCampaignID,
 				URL:           image.URL,
 				Author:        image.UploaderUsername,
 				SubmittedByID: uploaderId,
@@ -167,20 +182,70 @@ func (b *RoundService) ImportFromCommons(roundId string, categories []string) (*
 			}
 			submissions = append(submissions, submission)
 		}
+		task.SuccessCount = successCount
+		task.FailedCount = failedCount
+		*task.FailedIds = datatypes.JSONSlice[string](failedimages)
+		tx.Save(task)
 	}
+	tx := conn.Begin()
 	res := tx.Create(submissions)
 	if res.Error != nil {
 		tx.Rollback()
-		return nil, res.Error
+		return
+	}
+	round, err := round_repo.FindByID(tx, *task.AssociatedRoundID)
+	if err != nil {
+		tx.Rollback()
+		return
 	}
 	round.TotalSubmissions += successCount
 	tx.Save(round)
 	tx.Commit()
+}
+func (b *RoundService) ImportFromCommons(roundId database.IDType, categories []string) (*RoundImportSummary, error) {
+	round_repo := database.NewRoundRepository()
+	task_repo := database.NewTaskRepository()
+	conn, close := database.GetDB()
+	defer close()
+	tx := conn.Begin()
+	round, err := round_repo.FindByID(tx, roundId)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else if round == nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("round not found")
+	}
+	taskReq := &database.Task{
+		TaskID:               GenerateID("t"),
+		Type:                 "IMPORT_IMAGES",
+		Status:               "PENDING",
+		AssociatedRoundID:    &roundId,
+		AssociatedUserID:     &round.CreatedByID,
+		CreatedByID:          round.CreatedByID,
+		AssociatedCampaignID: &round.CampaignID,
+		SuccessCount:         0,
+		FailedCount:          0,
+		FailedIds:            &datatypes.JSONSlice[string]{},
+		RemainingCount:       0,
+	}
+	task, err := task_repo.Create(tx, taskReq)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
+	fmt.Println("Task created with ID: ", task.TaskID)
+	go importImages(roundId, categories)
 	return &RoundImportSummary{
 		SuccessCount: round.TotalSubmissions,
-		FailedCount:  failedCount,
-		FailedIds:    failedimages,
 	}, nil
+}
+func (b *RoundService) GetById(roundId database.IDType) (*database.Round, error) {
+	round_repo := database.NewRoundRepository()
+	conn, close := database.GetDB()
+	defer close()
+	return round_repo.FindByID(conn, roundId)
 }
 func (b *RoundService) DistributeTaskAmongExistingJuries(images []database.ImageResult) {
 	juries := []*Jury{}

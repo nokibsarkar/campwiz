@@ -160,7 +160,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/routes.ResponseList-database_CampaignRound"
+                            "$ref": "#/definitions/routes.ResponseList-database_Round"
                         }
                     }
                 }
@@ -189,7 +189,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-database_CampaignRound"
+                            "$ref": "#/definitions/routes.ResponseSingle-database_Round"
                         }
                     }
                 }
@@ -258,6 +258,57 @@ const docTemplate = `{
                         }
                     }
                 }
+            }
+        },
+        "/task/{taskId}": {
+            "get": {
+                "description": "The task represents a background job that can be run by the system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Task"
+                ],
+                "summary": "Get a task by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The task ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-services_TaskResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/task/{taskId}/stream": {
+            "get": {
+                "description": "The task represents a background job that can be run by the system. This endpoint streams the response",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Task"
+                ],
+                "summary": "Get a task by ID but stream the response",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The task ID",
+                        "name": "taskId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
             }
         }
     },
@@ -405,7 +456,7 @@ const docTemplate = `{
                 }
             }
         },
-        "database.CampaignRound": {
+        "database.Round": {
             "type": "object",
             "properties": {
                 "allowCreations": {
@@ -528,22 +579,22 @@ const docTemplate = `{
                 }
             }
         },
-        "routes.ResponseList-database_CampaignRound": {
+        "routes.ResponseList-database_Round": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/database.CampaignRound"
+                        "$ref": "#/definitions/database.Round"
                     }
                 }
             }
         },
-        "routes.ResponseSingle-database_CampaignRound": {
+        "routes.ResponseSingle-database_Round": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/database.CampaignRound"
+                    "$ref": "#/definitions/database.Round"
                 }
             }
         },
@@ -552,6 +603,14 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/services.RoundImportSummary"
+                }
+            }
+        },
+        "routes.ResponseSingle-services_TaskResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/services.TaskResponse"
                 }
             }
         },
@@ -733,19 +792,6 @@ const docTemplate = `{
                 }
             }
         },
-        "services.ImportStatus": {
-            "type": "string",
-            "enum": [
-                "success",
-                "failed",
-                "pending"
-            ],
-            "x-enum-varnames": [
-                "ImportStatusSuccess",
-                "ImportStatusFailed",
-                "ImportStatusPending"
-            ]
-        },
         "services.RoundImportSummary": {
             "type": "object",
             "properties": {
@@ -759,7 +805,7 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/services.ImportStatus"
+                    "$ref": "#/definitions/services.RoundStatus"
                 },
                 "successCount": {
                     "type": "integer"
@@ -845,6 +891,41 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "startDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "services.RoundStatus": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "IMPORTING",
+                "DISTRIBUTING",
+                "EVALUATING",
+                "REJECTED",
+                "CANCELLED",
+                "PAUSED",
+                "SCHEDULED",
+                "ACTIVE",
+                "COMPLETED"
+            ],
+            "x-enum-varnames": [
+                "RoundStatusPending",
+                "RoundStatusImporting",
+                "RoundStatusDistributing",
+                "RoundStatusEvaluating",
+                "RoundStatusRejected",
+                "RoundStatusCancelled",
+                "RoundStatusPaused",
+                "RoundStatusScheduled",
+                "RoundStatusActive",
+                "RoundStatusCompleted"
+            ]
+        },
+        "services.TaskResponse": {
+            "type": "object",
+            "properties": {
+                "taskId": {
                     "type": "string"
                 }
             }

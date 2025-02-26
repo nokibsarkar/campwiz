@@ -13,7 +13,7 @@ import (
 // @Summary Create a new round
 // @Description Create a new round for a campaign
 // @Produce  json
-// @Success 200 {object} ResponseSingle[database.CampaignRound]
+// @Success 200 {object} ResponseSingle[database.Round]
 // @Router /round/ [post]
 // @Param roundRequest body services.RoundRequest true "The round request"
 // @Tags Round
@@ -34,7 +34,7 @@ func CreateRound(c *gin.Context, sess *cache.Session) {
 		c.JSON(400, ResponseError{Detail: "Error creating round : " + err.Error()})
 		return
 	}
-	c.JSON(200, ResponseSingle[database.CampaignRound]{Data: *round})
+	c.JSON(200, ResponseSingle[database.Round]{Data: *round})
 
 }
 
@@ -42,7 +42,7 @@ func CreateRound(c *gin.Context, sess *cache.Session) {
 // @Summary List all rounds
 // @Description get all rounds
 // @Produce  json
-// @Success 200 {object} ResponseList[database.CampaignRound]
+// @Success 200 {object} ResponseList[database.Round]
 // @Router /round/ [get]
 // @param RoundFilter query database.RoundFilter false "Filter the rounds"
 // @Tags Round
@@ -61,7 +61,7 @@ func ListAllRounds(c *gin.Context, sess *cache.Session) {
 		c.JSON(400, ResponseError{Detail: "Error listing rounds : " + err.Error()})
 		return
 	}
-	c.JSON(200, ResponseList[database.CampaignRound]{Data: rounds})
+	c.JSON(200, ResponseList[database.Round]{Data: rounds})
 }
 
 // ImportFromCommons godoc
@@ -90,7 +90,7 @@ func ImportFromCommons(c *gin.Context, sess *cache.Session) {
 		c.JSON(400, ResponseError{Detail: "Invalid request : No categories provided"})
 		return
 	}
-	round, err := round_service.ImportFromCommons(roundId, req.Categories)
+	round, err := round_service.ImportFromCommons(database.IDType(roundId), req.Categories)
 	if err != nil {
 		c.JSON(400, ResponseError{Detail: "Failed to import images : " + err.Error()})
 		return
@@ -108,6 +108,20 @@ func ImportFromCommons(c *gin.Context, sess *cache.Session) {
 // @Tags Round
 // @Error 400 {object} ResponseError
 func GetImportStatus(c *gin.Context, sess *cache.Session) {
+	roundId := c.Param("roundId")
+	if roundId == "" {
+		c.JSON(400, ResponseError{Detail: "Invalid request : Round ID is required"})
+	}
+	round_service := services.NewRoundService()
+	round, err := round_service.GetById(database.IDType(roundId))
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Failed to get round : " + err.Error()})
+		return
+	}
+	if round == nil {
+		c.JSON(400, ResponseError{Detail: "Round not found"})
+		return
+	}
 
 }
 

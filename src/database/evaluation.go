@@ -1,10 +1,10 @@
 package database
 
 type Evaluation struct {
-	EvaluationID  string       `json:"evaluationId" gorm:"primaryKey;type:varchar(255)"`
-	SubmissionID  string       `json:"submissionId" gorm:"type:varchar(255)"`
-	JudgeID       string       `json:"judgeId" gorm:"type:varchar(255)"`
-	ParticipantID string       `json:"participantId" gorm:"type:varchar(255)"`
+	EvaluationID  IDType       `json:"evaluationId" gorm:"primaryKey"`
+	SubmissionID  IDType       `json:"submissionId"`
+	JudgeID       IDType       `json:"judgeId"`
+	ParticipantID IDType       `json:"participantId"`
 	Score         int          `json:"score" gorm:"default:0"`
 	Comment       string       `json:"comment" gorm:"default:null"`
 	Serial        uint         `json:"serial"`

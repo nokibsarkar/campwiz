@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"nokib/campwiz/consts"
+	"nokib/campwiz/database"
 	"nokib/campwiz/database/cache"
 	"strings"
 	"time"
@@ -33,8 +34,8 @@ func (a *AuthenticationService) VerifyToken(cacheDB *gorm.DB, tokenMap *SessionC
 		return nil, fmt.Errorf("no session ID found")
 	}
 	session := &cache.Session{
-		ID:     sessionIDString,
-		UserID: tokenMap.Subject,
+		ID:     database.IDType(sessionIDString),
+		UserID: database.IDType(tokenMap.Subject),
 	}
 	result := cacheDB.First(session)
 	if result.Error != nil {
@@ -46,7 +47,7 @@ func (a *AuthenticationService) VerifyToken(cacheDB *gorm.DB, tokenMap *SessionC
 func (a *AuthenticationService) NewSession(tx *gorm.DB, tokenMap *SessionClaims) (string, *cache.Session, error) {
 	session := &cache.Session{
 		ID:         GenerateID("ses"),
-		UserID:     tokenMap.Subject,
+		UserID:     database.IDType(tokenMap.Subject),
 		Username:   tokenMap.Name,
 		Permission: tokenMap.Permission,
 		ExpiresAt:  tokenMap.ExpiresAt.Time,
@@ -55,7 +56,7 @@ func (a *AuthenticationService) NewSession(tx *gorm.DB, tokenMap *SessionClaims)
 	if result.Error != nil {
 		return "", nil, result.Error
 	}
-	tokenMap.ID = session.ID
+	tokenMap.ID = string(database.IDType(session.ID))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, tokenMap)
 	accessToken, err := token.SignedString([]byte(a.Config.Secret))
 	if err != nil {
@@ -90,14 +91,14 @@ func (a *AuthenticationService) RefreshSession(cacheDB *gorm.DB, tokenMap *Sessi
 		return "", nil, fmt.Errorf("no session ID found")
 	}
 	session = &cache.Session{
-		ID:         sessionIDString,
-		UserID:     tokenMap.Subject,
+		ID:         database.IDType(sessionIDString),
+		UserID:     database.IDType(tokenMap.Subject),
 		Username:   tokenMap.Name,
 		Permission: tokenMap.Permission,
 		ExpiresAt:  tokenMap.ExpiresAt.Time,
 	}
 	tx := cacheDB.Begin()
-	result := tx.First(session, &cache.Session{ID: sessionIDString})
+	result := tx.First(session, &cache.Session{ID: database.IDType(sessionIDString)})
 	if result.Error != nil {
 		fmt.Println("Error: ", result.Error)
 		tx.Rollback()
@@ -119,7 +120,7 @@ func (a *AuthenticationService) RefreshSession(cacheDB *gorm.DB, tokenMap *Sessi
 	tx.Commit()
 	return accessToken, session, nil
 }
-func (a *AuthenticationService) RemoveSession(cacheDB *gorm.DB, ID string) error {
+func (a *AuthenticationService) RemoveSession(cacheDB *gorm.DB, ID database.IDType) error {
 	session := &cache.Session{ID: ID}
 	result := cacheDB.Delete(session)
 	if result.Error != nil {

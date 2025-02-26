@@ -83,7 +83,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 		Name:       db_user.Username,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Audience:  jwt.ClaimStrings{"campwiz"},
-			Subject:   db_user.UserID,
+			Subject:   string(db_user.UserID),
 			Issuer:    consts.Config.Auth.Issuer,
 			ExpiresAt: jwt.NewNumericDate(nextExpiry),
 		},

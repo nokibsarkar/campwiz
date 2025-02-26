@@ -7,7 +7,7 @@ import (
 )
 
 type Participant struct {
-	ParticipantID string `json:"id" gorm:"primaryKey;type:varchar(255)"`
+	ParticipantID IDType `json:"id" gorm:"primaryKey"`
 	Username      string `json:"name"`
 }
 type ParticipantRepository struct{}
@@ -24,11 +24,11 @@ func (u *ParticipantRepository) FetchExistingUsernames(conn *gorm.DB, usernames 
 	}
 	userName2IDMap := map[string]string{}
 	for _, u := range exists {
-		userName2IDMap[u.Username] = u.ParticipantID
+		userName2IDMap[u.Username] = string(u.ParticipantID)
 	}
 	return userName2IDMap, nil
 }
-func (u *ParticipantRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[string]string) (map[string]string, error) {
+func (u *ParticipantRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[string]IDType) (map[string]IDType, error) {
 	usernames := []string{}
 	for username := range usernameToRandomIdMap {
 		usernames = append(usernames, username)
@@ -73,7 +73,7 @@ func (u *ParticipantRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap 
 	new_participants := []Participant{}
 	for _, p := range new_users {
 		new_participants = append(new_participants, Participant{
-			ParticipantID: p.UserID,
+			ParticipantID: IDType(p.UserID),
 			Username:      p.Username,
 		})
 		userName2Id[p.Username] = p.UserID

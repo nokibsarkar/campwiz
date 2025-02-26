@@ -9,9 +9,9 @@ type JuryUserName string
 type CampaignService struct{}
 type CampaignCreateRequest struct {
 	database.CampaignWithWriteableFields
-	CreatedByID string         `json:"-"`
-	Jury        []JuryUserName `json:"jury"`
-	database.CampaignRoundRestrictions
+	CreatedByID database.IDType `json:"-"`
+	Jury        []JuryUserName  `json:"jury"`
+	database.RoundRestrictions
 }
 type CampaignUpdateRequest struct {
 	CampaignCreateRequest
@@ -61,7 +61,7 @@ func (service *CampaignService) GetAllCampaigns(query *database.CampaignFilter) 
 	}
 	return campaigns
 }
-func (service *CampaignService) GetCampaignByID(id string) (*database.Campaign, error) {
+func (service *CampaignService) GetCampaignByID(id database.IDType) (*database.Campaign, error) {
 	conn, close := database.GetDB()
 	defer close()
 	campaign_repo := database.NewCampaignRepository()
@@ -82,7 +82,7 @@ func (service *CampaignService) GetCampaignByID(id string) (*database.Campaign, 
 // @produce json
 // @success 200 {object} database.Campaign
 // @router /campaign/{id} [post]
-func (service *CampaignService) UpdateCampaign(ID string, campaignRequest *CampaignUpdateRequest) (*database.Campaign, error) {
+func (service *CampaignService) UpdateCampaign(ID database.IDType, campaignRequest *CampaignUpdateRequest) (*database.Campaign, error) {
 	conn, close := database.GetDB()
 	defer close()
 	campaign_repo := database.NewCampaignRepository()
