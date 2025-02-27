@@ -6,6 +6,7 @@ import (
 	"nokib/campwiz/consts"
 	"nokib/campwiz/database"
 	"nokib/campwiz/database/cache"
+	idgenerator "nokib/campwiz/services/idGenerator"
 	"strings"
 	"time"
 
@@ -46,7 +47,7 @@ func (a *AuthenticationService) VerifyToken(cacheDB *gorm.DB, tokenMap *SessionC
 }
 func (a *AuthenticationService) NewSession(tx *gorm.DB, tokenMap *SessionClaims) (string, *cache.Session, error) {
 	session := &cache.Session{
-		ID:         GenerateID("ses"),
+		ID:         idgenerator.GenerateID("ses"),
 		UserID:     database.IDType(tokenMap.Subject),
 		Username:   tokenMap.Name,
 		Permission: tokenMap.Permission,

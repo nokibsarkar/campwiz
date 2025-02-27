@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"nokib/campwiz/consts"
 	"nokib/campwiz/database"
+	idgenerator "nokib/campwiz/services/idGenerator"
 
 	"gorm.io/gorm"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -66,7 +67,7 @@ func (u *UserService) EnsureExists(tx *gorm.DB, usernameSet sets.Set[string]) (m
 	new_users := []database.User{}
 	for _, u := range users {
 		new_user := database.User{
-			UserID:       GenerateID("user"),
+			UserID:       idgenerator.GenerateID("user"),
 			RegisteredAt: u.Registered,
 			Username:     u.Name,
 			Permission:   consts.PermissionGroupUSER,
