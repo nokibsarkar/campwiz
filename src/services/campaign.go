@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 	"nokib/campwiz/database"
+	idgenerator "nokib/campwiz/services/idGenerator"
 )
 
 type JuryUserName string
@@ -24,7 +25,7 @@ func NewCampaignService() *CampaignService {
 func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRequest) (*database.Campaign, error) {
 	// Create a new campaign
 	campaign := &database.Campaign{
-		CampaignID: GenerateID("c"),
+		CampaignID: idgenerator.GenerateID("c"),
 		CampaignWithWriteableFields: database.CampaignWithWriteableFields{
 			Name:        campaignRequest.Name,
 			Description: campaignRequest.Description,

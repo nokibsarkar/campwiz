@@ -6,6 +6,7 @@ import (
 	"nokib/campwiz/database"
 	"nokib/campwiz/database/cache"
 	"nokib/campwiz/services"
+	idgenerator "nokib/campwiz/services/idGenerator"
 	"strings"
 	"time"
 
@@ -51,7 +52,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 		if err == gorm.ErrRecordNotFound {
 			// Create the user
 			db_user = &database.User{
-				UserID:       services.GenerateID("usr"),
+				UserID:       idgenerator.GenerateID("usr"),
 				RegisteredAt: user.Registered,
 				Username:     user.Name,
 				Permission:   consts.PermissionGroupADMIN,

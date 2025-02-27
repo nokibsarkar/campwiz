@@ -1,4 +1,4 @@
-package services
+package idgenerator
 
 import (
 	"nokib/campwiz/database"
