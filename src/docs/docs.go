@@ -195,35 +195,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/round/import/{roundId}": {
-            "get": {
-                "description": "It would be used as a server sent event stream to broadcast on the frontend about current status of the round",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Round"
-                ],
-                "summary": "Get the import status about a round",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The round ID",
-                        "name": "roundId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/routes.ResponseSingle-services_RoundImportSummary"
-                        }
-                    }
-                }
-            }
-        },
         "/round/import/{roundId}/commons": {
             "post": {
                 "description": "The user would provide a round ID and a list of commons categories and the system would import images from those categories",
@@ -257,6 +228,44 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/routes.ResponseSingle-database_Task"
+                        }
+                    }
+                }
+            }
+        },
+        "/round/{roundId}": {
+            "post": {
+                "description": "Update the details of a round",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Round"
+                ],
+                "summary": "Update the details of a round",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The round ID",
+                        "name": "roundId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The round request",
+                        "name": "roundRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.RoundRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-database_Round"
                         }
                     }
                 }
@@ -752,10 +761,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "failedIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "object"
                 },
                 "remainingCount": {
                     "type": "integer"
@@ -812,33 +818,51 @@ const docTemplate = `{
         "routes.ResponseList-database_Campaign": {
             "type": "object",
             "properties": {
+                "continueToken": {
+                    "type": "string"
+                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Campaign"
                     }
+                },
+                "previousToken": {
+                    "type": "string"
                 }
             }
         },
         "routes.ResponseList-database_Round": {
             "type": "object",
             "properties": {
+                "continueToken": {
+                    "type": "string"
+                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Round"
                     }
+                },
+                "previousToken": {
+                    "type": "string"
                 }
             }
         },
         "routes.ResponseList-database_Submission": {
             "type": "object",
             "properties": {
+                "continueToken": {
+                    "type": "string"
+                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Submission"
                     }
+                },
+                "previousToken": {
+                    "type": "string"
                 }
             }
         },
@@ -855,14 +879,6 @@ const docTemplate = `{
             "properties": {
                 "data": {
                     "$ref": "#/definitions/database.Task"
-                }
-            }
-        },
-        "routes.ResponseSingle-services_RoundImportSummary": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/services.RoundImportSummary"
                 }
             }
         },
@@ -1052,26 +1068,6 @@ const docTemplate = `{
                 }
             }
         },
-        "services.RoundImportSummary": {
-            "type": "object",
-            "properties": {
-                "failedCount": {
-                    "type": "integer"
-                },
-                "failedIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "status": {
-                    "$ref": "#/definitions/database.RoundStatus"
-                },
-                "successCount": {
-                    "type": "integer"
-                }
-            }
-        },
         "services.RoundRequest": {
             "type": "object",
             "properties": {
@@ -1177,10 +1173,7 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "failedIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "type": "object"
                 },
                 "remainingCount": {
                     "type": "integer"

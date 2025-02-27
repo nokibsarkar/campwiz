@@ -109,6 +109,13 @@ func (r *RoundRepository) Create(conn *gorm.DB, round *Round) (*Round, error) {
 	}
 	return round, nil
 }
+func (r *RoundRepository) Update(conn *gorm.DB, round *Round) (*Round, error) {
+	result := conn.Save(round)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return round, nil
+}
 func (r *RoundRepository) FindAll(conn *gorm.DB, filter *RoundFilter) ([]Round, error) {
 	var rounds []Round
 	where := &Round{}

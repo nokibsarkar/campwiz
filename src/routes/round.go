@@ -97,37 +97,40 @@ func ImportFromCommons(c *gin.Context, sess *cache.Session) {
 	c.JSON(200, ResponseSingle[*database.Task]{Data: task})
 }
 
-// GetImportStatus godoc
-// @Summary Get the import status about a round
-// @Description It would be used as a server sent event stream to broadcast on the frontend about current status of the round
+// UpdateRoundDetails godoc
+// @Summary Update the details of a round
+// @Description Update the details of a round
 // @Produce  json
-// @Success 200 {object} ResponseSingle[services.RoundImportSummary]
-// @Router /round/import/{roundId} [get]
+// @Success 200 {object} ResponseSingle[database.Round]
+// @Router /round/{roundId} [post]
 // @Param roundId path string true "The round ID"
+// @Param roundRequest body services.RoundRequest true "The round request"
 // @Tags Round
 // @Error 400 {object} ResponseError
-func GetImportStatus(c *gin.Context, sess *cache.Session) {
+func UpdateRoundDetails(c *gin.Context, sess *cache.Session) {
 	roundId := c.Param("roundId")
 	if roundId == "" {
 		c.JSON(400, ResponseError{Detail: "Invalid request : Round ID is required"})
 	}
-	round_service := services.NewRoundService()
-	round, err := round_service.GetById(database.IDType(roundId))
+	req := &services.RoundRequest{}
+	err := c.ShouldBind(req)
 	if err != nil {
-		c.JSON(400, ResponseError{Detail: "Failed to get round : " + err.Error()})
+		c.JSON(400, ResponseError{Detail: "Error Decoding : " + err.Error()})
 		return
 	}
-	if round == nil {
-		c.JSON(400, ResponseError{Detail: "Round not found"})
+	round_service := services.NewRoundService()
+	round, err := round_service.UpdateRoundDetails(database.IDType(roundId), req)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Failed to update round : " + err.Error()})
 		return
 	}
-
+	c.JSON(200, ResponseSingle[*database.Round]{Data: round})
 }
-
 func NewRoundRoutes(parent *gin.RouterGroup) {
 	r := parent.Group("/round")
-	r.POST("/", WithPermission(consts.PermissionCreateCampaign, CreateRound))
 	r.GET("/", WithSession(ListAllRounds))
-	r.GET("/import/:roundId", SSEHeadersMiddleware(), WithPermission(consts.PermissionCreateRound, GetImportStatus))
+
+	r.POST("/", WithPermission(consts.PermissionCreateCampaign, CreateRound))
+	r.POST("/:roundId", WithPermission(consts.PermissionCreateCampaign, UpdateRoundDetails))
 	r.POST("/import/:roundId/commons", WithPermission(consts.PermissionCreateCampaign, ImportFromCommons))
 }

@@ -50,7 +50,7 @@ func (u *UserService) EnsureExists(tx *gorm.DB, usernameSet sets.Set[string]) (m
 		return nil, err
 	}
 	if len(userName2Id) > 0 {
-		for username, _ := range userName2Id {
+		for username := range userName2Id {
 			usernameSet.Delete(username)
 		}
 	}

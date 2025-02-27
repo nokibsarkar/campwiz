@@ -425,3 +425,26 @@ func (b *RoundService) DistributeTaskAmongExistingJuries(images []database.Image
 		fmt.Printf("Jury %d has %d images\n", sortedJuryByAssigned[j].ID, len(groupByJuryID[sortedJuryByAssigned[j].ID]))
 	}
 }
+func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundRequest) (*database.Round, error) {
+	round_repo := database.NewRoundRepository()
+	conn, close := database.GetDB()
+	defer close()
+	tx := conn.Begin()
+	round, err := round_repo.FindByID(tx, roundID)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else if round == nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("round not found")
+	}
+	// round.CampaignID = req.CampaignID
+	round.RoundWritable = req.RoundWritable
+	round, err = round_repo.Update(tx, round)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
+	return round, nil
+}

@@ -303,9 +303,7 @@ definitions:
       failedCount:
         type: integer
       failedIds:
-        items:
-          type: string
-        type: array
+        type: object
       remainingCount:
         type: integer
       roundId:
@@ -345,24 +343,36 @@ definitions:
     - TaskTypeDistributeEvaluations
   routes.ResponseList-database_Campaign:
     properties:
+      continueToken:
+        type: string
       data:
         items:
           $ref: '#/definitions/database.Campaign'
         type: array
+      previousToken:
+        type: string
     type: object
   routes.ResponseList-database_Round:
     properties:
+      continueToken:
+        type: string
       data:
         items:
           $ref: '#/definitions/database.Round'
         type: array
+      previousToken:
+        type: string
     type: object
   routes.ResponseList-database_Submission:
     properties:
+      continueToken:
+        type: string
       data:
         items:
           $ref: '#/definitions/database.Submission'
         type: array
+      previousToken:
+        type: string
     type: object
   routes.ResponseSingle-database_Round:
     properties:
@@ -373,11 +383,6 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/database.Task'
-    type: object
-  routes.ResponseSingle-services_RoundImportSummary:
-    properties:
-      data:
-        $ref: '#/definitions/services.RoundImportSummary'
     type: object
   routes.ResponseSingle-services_TaskResponse:
     properties:
@@ -502,19 +507,6 @@ definitions:
           type: string
         type: array
     type: object
-  services.RoundImportSummary:
-    properties:
-      failedCount:
-        type: integer
-      failedIds:
-        items:
-          type: string
-        type: array
-      status:
-        $ref: '#/definitions/database.RoundStatus'
-      successCount:
-        type: integer
-    type: object
   services.RoundRequest:
     properties:
       allowCreations:
@@ -585,9 +577,7 @@ definitions:
       failedCount:
         type: integer
       failedIds:
-        items:
-          type: string
-        type: array
+        type: object
       remainingCount:
         type: integer
       roundId:
@@ -727,24 +717,29 @@ paths:
       summary: Create a new round
       tags:
       - Round
-  /round/import/{roundId}:
-    get:
-      description: It would be used as a server sent event stream to broadcast on
-        the frontend about current status of the round
+  /round/{roundId}:
+    post:
+      description: Update the details of a round
       parameters:
       - description: The round ID
         in: path
         name: roundId
         required: true
         type: string
+      - description: The round request
+        in: body
+        name: roundRequest
+        required: true
+        schema:
+          $ref: '#/definitions/services.RoundRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/routes.ResponseSingle-services_RoundImportSummary'
-      summary: Get the import status about a round
+            $ref: '#/definitions/routes.ResponseSingle-database_Round'
+      summary: Update the details of a round
       tags:
       - Round
   /round/import/{roundId}/commons:
