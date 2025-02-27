@@ -1,4 +1,4 @@
-package importservice
+package importsources
 
 import (
 	"maps"

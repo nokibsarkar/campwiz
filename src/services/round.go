@@ -6,7 +6,8 @@ import (
 	"math/rand/v2"
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
-	importservice "nokib/campwiz/services/round/importService"
+	importservice "nokib/campwiz/services/round/taskrunner"
+	importsources "nokib/campwiz/services/round/taskrunner/import-sources"
 	"slices"
 
 	"gorm.io/datatypes"
@@ -120,7 +121,7 @@ func (b *RoundService) ImportFromCommons(roundId database.IDType, categories []s
 	}
 	tx.Commit()
 	fmt.Println("Task created with ID: ", task.TaskID)
-	commonsCategorySource := importservice.NewCommonsCategoryListSource(categories)
+	commonsCategorySource := importsources.NewCommonsCategoryListSource(categories)
 	batch_processor := importservice.NewTaskRunner(task.TaskID, commonsCategorySource)
 	go batch_processor.Run()
 	return task, nil

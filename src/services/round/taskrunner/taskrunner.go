@@ -1,4 +1,4 @@
-package importservice
+package taskrunner
 
 import (
 	"log"
@@ -13,11 +13,13 @@ import (
 // ImportService is an interface for importing data from different sources
 // All the importer services should implement this interface
 type IImportSource interface {
+	// This method would be called in a loop to fetch each batch of images
+	// It should return the images that were successfully imported and the images that failed to import
+	// If there are no images to import it should return nil
+	// If there are failed images it should return the reason as a map
 	ImportImageResults(failedImageReason *map[string]string) ([]database.ImageResult, *map[string]string)
 }
-type TechnicalJudge interface {
-	PreventionReason(database.ImageResult) string
-}
+
 type TaskRunner struct {
 	TaskId database.IDType
 	Source IImportSource
