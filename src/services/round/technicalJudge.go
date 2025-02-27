@@ -18,7 +18,7 @@ type TechnicalJudgeService struct {
 func NewTechnicalJudgeService(round *database.Round) *TechnicalJudgeService {
 	return &TechnicalJudgeService{
 		AllowedTypes:      round.AllowedMediaTypes,
-		MinimumUploadDate: time.Now().AddDate(0, 0, -1),
+		MinimumUploadDate: round.StartDate,
 		MinimumResolution: uint64(round.MinimumResolution),
 		MinimumSize:       uint64(round.MinimumTotalBytes),
 		Blacklist:         []string{},
@@ -32,16 +32,22 @@ func NewTechnicalJudgeService(round *database.Round) *TechnicalJudgeService {
 //   - Minimum Resolution
 //   - Minimum Size
 //   - Whether Image allowed or not
-func (j *TechnicalJudgeService) IsMediaAllowed(img database.ImageResult) bool {
-	return true
-	if img.SubmittedAt.Before(j.MinimumUploadDate) {
-		return false
+func (j *TechnicalJudgeService) PreventionReason(img database.ImageResult) string {
+	if !j.MinimumUploadDate.IsZero() && img.SubmittedAt.Before(j.MinimumUploadDate) {
+		// log.Printf("Image %s is not allowed because it was uploaded before %s", img.Name, j.MinimumUploadDate)
+		return "before-minimum-upload-date"
 	}
-	// if img. < j.MinimumResolution {
-	// 	return false
-	// }
+	if img.Resolution < j.MinimumResolution {
+		// log.Printf("Image %s is not allowed because it has a resolution of %d which is less than %d", img.Name, img.Resolution, j.MinimumResolution)
+		return "below-minimum-resolution"
+	}
 	if img.Size < j.MinimumSize {
-		return false
+		// log.Printf("Image %s is not allowed because it has a size of %d which is less than %d", img.Name, img.Size, j.MinimumSize)
+		return "below-minimum-size"
 	}
-	return j.AllowedTypes.Contains(database.MediaType(img.MediaType))
+	if j.AllowedTypes != nil && !j.AllowedTypes.Contains(database.MediaType(img.MediaType)) {
+		// log.Printf("Image %s is not allowed because it is of type %s", img.Name, img.MediaType)
+		return "not-allowed-type"
+	}
+	return ""
 }

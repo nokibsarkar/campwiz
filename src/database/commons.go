@@ -33,6 +33,7 @@ type ImageResult struct {
 	License          string
 	Description      string
 	CreditHTML       string
+	Resolution       uint64
 }
 type GContinue struct {
 	Gcmcontinue string `json:"gcmcontinue"`
@@ -97,7 +98,7 @@ func (c *CommonsRepository) Get(values url.Values) (_ io.ReadCloser, err error) 
 }
 
 // returns images from commons categories
-func (c *CommonsRepository) GetImagesFromCommonsCategories(category string) ([]ImageResult, []string) {
+func (c *CommonsRepository) GetImagesFromCommonsCategories(category string) ([]ImageResult, map[string]string) {
 	// Get images from commons category
 	// Create batch from commons category
 	log.Println("Getting images from commons category: ", category)
@@ -149,7 +150,7 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(category string) ([]I
 		result = append(result, img)
 	}
 	log.Println("Found images: ", len(result))
-	return result, []string{}
+	return result, map[string]string{}
 }
 
 // returns images from commons categories
