@@ -58,7 +58,6 @@ func (b *TaskRunner) Run() (successCount, failedCount int) {
 	user_repo := database.NewUserRepository()
 	for {
 		successBatch, failedBatch := b.Source.ImportImageResults(FailedImages)
-
 		if failedBatch != nil {
 			task.FailedCount = len(*failedBatch)
 			*task.FailedIds = datatypes.NewJSONType(*failedBatch)
