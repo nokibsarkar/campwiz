@@ -93,6 +93,7 @@ type Round struct {
 	Creator          *User       `json:"-" gorm:"foreignKey:CreatedByID"`
 	LatestTaskID     *IDType     `json:"latestTaskId" gorm:"default:null"`
 	RoundWritable
+	Roles []Role `json:"roles"`
 }
 type RoundFilter struct {
 	CampaignID IDType      `form:"campaignId"`

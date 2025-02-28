@@ -16,6 +16,7 @@ type CampaignWithWriteableFields struct {
 	Language    consts.Language `json:"language"`
 	Rules       string          `json:"rules"`
 	Image       string          `json:"image"`
+	Roles       []Role          `json:"roles"`
 }
 type Campaign struct {
 	CampaignID IDType `gorm:"primaryKey" json:"campaignId"`

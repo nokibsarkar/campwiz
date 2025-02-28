@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
 
@@ -38,21 +39,24 @@ func (r *RoleService) CalculateRoleDifference(tx *gorm.DB, Type database.RoleTyp
 		id2RoleMap[existingRole.UserID] = existingRole
 		if !existingRole.IsAllowed {
 			// Already soft deleted, so either way, pretend it does not exist
+			log.Printf("Soft %s", existingRole.UserID)
 			continue
 		}
 		_, ok := userId2NameMap[existingRole.UserID]
 		if !ok {
 			// not exist in updated roles
 			// remove the role by adding isAllowed = false and permission would be null
-			removedRole := &database.Role{
-				RoleID: existingRole.RoleID,
-			}
-			removedRoles = append(removedRoles, removedRole.RoleID)
+
+			log.Printf("%s is being removed as %s", existingRole.RoleID, Type)
+			removedRoles = append(removedRoles, existingRole.RoleID)
 		} else {
 			// Remain unchanged
+			log.Printf("%s is unchanged as %s", userId2NameMap[existingRole.UserID], Type)
 		}
 	}
+
 	for userId := range userId2NameMap {
+		log.Printf("%v", userId)
 		role, ok := id2RoleMap[userId]
 		if !ok || !role.IsAllowed {
 			// Newly added
@@ -67,13 +71,47 @@ func (r *RoleService) CalculateRoleDifference(tx *gorm.DB, Type database.RoleTyp
 				newRole.RoundID = &filter.RoundID
 			}
 			if ok {
+				log.Printf("%s was banned earlier. Unbanning ", role.RoleID)
 				// already exisiting but was banned
 				newRole.RoleID = role.RoleID
 			}
+			log.Printf("adding %s was banned earlier.", newRole.RoleID)
 			addedRoles = append(addedRoles, newRole)
 		} else {
 			//remain unchanged
 		}
 	}
+	log.Println("Add: ", addedRoles)
+	log.Println("Remove ", removedRoles)
 	return addedRoles, removedRoles, nil
+}
+func (service *RoleService) FetchChangeRoles(tx *gorm.DB, roleType database.RoleType, campaignId database.IDType, updatedRoleUsernames []database.UserName) error {
+	filter := &database.RoleFilter{
+		CampaignID: campaignId,
+		Type:       &roleType,
+	}
+	addedRoles, removedRoles, err := service.CalculateRoleDifference(tx, roleType, filter, updatedRoleUsernames)
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+		return err
+	}
+	if len(addedRoles) > 0 {
+		res := tx.Save(addedRoles)
+		if res.Error != nil {
+			tx.Rollback()
+			return res.Error
+		}
+	}
+	if len(removedRoles) > 0 {
+		for _, roleID := range removedRoles {
+			log.Println("Banning role: ", roleID)
+			res := tx.Model(&database.Role{RoleID: roleID}).Update("is_allowed", false)
+			if res.Error != nil {
+				tx.Rollback()
+				return res.Error
+			}
+		}
+	}
+	return nil
 }
