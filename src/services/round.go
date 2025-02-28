@@ -55,7 +55,7 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, erro
 	round_repo := database.NewRoundRepository()
 	campaign_repo := database.NewCampaignRepository()
 	user_repo := database.NewUserRepository()
-	role_repo := database.NewJuryRepository()
+	role_repo := database.NewRoleRepository()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
@@ -270,7 +270,13 @@ func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundReq
 		tx.Rollback()
 		return nil, err
 	}
-	addedRoles, removedRoles, err := role_service.CalculateJuryDifference(tx, database.RoleTypeJury, round, req.Juries)
+	juryType := database.RoleTypeJury
+	filter := &database.RoleFilter{
+		RoundID:    roundID,
+		CampaignID: round.CampaignID,
+		Type:       &juryType,
+	}
+	addedRoles, removedRoles, err := role_service.CalculateRoleDifference(tx, database.RoleTypeJury, filter, req.Juries)
 	if err != nil {
 		log.Println(err)
 		tx.Rollback()

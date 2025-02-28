@@ -21,7 +21,7 @@ type EvaluationRequest struct {
 func (e *EvaluationService) Evaluate(currentUserID database.IDType, evaluationID database.IDType, evaluationRequest *EvaluationRequest) (*database.Evaluation, error) {
 	ev_repo := database.NewEvaluationRepository()
 	user_repo := database.NewUserRepository()
-	jury_repo := database.NewJuryRepository()
+	jury_repo := database.NewRoleRepository()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()

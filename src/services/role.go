@@ -1,7 +1,6 @@
 package services
 
 import (
-	"log"
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
 
@@ -13,14 +12,9 @@ type RoleService struct{}
 func NewRoleService() *RoleService {
 	return &RoleService{}
 }
-func (r *RoleService) CalculateJuryDifference(tx *gorm.DB, Type database.RoleType, round *database.Round, updatedRoleUsernames []database.UserName) (addedRoles []database.Role, removedRoles []database.IDType, err error) {
-	role_repo := database.NewJuryRepository()
+func (r *RoleService) CalculateRoleDifference(tx *gorm.DB, Type database.RoleType, filter *database.RoleFilter, updatedRoleUsernames []database.UserName) (addedRoles []database.Role, removedRoles []database.IDType, err error) {
+	role_repo := database.NewRoleRepository()
 	user_repo := database.NewUserRepository()
-	filter := &database.RoleFilter{
-		RoundID:    round.RoundID,
-		CampaignID: round.CampaignID,
-		Type:       &Type,
-	}
 	existingRoles, err := role_repo.ListAllRoles(tx, filter)
 	if err != nil {
 		return nil, nil, err
@@ -66,12 +60,13 @@ func (r *RoleService) CalculateJuryDifference(tx *gorm.DB, Type database.RoleTyp
 				RoleID:     idgenerator.GenerateID("j"),
 				Type:       Type,
 				UserID:     userId,
-				CampaignID: round.CampaignID,
-				Round:      round,
+				CampaignID: filter.CampaignID,
 				IsAllowed:  true,
 			}
+			if filter.RoundID != "" {
+				newRole.RoundID = &filter.RoundID
+			}
 			if ok {
-				log.Println("Banned")
 				// already exisiting but was banned
 				newRole.RoleID = role.RoleID
 			}

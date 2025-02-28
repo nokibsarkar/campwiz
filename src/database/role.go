@@ -37,7 +37,7 @@ type RoleFilter struct {
 }
 type RoleRepository struct{}
 
-func NewJuryRepository() *RoleRepository {
+func NewRoleRepository() *RoleRepository {
 	return &RoleRepository{}
 }
 func (r *RoleRepository) CreateRole(tx *gorm.DB, jury *Role) error {

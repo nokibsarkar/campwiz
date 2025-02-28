@@ -172,7 +172,7 @@ func (b *TaskRunner) distributeEvaluations(conn *gorm.DB, task *database.Task) (
 		log.Println("Error fetching round: ", err)
 		return
 	}
-	jury_repo := database.NewJuryRepository()
+	jury_repo := database.NewRoleRepository()
 	filter := &database.RoleFilter{
 		RoundID:    round.RoundID,
 		CampaignID: round.CampaignID,

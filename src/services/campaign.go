@@ -42,7 +42,7 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 	}
 	campaign_repo := database.NewCampaignRepository()
 	user_repo := database.NewUserRepository()
-	role_repo := database.NewJuryRepository()
+	role_repo := database.NewRoleRepository()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
