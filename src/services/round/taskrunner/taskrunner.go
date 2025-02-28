@@ -6,6 +6,7 @@ import (
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
 	rnd "nokib/campwiz/services/round"
+	distributionstrategy "nokib/campwiz/services/round/taskrunner/distribution-strategy"
 	"strings"
 
 	"gorm.io/datatypes"
@@ -22,7 +23,7 @@ type IImportSource interface {
 	ImportImageResults(failedImageReason *map[string]string) ([]database.ImageResult, *map[string]string)
 }
 type IDistributionStrategy interface {
-	AssignJuries(conn *gorm.DB, round *database.Round, juries []*database.Role) error
+	AssignJuries(conn *gorm.DB, round *database.Round, juries []database.Role) error
 }
 
 type TaskRunner struct {
@@ -184,6 +185,12 @@ func (b *TaskRunner) distributeEvaluations(conn *gorm.DB, task *database.Task) (
 		return
 	}
 	fmt.Println("Found juries: ", juries)
+	strategy := distributionstrategy.NewRoundRobinDistributionStrategy()
+	err = strategy.AssignJuries(conn, round, juries)
+	if err != nil {
+		log.Println("Error assigning juries: ", err)
+		return
+	}
 	successCount, failedCount = 0, 0
 	return
 }
