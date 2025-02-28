@@ -1,6 +1,8 @@
 package database
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type RoleType string
 
@@ -18,13 +20,14 @@ type Role struct {
 	UserID         IDType    `json:"userId" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	CampaignID     IDType    `json:"campaignId" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	RoundID        *IDType   `json:"roundId" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	IsAllowed      bool      `json:"isAllowed" gorm:"default:true"`
+	IsAllowed      bool      `json:"isAllowed"`
 	TotalAssigned  int       `json:"totalAssigned"`
 	TotalEvaluated int       `json:"totalEvaluated"`
 	TotalScore     int       `json:"totalScore"`
 	Campaign       *Campaign `json:"-"`
 	User           *User     `json:"-"`
 	Round          *Round    `json:"-"`
+	Roles          []Role    `json:"roles"`
 }
 type RoleFilter struct {
 	CommonFilter

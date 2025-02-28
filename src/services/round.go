@@ -13,7 +13,6 @@ import (
 	"slices"
 
 	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 type RoundService struct {
@@ -249,45 +248,10 @@ func (b *RoundService) DistributeTaskAmongExistingJuries(images []database.Image
 		fmt.Printf("Jury %d has %d images\n", sortedJuryByAssigned[j].ID, len(groupByJuryID[sortedJuryByAssigned[j].ID]))
 	}
 }
-func (r *RoundService) calculateJuryDifference(tx *gorm.DB, Type database.RoleType, round *database.Round, updatedRoleUsernames []database.UserName) (addedRoles []database.Role, removedRoles []database.Role, err error) {
-	role_repo := database.NewJuryRepository()
-	user_repo := database.NewUserRepository()
-	filter := &database.RoleFilter{
-		RoundID:    round.RoundID,
-		CampaignID: round.CampaignID,
-		Type:       &Type,
-	}
-	existingRoles, err := role_repo.ListAllRoles(tx, filter)
-	if err != nil {
-		return nil, nil, err
-	}
-	username2IDMap := map[database.UserName]database.IDType{}
-	for _, username := range updatedRoleUsernames {
-		username2IDMap[username] = idgenerator.GenerateID("u")
-	}
-	username2IDMap, err = user_repo.EnsureExists(tx, username2IDMap)
-	if err != nil {
-		return nil, nil, err
-	}
-	userId2NameMap := map[database.IDType]database.UserName{}
-	for username := range username2IDMap {
-		userId := username2IDMap[username]
-		userId2NameMap[userId] = username
-	}
-	for _, existingRole := range existingRoles {
-		username, ok := userId2NameMap[*existingRole.RoundID]
-		if !ok {
-			// not exist in updated roles
-			// remove the role by adding isAllowed = false and permission would be null
 
-			log.Println(username, "Should be removed")
-		}
-	}
-	log.Println("Found juries: ", existingRoles, username2IDMap)
-	return nil, nil, nil
-}
 func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundRequest) (*database.Round, error) {
 	round_repo := database.NewRoundRepository()
+	role_service := NewRoleService()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
@@ -306,7 +270,29 @@ func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundReq
 		tx.Rollback()
 		return nil, err
 	}
-	r.calculateJuryDifference(tx, database.RoleTypeJury, round, req.Juries)
+	addedRoles, removedRoles, err := role_service.CalculateJuryDifference(tx, database.RoleTypeJury, round, req.Juries)
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+		return nil, err
+	}
+	if len(addedRoles) > 0 {
+		res := tx.Save(addedRoles)
+		if res.Error != nil {
+			tx.Rollback()
+			return nil, res.Error
+		}
+	}
+	if len(removedRoles) > 0 {
+		for _, roleID := range removedRoles {
+			log.Println("Banning role: ", roleID)
+			res := tx.Model(&database.Role{RoleID: roleID}).Update("is_allowed", false)
+			if res.Error != nil {
+				tx.Rollback()
+				return nil, res.Error
+			}
+		}
+	}
 	tx.Commit()
 	return round, nil
 }

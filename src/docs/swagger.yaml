@@ -627,6 +627,10 @@ definitions:
         type: boolean
       isPublic:
         type: boolean
+      jury:
+        items:
+          type: string
+        type: array
       maximumSubmissionOfSameArticle:
         type: integer
       minimumAddedBytes:

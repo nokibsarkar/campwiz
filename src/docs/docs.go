@@ -1448,6 +1448,12 @@ const docTemplate = `{
                 "isPublic": {
                     "type": "boolean"
                 },
+                "jury": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "maximumSubmissionOfSameArticle": {
                     "type": "integer"
                 },
