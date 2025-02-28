@@ -55,8 +55,15 @@ func (r *RoleRepository) ListAllRoles(tx *gorm.DB, filter *RoleFilter) ([]Role, 
 	stmt := tx
 	if filter != nil {
 		if filter.CampaignID != "" {
-			stmt = stmt.Where("campaign_id = ?", filter.CampaignID)
+			stmt = stmt.Where(&Role{CampaignID: filter.CampaignID})
 		}
+		if filter.RoundID != "" {
+			stmt = stmt.Where(&Role{RoundID: &filter.RoundID})
+		}
+		if filter.Type != nil {
+			stmt = stmt.Where(&Role{Type: *filter.Type})
+		}
+
 	}
 	result := stmt.Find(&juries)
 	return juries, result.Error

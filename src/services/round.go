@@ -21,7 +21,7 @@ type RoundRequest struct {
 	CampaignID  database.IDType `json:"campaignId"`
 	CreatedByID database.IDType `json:"-"`
 	database.RoundWritable
-	Juries []UserName `json:"juries"`
+	Juries []UserName `json:"jury"`
 }
 
 type DistributionRequest struct {
@@ -115,13 +115,13 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, erro
 			RoleID:     idgenerator.GenerateID("j"),
 			UserID:     userID,
 			CampaignID: campaign.CampaignID,
-			Type:       database.RoleTypeOrganizer,
-			RoundID:    nil,
+			Type:       database.RoleTypeJury,
+			RoundID:    &round.RoundID,
 		})
 	}
 	if len(roles) == 0 {
 		tx.Rollback()
-		return nil, fmt.Errorf("no valid coordinators or organizers found")
+		return nil, fmt.Errorf("no valid jury found")
 	}
 	err = role_repo.CreateRoles(tx, roles)
 	if err != nil {

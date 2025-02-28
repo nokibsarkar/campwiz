@@ -48,6 +48,22 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 		log.Println("Error fetching round: ", err)
 		return
 	}
+	if round.LatestTaskID != nil && *round.LatestTaskID != task.TaskID {
+		// log.Println("Task is not the latest task for the round")
+		// task.Status = database.TaskStatusFailed
+		// return
+	}
+	currentRoundStatus := round.Status
+	{
+		// Update the round status to importing
+		round.LatestTaskID = &task.TaskID
+		round.Status = database.RoundStatusImporting
+		conn.Save(round)
+		defer func() {
+			round.Status = currentRoundStatus
+			conn.Save(round)
+		}()
+	}
 	FailedImages := &map[string]string{}
 	technicalJudge := rnd.NewTechnicalJudgeService(round)
 	user_repo := database.NewUserRepository()
@@ -62,6 +78,7 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 			break
 		}
 		images := []database.ImageResult{}
+		log.Println("Processing batch of images")
 		for _, image := range successBatch {
 			if technicalJudge.PreventionReason(image) != "" {
 				images = append(images, image)
@@ -140,7 +157,10 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 		}
 		perBatch.Commit()
 	}
-	task.Status = database.TaskStatusSuccess
+	{
+		task.Status = database.TaskStatusSuccess
+		round.LatestTaskID = nil // Reset the latest task id
+	}
 	return
 }
 
@@ -152,9 +172,13 @@ func (b *TaskRunner) distributeEvaluations(conn *gorm.DB, task *database.Task) (
 		return
 	}
 	jury_repo := database.NewJuryRepository()
-	juries, err := jury_repo.ListAllRoles(conn, &database.RoleFilter{
-		RoundID: round.RoundID,
-	})
+	filter := &database.RoleFilter{
+		RoundID:    round.RoundID,
+		CampaignID: round.CampaignID,
+	}
+	j := database.RoleTypeJury
+	filter.Type = &j
+	juries, err := jury_repo.ListAllRoles(conn, filter)
 	if err != nil {
 		log.Println("Error fetching juries: ", err)
 		return
@@ -174,6 +198,7 @@ func (b *TaskRunner) Run() {
 		return
 	}
 	defer func() {
+
 		res := conn.Save(task)
 		if res.Error != nil {
 			log.Println("Error saving task: ", res.Error)
