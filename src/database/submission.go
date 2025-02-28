@@ -47,7 +47,7 @@ type Submission struct {
 	CampaignID   IDType `json:"campaignId" gorm:"null;index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	URL          string `json:"url"`
 	// The Actual Author in the Wikimedia
-	Author string `json:"author"`
+	Author UserName `json:"author"`
 	// The User who submitted the article on behalf of the participant
 	SubmittedByID  IDType    `json:"submittedById" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	ParticipantID  IDType    `json:"participantId" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`

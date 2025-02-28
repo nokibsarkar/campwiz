@@ -13,6 +13,7 @@ import (
 	"slices"
 
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 type RoundService struct {
@@ -21,7 +22,7 @@ type RoundRequest struct {
 	CampaignID  database.IDType `json:"campaignId"`
 	CreatedByID database.IDType `json:"-"`
 	database.RoundWritable
-	Juries []UserName `json:"jury"`
+	Juries []database.UserName `json:"jury"`
 }
 
 type DistributionRequest struct {
@@ -75,9 +76,9 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, erro
 		tx.Rollback()
 		return nil, err
 	}
-	username2IDMap := map[string]database.IDType{}
+	username2IDMap := map[database.UserName]database.IDType{}
 	for _, coordinatorUsername := range request.Juries {
-		username2IDMap[string(coordinatorUsername)] = idgenerator.GenerateID("u")
+		username2IDMap[coordinatorUsername] = idgenerator.GenerateID("u")
 	}
 	username2IDMap, err = user_repo.EnsureExists(tx, username2IDMap)
 	if err != nil {
@@ -86,7 +87,7 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, erro
 	}
 	roles := []database.Role{}
 	for _, userName := range request.Juries {
-		userID, ok := username2IDMap[string(userName)]
+		userID, ok := username2IDMap[userName]
 		if !ok {
 			log.Println("User not found: ", userName)
 			continue
@@ -103,7 +104,7 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, erro
 		})
 	}
 	for _, userName := range request.Juries {
-		userID, ok := username2IDMap[string(userName)]
+		userID, ok := username2IDMap[userName]
 		if !ok {
 			log.Println("User not found: ", userName)
 			continue
@@ -248,6 +249,43 @@ func (b *RoundService) DistributeTaskAmongExistingJuries(images []database.Image
 		fmt.Printf("Jury %d has %d images\n", sortedJuryByAssigned[j].ID, len(groupByJuryID[sortedJuryByAssigned[j].ID]))
 	}
 }
+func (r *RoundService) calculateJuryDifference(tx *gorm.DB, Type database.RoleType, round *database.Round, updatedRoleUsernames []database.UserName) (addedRoles []database.Role, removedRoles []database.Role, err error) {
+	role_repo := database.NewJuryRepository()
+	user_repo := database.NewUserRepository()
+	filter := &database.RoleFilter{
+		RoundID:    round.RoundID,
+		CampaignID: round.CampaignID,
+		Type:       &Type,
+	}
+	existingRoles, err := role_repo.ListAllRoles(tx, filter)
+	if err != nil {
+		return nil, nil, err
+	}
+	username2IDMap := map[database.UserName]database.IDType{}
+	for _, username := range updatedRoleUsernames {
+		username2IDMap[username] = idgenerator.GenerateID("u")
+	}
+	username2IDMap, err = user_repo.EnsureExists(tx, username2IDMap)
+	if err != nil {
+		return nil, nil, err
+	}
+	userId2NameMap := map[database.IDType]database.UserName{}
+	for username := range username2IDMap {
+		userId := username2IDMap[username]
+		userId2NameMap[userId] = username
+	}
+	for _, existingRole := range existingRoles {
+		username, ok := userId2NameMap[*existingRole.RoundID]
+		if !ok {
+			// not exist in updated roles
+			// remove the role by adding isAllowed = false and permission would be null
+
+			log.Println(username, "Should be removed")
+		}
+	}
+	log.Println("Found juries: ", existingRoles, username2IDMap)
+	return nil, nil, nil
+}
 func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundRequest) (*database.Round, error) {
 	round_repo := database.NewRoundRepository()
 	conn, close := database.GetDB()
@@ -261,13 +299,14 @@ func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundReq
 		tx.Rollback()
 		return nil, fmt.Errorf("round not found")
 	}
-	// round.CampaignID = req.CampaignID
+	// round.CampaignID = req.CampaignID // CampaignID is not updatable
 	round.RoundWritable = req.RoundWritable
 	round, err = round_repo.Update(tx, round)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
+	r.calculateJuryDifference(tx, database.RoleTypeJury, round, req.Juries)
 	tx.Commit()
 	return round, nil
 }

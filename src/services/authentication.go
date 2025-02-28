@@ -20,7 +20,7 @@ type AuthenticationService struct {
 }
 type SessionClaims struct {
 	Permission consts.PermissionGroup `json:"permission"`
-	Name       string                 `json:"name"`
+	Name       database.UserName      `json:"name"`
 	jwt.RegisteredClaims
 }
 

@@ -8,13 +8,13 @@ import (
 )
 
 // UserName is a type for jury user name
-type UserName string
+
 type CampaignService struct{}
 type CampaignCreateRequest struct {
 	database.CampaignWithWriteableFields
-	CreatedByID  database.IDType `json:"-"`
-	Coordinators []UserName      `json:"coordinators"`
-	Organizers   []UserName      `json:"organizers"`
+	CreatedByID  database.IDType     `json:"-"`
+	Coordinators []database.UserName `json:"coordinators"`
+	Organizers   []database.UserName `json:"organizers"`
 	database.RoundRestrictions
 }
 type CampaignUpdateRequest struct {
@@ -51,12 +51,12 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 		tx.Rollback()
 		return nil, err
 	}
-	username2IDMap := map[string]database.IDType{}
+	username2IDMap := map[database.UserName]database.IDType{}
 	for _, coordinatorUsername := range campaignRequest.Coordinators {
-		username2IDMap[string(coordinatorUsername)] = idgenerator.GenerateID("u")
+		username2IDMap[coordinatorUsername] = idgenerator.GenerateID("u")
 	}
 	for _, organizerUsername := range campaignRequest.Organizers {
-		username2IDMap[string(organizerUsername)] = idgenerator.GenerateID("u")
+		username2IDMap[organizerUsername] = idgenerator.GenerateID("u")
 	}
 	username2IDMap, err = user_repo.EnsureExists(tx, username2IDMap)
 	if err != nil {
@@ -65,7 +65,7 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 	}
 	roles := []database.Role{}
 	for _, userName := range campaignRequest.Coordinators {
-		userID, ok := username2IDMap[string(userName)]
+		userID, ok := username2IDMap[userName]
 		if !ok {
 			log.Println("User not found: ", userName)
 			continue
@@ -82,7 +82,7 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 		})
 	}
 	for _, userName := range campaignRequest.Organizers {
-		userID, ok := username2IDMap[string(userName)]
+		userID, ok := username2IDMap[userName]
 		if !ok {
 			log.Println("User not found: ", userName)
 			continue

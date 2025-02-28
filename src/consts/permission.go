@@ -46,6 +46,7 @@ const (
 )
 const (
 	// PermissionGroups
+	PermissionGroupBanned     = PermissionGroup(0)
 	PermissionGroupUSER       = PermissionGroup(PermissionLogin)
 	PermissionGroupADMIN      = PermissionGroupUSER | PermissionGroup(PermissionCreateCampaign) | PermissionGroup(PermissionUpdateCampaignDetails) | PermissionGroup(PermissionUpdateCampaignStatus) | PermissionGroup(PermissionDeleteCampaign) | PermissionGroup(PermissionSeeUserDetails)
 	PermissionGroupSuperAdmin = PermissionGroupADMIN | PermissionGroup(PermissionCreateRound)

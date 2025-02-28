@@ -86,7 +86,7 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 			}
 		}
 		task.SuccessCount += len(images)
-		participants := map[string]database.IDType{}
+		participants := map[database.UserName]database.IDType{}
 		for _, image := range images {
 			participants[image.UploaderUsername] = idgenerator.GenerateID("u")
 		}
