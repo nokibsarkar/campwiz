@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math/rand/v2"
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
@@ -20,6 +21,7 @@ type RoundRequest struct {
 	CampaignID  database.IDType `json:"campaignId"`
 	CreatedByID database.IDType `json:"-"`
 	database.RoundWritable
+	Juries []UserName `json:"juries"`
 }
 
 type DistributionRequest struct {
@@ -52,6 +54,8 @@ func NewRoundService() *RoundService {
 func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, error) {
 	round_repo := database.NewRoundRepository()
 	campaign_repo := database.NewCampaignRepository()
+	user_repo := database.NewUserRepository()
+	role_repo := database.NewJuryRepository()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
@@ -71,6 +75,60 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, erro
 		tx.Rollback()
 		return nil, err
 	}
+	username2IDMap := map[string]database.IDType{}
+	for _, coordinatorUsername := range request.Juries {
+		username2IDMap[string(coordinatorUsername)] = idgenerator.GenerateID("u")
+	}
+	username2IDMap, err = user_repo.EnsureExists(tx, username2IDMap)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	roles := []database.Role{}
+	for _, userName := range request.Juries {
+		userID, ok := username2IDMap[string(userName)]
+		if !ok {
+			log.Println("User not found: ", userName)
+			continue
+		}
+		if userID == "" {
+			continue
+		}
+		roles = append(roles, database.Role{
+			RoleID:     idgenerator.GenerateID("j"),
+			UserID:     userID,
+			CampaignID: campaign.CampaignID,
+			Type:       database.RoleTypeCoordinator,
+			RoundID:    nil,
+		})
+	}
+	for _, userName := range request.Juries {
+		userID, ok := username2IDMap[string(userName)]
+		if !ok {
+			log.Println("User not found: ", userName)
+			continue
+		}
+		if userID == "" {
+			continue
+		}
+		roles = append(roles, database.Role{
+			RoleID:     idgenerator.GenerateID("j"),
+			UserID:     userID,
+			CampaignID: campaign.CampaignID,
+			Type:       database.RoleTypeOrganizer,
+			RoundID:    nil,
+		})
+	}
+	if len(roles) == 0 {
+		tx.Rollback()
+		return nil, fmt.Errorf("no valid coordinators or organizers found")
+	}
+	err = role_repo.CreateRoles(tx, roles)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
 	tx.Commit()
 	return round, nil
 }
