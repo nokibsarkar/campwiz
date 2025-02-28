@@ -126,11 +126,30 @@ func UpdateRoundDetails(c *gin.Context, sess *cache.Session) {
 	}
 	c.JSON(200, ResponseSingle[*database.Round]{Data: round})
 }
+func DistributeEvaluations(c *gin.Context, sess *cache.Session) {
+	roundId := c.Param("roundId")
+	if roundId == "" {
+		c.JSON(400, ResponseError{Detail: "Invalid request : Round ID is required"})
+	}
+	distributionReq := &services.DistributionRequest{}
+	err := c.ShouldBind(distributionReq)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Error Decoding : " + err.Error()})
+		return
+	}
+	round_service := services.NewRoundService()
+	task, err := round_service.DistributeEvaluations(database.IDType(roundId), distributionReq)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Failed to distribute evaluations : " + err.Error()})
+		return
+	}
+	c.JSON(200, ResponseSingle[*database.Task]{Data: task})
+}
 func NewRoundRoutes(parent *gin.RouterGroup) {
 	r := parent.Group("/round")
 	r.GET("/", WithSession(ListAllRounds))
-
 	r.POST("/", WithPermission(consts.PermissionCreateCampaign, CreateRound))
 	r.POST("/:roundId", WithPermission(consts.PermissionCreateCampaign, UpdateRoundDetails))
 	r.POST("/import/:roundId/commons", WithPermission(consts.PermissionCreateCampaign, ImportFromCommons))
+	r.POST("/distribute/:roundId", WithPermission(consts.PermissionCreateCampaign, DistributeEvaluations))
 }

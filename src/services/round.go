@@ -21,11 +21,8 @@ type RoundRequest struct {
 	database.RoundWritable
 }
 
-type RoundImportSummary struct {
-	Status       database.RoundStatus `json:"status"`
-	SuccessCount int                  `json:"successCount"`
-	FailedCount  int                  `json:"failedCount"`
-	FailedIds    []string             `json:"failedIds"`
+type DistributionRequest struct {
+	AmongJuries []database.IDType `json:"juries"`
 }
 type ImportFromCommonsPayload struct {
 	// Categories from which images will be fetched
@@ -214,4 +211,58 @@ func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundReq
 	}
 	tx.Commit()
 	return round, nil
+}
+func (r *RoundService) DistributeEvaluations(roundId database.IDType, distributionReq *DistributionRequest) (*database.Task, error) {
+	return nil, nil
+}
+
+/*
+NewImages := []database.ImageResult{}
+NewImageCount := len(NewImages)
+Jury[i] is already assigned count of the jury
+TotalEvaluation := NewImageCount * evaluationCountRequired + sum(Jury[i])
+TotalJury := len(Jury)
+Average := TotalEvaluation / TotalJury
+Now the goal is to distribute in such way so that each jury would be assigned Average +/- toleranceCount
+If the toleranceCount is 0, then it will be set to 1
+Difference[i] = Average - Jury[i] // if Difference[i] is positive, then the jury has to be assigned more images, if negative or zero then discard the jury because he already has more images
+Now Difference[i] images will be assigned to the jury[i]
+Adjusted Jury Count = len(Difference) after removing the juries with Difference[i] <= 0
+Now the goal is to distribute the remaining images among the Adjusted Jury Count
+Give each image a serial number from 0 to NewImageCount
+Now sort the juries based on the Difference[i]
+Now start assigning the images to the juries in a round-robin fashion
+ImageCount 16
+AlreadyAssigned 4
+JuryCount 5
+EvaluationCountRequired 1
+ToleranceCount 1
+TotalEvaluation 16 * 1 + 4 = 20
+TotalJury 5
+Average 19 / 5 = 4
+------------------------
+Jury 0: 13	14	15	16
+Jury 1:	9	10	11	12
+Jury 2: * 	6	7	8
+Jury 3: * 	3	4	5
+Jury 4: * 	* 	1 	2
+------------------------
+Now for the next iteration,
+adjusted set = images
+jurylist = previous jurylist - 4 (because jury 4 already have been assigned 1 and 2 once)
+Images: 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+Total Evaluation = 16 * 1 + 4 = 20
+Total Jury = 4
+Average = 20 / 4 = 5
+Difference = 0 0 0 0
+---------------------
+Jury 0: 13	14	15	16 8
+Jury 1:	9	10	11	12
+Jury 2: * 	6	7	8	3	4	5	6	7
+Jury 3: * 	3	4	5
+// Jury 4: * 	* 	1 	2
+*/
+
+func Distribute() {
+
 }
