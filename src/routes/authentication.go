@@ -3,6 +3,7 @@ package routes
 import (
 	"errors"
 	"fmt"
+	"log"
 	"nokib/campwiz/consts"
 	"nokib/campwiz/services"
 	"strings"
@@ -91,8 +92,9 @@ func (a *AuthenticationMiddleWare) Authenticate(c *gin.Context) {
 				c.AbortWithStatusJSON(401, ResponseError{Detail: "Unauthorized : Invalid token"})
 				return
 			} else {
-				if setCookie || true {
-					c.SetCookie(AuthenticationCookieName, accessToken, consts.Config.Auth.Expiry*60, "/", "", false, true)
+				if setCookie {
+					log.Println("Setting Authentication Cookie")
+					c.SetCookie(AuthenticationCookieName, accessToken, consts.Config.Auth.Expiry, "/", "", false, true)
 				}
 				c.Set(SESSION_KEY, session)
 			}

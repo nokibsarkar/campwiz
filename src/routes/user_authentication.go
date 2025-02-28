@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"log"
 	"nokib/campwiz/consts"
 	"nokib/campwiz/database"
 	"nokib/campwiz/database/cache"
@@ -64,7 +65,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 				})
 				return
 			}
-			fmt.Println("User created: ", trx.RowsAffected)
+			log.Println("User created: ", trx.RowsAffected)
 
 		} else {
 			c.JSON(500, ResponseError{
@@ -79,6 +80,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 	cacheDB, close := cache.GetCacheDB()
 	defer close()
 	nextExpiry := time.Now().UTC().Add(time.Minute * time.Duration(consts.Config.Auth.Expiry))
+	log.Println("Session expire at : ", nextExpiry, "Now :", time.Now().UTC())
 	claims := &services.SessionClaims{
 		Permission: consts.PermissionGroup(db_user.Permission),
 		Name:       db_user.Username,
@@ -91,6 +93,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 	}
 	tx := cacheDB.Begin()
 	newAccessToken, _, err := auth_service.NewSession(tx, claims)
+	log.Println("New Access token ", newAccessToken)
 	if err != nil {
 		tx.Rollback()
 		c.JSON(500, ResponseError{
@@ -99,6 +102,7 @@ func HandleOAuth2Callback(c *gin.Context) {
 		return
 	}
 	newRefreshToken, err := auth_service.NewRefreshToken(claims)
+	log.Println("Refresh Token :", newRefreshToken)
 	if err != nil {
 		tx.Rollback()
 		c.JSON(500, ResponseError{
@@ -106,8 +110,8 @@ func HandleOAuth2Callback(c *gin.Context) {
 		})
 		return
 	}
-	c.SetCookie(AuthenticationCookieName, newAccessToken, consts.Config.Auth.Expiry, "/", "", false, false)
-	c.SetCookie(RefreshCookieName, newRefreshToken, consts.Config.Auth.Refresh, "/", "", false, false)
+	c.SetCookie(AuthenticationCookieName, newAccessToken, consts.Config.Auth.Expiry*60, "/", "", false, false)
+	c.SetCookie(RefreshCookieName, newRefreshToken, consts.Config.Auth.Refresh*60, "/", "", false, false)
 	c.Redirect(302, state)
 	tx.Commit()
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"nokib/campwiz/consts"
 	"nokib/campwiz/database"
 	"nokib/campwiz/database/cache"
@@ -72,7 +73,7 @@ func (a *AuthenticationService) NewRefreshToken(tokenMap *SessionClaims) (string
 			Audience:  jwt.ClaimStrings{"campwiz"},
 			Subject:   tokenMap.Subject,
 			Issuer:    a.Config.Issuer,
-			ExpiresAt: jwt.NewNumericDate(tokenMap.ExpiresAt.Time.Add(time.Minute * time.Duration(a.Config.Refresh))),
+			ExpiresAt: jwt.NewNumericDate(tokenMap.ExpiresAt.Time.Add(time.Second * time.Duration(a.Config.Refresh))),
 		},
 		Permission: tokenMap.Permission,
 		Name:       tokenMap.Name,
@@ -105,7 +106,8 @@ func (a *AuthenticationService) RefreshSession(cacheDB *gorm.DB, tokenMap *Sessi
 		tx.Rollback()
 		return "", nil, result.Error
 	}
-	session.ExpiresAt = time.Now().UTC().Add(time.Minute * time.Duration(a.Config.Expiry))
+	session.ExpiresAt = time.Now().UTC().Add(time.Second * time.Duration(a.Config.Expiry))
+	log.Println("Session expires at: ", session.ExpiresAt)
 	result = tx.Save(session)
 	if result.Error != nil {
 		fmt.Println("Error: ", result.Error)
