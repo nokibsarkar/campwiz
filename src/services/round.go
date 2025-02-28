@@ -7,6 +7,7 @@ import (
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
 	importservice "nokib/campwiz/services/round/taskrunner"
+	distributionstrategy "nokib/campwiz/services/round/taskrunner/distribution-strategy"
 	importsources "nokib/campwiz/services/round/taskrunner/import-sources"
 	"slices"
 
@@ -119,7 +120,7 @@ func (b *RoundService) ImportFromCommons(roundId database.IDType, categories []s
 	tx.Commit()
 	fmt.Println("Task created with ID: ", task.TaskID)
 	commonsCategorySource := importsources.NewCommonsCategoryListSource(categories)
-	batch_processor := importservice.NewTaskRunner(task.TaskID, commonsCategorySource)
+	batch_processor := importservice.NewImportTaskRunner(task.TaskID, commonsCategorySource)
 	go batch_processor.Run()
 	return task, nil
 }
@@ -212,8 +213,44 @@ func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundReq
 	tx.Commit()
 	return round, nil
 }
-func (r *RoundService) DistributeEvaluations(roundId database.IDType, distributionReq *DistributionRequest) (*database.Task, error) {
-	return nil, nil
+func (r *RoundService) DistributeEvaluations(currentUserID database.IDType, roundId database.IDType, distributionReq *DistributionRequest) (*database.Task, error) {
+	round_repo := database.NewRoundRepository()
+	task_repo := database.NewTaskRepository()
+	conn, close := database.GetDB()
+	defer close()
+	tx := conn.Begin()
+	round, err := round_repo.FindByID(tx, roundId)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else if round == nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("round not found")
+	}
+	taskReq := &database.Task{
+		TaskID:               idgenerator.GenerateID("t"),
+		Type:                 database.TaskTypeDistributeEvaluations,
+		Status:               database.TaskStatusPending,
+		AssociatedRoundID:    &roundId,
+		AssociatedUserID:     &currentUserID,
+		CreatedByID:          currentUserID,
+		AssociatedCampaignID: &round.CampaignID,
+		SuccessCount:         0,
+		FailedCount:          0,
+		FailedIds:            &datatypes.JSONType[map[string]string]{},
+		RemainingCount:       0,
+	}
+	task, err := task_repo.Create(tx, taskReq)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
+	fmt.Println("Task created with ID: ", task.TaskID)
+	strategy := distributionstrategy.NewRoundRobinDistributionStrategy()
+	runner := importservice.NewDistributionTaskRunner(task.TaskID, strategy)
+	go runner.Run()
+	return task, nil
 }
 
 /*

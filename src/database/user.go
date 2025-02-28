@@ -41,7 +41,7 @@ func (u *UserRepository) FetchExistingUsernames(conn *gorm.DB, usernames []strin
 func (u *UserRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[string]IDType) (map[string]IDType, error) {
 	usernames := []string{}
 	if len(usernameToRandomIdMap) == 0 {
-		return nil, nil
+		return usernameToRandomIdMap, nil
 	}
 	for username := range usernameToRandomIdMap {
 		usernames = append(usernames, username)
@@ -68,6 +68,7 @@ func (u *UserRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[str
 		log.Printf("Error fetching users: %v\n", err)
 		return nil, err
 	}
+	log.Println("Fetched users: ", users)
 	new_users := []User{}
 	for _, u := range users {
 		new_user := User{
@@ -84,4 +85,9 @@ func (u *UserRepository) EnsureExists(tx *gorm.DB, usernameToRandomIdMap map[str
 	}
 	result := tx.Create(new_users)
 	return userName2Id, result.Error
+}
+func (u *UserRepository) FindByID(tx *gorm.DB, userID IDType) (*User, error) {
+	user := &User{}
+	result := tx.Limit(1).Find(user, &User{UserID: userID})
+	return user, result.Error
 }

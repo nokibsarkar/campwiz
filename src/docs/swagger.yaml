@@ -435,6 +435,11 @@ definitions:
       prev:
         type: string
     type: object
+  routes.ResponseSingle-database_Evaluation:
+    properties:
+      data:
+        $ref: '#/definitions/database.Evaluation'
+    type: object
   routes.ResponseSingle-database_Round:
     properties:
       data:
@@ -466,16 +471,16 @@ definitions:
         type: array
       blacklist:
         type: string
+      coordinators:
+        items:
+          type: string
+        type: array
       description:
         type: string
       endDate:
         type: string
       image:
         type: string
-      jury:
-        items:
-          type: string
-        type: array
       language:
         $ref: '#/definitions/consts.Language'
       maximumSubmissionOfSameArticle:
@@ -498,6 +503,10 @@ definitions:
         type: integer
       name:
         type: string
+      organizers:
+        items:
+          type: string
+        type: array
       rules:
         type: string
       secretBallot:
@@ -521,16 +530,16 @@ definitions:
         type: array
       blacklist:
         type: string
+      coordinators:
+        items:
+          type: string
+        type: array
       description:
         type: string
       endDate:
         type: string
       image:
         type: string
-      jury:
-        items:
-          type: string
-        type: array
       language:
         $ref: '#/definitions/consts.Language'
       maximumSubmissionOfSameArticle:
@@ -553,12 +562,34 @@ definitions:
         type: integer
       name:
         type: string
+      organizers:
+        items:
+          type: string
+        type: array
       rules:
         type: string
       secretBallot:
         type: boolean
       startDate:
         type: string
+    type: object
+  services.DistributionRequest:
+    properties:
+      juries:
+        items:
+          type: string
+        type: array
+    type: object
+  services.EvaluationRequest:
+    properties:
+      comment:
+        type: string
+      votePassed:
+        type: boolean
+      votePosition:
+        type: integer
+      voteScore:
+        type: integer
     type: object
   services.ImportFromCommonsPayload:
     properties:
@@ -790,6 +821,33 @@ paths:
       summary: List all evaluations
       tags:
       - Evaluation
+  /evaluation/{evaluationId}:
+    post:
+      description: Update an evaluation
+      parameters:
+      - description: The evaluation ID
+        in: path
+        name: evaluationId
+        required: true
+        type: string
+      - description: The evaluation request
+        in: body
+        name: evaluationRequest
+        required: true
+        schema:
+          $ref: '#/definitions/services.EvaluationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-database_Evaluation'
+      security:
+      - ApiKeyAuth: []
+      summary: Update an evaluation
+      tags:
+      - Evaluation
   /round/:
     get:
       description: get all rounds
@@ -883,6 +941,31 @@ paths:
           schema:
             $ref: '#/definitions/routes.ResponseSingle-database_Round'
       summary: Update the details of a round
+      tags:
+      - Round
+  /round/distribute/{roundId}:
+    post:
+      description: Distribute evaluations to juries
+      parameters:
+      - description: The round ID
+        in: path
+        name: roundId
+        required: true
+        type: string
+      - description: The distribution request
+        in: body
+        name: DistributionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/services.DistributionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-database_Task'
+      summary: Distribute evaluations to juries
       tags:
       - Round
   /round/import/{roundId}/commons:

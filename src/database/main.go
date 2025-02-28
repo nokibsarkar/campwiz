@@ -68,7 +68,7 @@ func InitDB() {
 	db.AutoMigrate(&Campaign{})
 	db.AutoMigrate(&Round{})
 	db.AutoMigrate(&Task{})
-	db.AutoMigrate(&Jury{})
+	db.AutoMigrate(&Role{})
 	db.AutoMigrate(&Submission{})
 	db.AutoMigrate(&Evaluation{})
 	fmt.Println((db))

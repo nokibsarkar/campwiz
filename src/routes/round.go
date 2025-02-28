@@ -126,6 +126,17 @@ func UpdateRoundDetails(c *gin.Context, sess *cache.Session) {
 	}
 	c.JSON(200, ResponseSingle[*database.Round]{Data: round})
 }
+
+// DistributeEvaluations godoc
+// @Summary Distribute evaluations to juries
+// @Description Distribute evaluations to juries
+// @Produce  json
+// @Success 200 {object} ResponseSingle[database.Task]
+// @Router /round/distribute/{roundId} [post]
+// @Param roundId path string true "The round ID"
+// @Param DistributionRequest body services.DistributionRequest true "The distribution request"
+// @Tags Round
+// @Error 400 {object} ResponseError
 func DistributeEvaluations(c *gin.Context, sess *cache.Session) {
 	roundId := c.Param("roundId")
 	if roundId == "" {
@@ -138,7 +149,7 @@ func DistributeEvaluations(c *gin.Context, sess *cache.Session) {
 		return
 	}
 	round_service := services.NewRoundService()
-	task, err := round_service.DistributeEvaluations(database.IDType(roundId), distributionReq)
+	task, err := round_service.DistributeEvaluations(sess.UserID, database.IDType(roundId), distributionReq)
 	if err != nil {
 		c.JSON(400, ResponseError{Detail: "Failed to distribute evaluations : " + err.Error()})
 		return

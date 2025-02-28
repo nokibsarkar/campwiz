@@ -1,6 +1,7 @@
 package taskrunner
 
 import (
+	"fmt"
 	"log"
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 )
 
 // ImportService is an interface for importing data from different sources
@@ -19,35 +21,28 @@ type IImportSource interface {
 	// If there are failed images it should return the reason as a map
 	ImportImageResults(failedImageReason *map[string]string) ([]database.ImageResult, *map[string]string)
 }
+type IDistributionStrategy interface {
+	AssignJuries(conn *gorm.DB, round *database.Round, juries []*database.Role) error
+}
 
 type TaskRunner struct {
-	TaskId database.IDType
-	Source IImportSource
+	TaskId       database.IDType
+	ImportSource IImportSource
 }
 
-func NewTaskRunner(taskId database.IDType, importService IImportSource) *TaskRunner {
+func NewImportTaskRunner(taskId database.IDType, importService IImportSource) *TaskRunner {
+	return &TaskRunner{
+		TaskId:       taskId,
+		ImportSource: importService,
+	}
+}
+func NewDistributionTaskRunner(taskId database.IDType, strategy IDistributionStrategy) *TaskRunner {
 	return &TaskRunner{
 		TaskId: taskId,
-		Source: importService,
 	}
 }
-func (b *TaskRunner) Run() (successCount, failedCount int) {
-	task_repo := database.NewTaskRepository()
+func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCount, failedCount int) {
 	round_repo := database.NewRoundRepository()
-	conn, close := database.GetDB()
-	defer close()
-
-	task, err := task_repo.FindByID(conn, b.TaskId)
-	if err != nil {
-		log.Println("Error fetching task: ", err)
-		return
-	}
-	defer func() {
-		res := conn.Save(task)
-		if res.Error != nil {
-			log.Println("Error saving task: ", res.Error)
-		}
-	}()
 	round, err := round_repo.FindByID(conn, *task.AssociatedRoundID)
 	if err != nil {
 		log.Println("Error fetching round: ", err)
@@ -57,7 +52,7 @@ func (b *TaskRunner) Run() (successCount, failedCount int) {
 	technicalJudge := rnd.NewTechnicalJudgeService(round)
 	user_repo := database.NewUserRepository()
 	for {
-		successBatch, failedBatch := b.Source.ImportImageResults(FailedImages)
+		successBatch, failedBatch := b.ImportSource.ImportImageResults(FailedImages)
 		if failedBatch != nil {
 			task.FailedCount = len(*failedBatch)
 			*task.FailedIds = datatypes.NewJSONType(*failedBatch)
@@ -147,4 +142,57 @@ func (b *TaskRunner) Run() (successCount, failedCount int) {
 	}
 	task.Status = database.TaskStatusSuccess
 	return
+}
+
+func (b *TaskRunner) distributeEvaluations(conn *gorm.DB, task *database.Task) (successCount, failedCount int) {
+	round_repo := database.NewRoundRepository()
+	round, err := round_repo.FindByID(conn, *task.AssociatedRoundID)
+	if err != nil {
+		log.Println("Error fetching round: ", err)
+		return
+	}
+	jury_repo := database.NewJuryRepository()
+	juries, err := jury_repo.ListAllRoles(conn, &database.RoleFilter{
+		RoundID: round.RoundID,
+	})
+	if err != nil {
+		log.Println("Error fetching juries: ", err)
+		return
+	}
+	fmt.Println("Found juries: ", juries)
+	successCount, failedCount = 0, 0
+	return
+}
+func (b *TaskRunner) Run() {
+	task_repo := database.NewTaskRepository()
+	conn, close := database.GetDB()
+	defer close()
+
+	task, err := task_repo.FindByID(conn, b.TaskId)
+	if err != nil {
+		log.Println("Error fetching task: ", err)
+		return
+	}
+	defer func() {
+		res := conn.Save(task)
+		if res.Error != nil {
+			log.Println("Error saving task: ", res.Error)
+		}
+	}()
+	successCount, failedCount := 0, 0
+	if task.Type == database.TaskTypeImportFromCommons {
+		if b.ImportSource == nil {
+			log.Printf("No import source found for task %s\n", b.TaskId)
+			task.Status = database.TaskStatusFailed
+			return
+		}
+		successCount, failedCount = b.importImagws(conn, task)
+	} else if task.Type == database.TaskTypeDistributeEvaluations {
+		successCount, failedCount = b.distributeEvaluations(conn, task)
+	} else {
+		log.Printf("Unknown task type %s\n", task.Type)
+		task.Status = database.TaskStatusFailed
+		return
+	}
+	log.Printf("Task %s completed with %d success and %d failed\n", b.TaskId, successCount, failedCount)
 }

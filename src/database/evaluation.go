@@ -31,7 +31,7 @@ type Evaluation struct {
 	Serial             uint        `json:"serial"`
 	Submission         *Submission `json:"-"`
 	Participant        *User       `json:"-" gorm:"foreignKey:ParticipantID"`
-	Judge              *Jury       `json:"-"`
+	Judge              *Role       `json:"-"`
 	CreatedAt          *time.Time  `json:"createdAt" gorm:"autoCreateTime"`
 	UpdatedAt          *time.Time  `json:"updatedAt" gorm:"autoUpdateTime"`
 	EvaluatedAt        *time.Time  `json:"evaluatedAt" gorm:"type:datetime"`

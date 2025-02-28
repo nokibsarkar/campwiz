@@ -186,6 +186,10 @@ func (c *CommonsRepository) GeUsersFromUsernames(usernames []string) ([]Wikimedi
 			if user == nil {
 				break
 			}
+			if user.Registered.IsZero() {
+				fmt.Println("No registration date found. Skipping")
+				continue
+			}
 			result = append(result, *user)
 		}
 	}

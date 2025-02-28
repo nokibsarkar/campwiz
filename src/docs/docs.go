@@ -216,6 +216,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/evaluation/{evaluationId}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update an evaluation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Update an evaluation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The evaluation ID",
+                        "name": "evaluationId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The evaluation request",
+                        "name": "evaluationRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.EvaluationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-database_Evaluation"
+                        }
+                    }
+                }
+            }
+        },
         "/round/": {
             "get": {
                 "description": "get all rounds",
@@ -311,6 +354,44 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/routes.ResponseSingle-database_Round"
+                        }
+                    }
+                }
+            }
+        },
+        "/round/distribute/{roundId}": {
+            "post": {
+                "description": "Distribute evaluations to juries",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Round"
+                ],
+                "summary": "Distribute evaluations to juries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The round ID",
+                        "name": "roundId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The distribution request",
+                        "name": "DistributionRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.DistributionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-database_Task"
                         }
                     }
                 }
@@ -1075,6 +1156,14 @@ const docTemplate = `{
                 }
             }
         },
+        "routes.ResponseSingle-database_Evaluation": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/database.Evaluation"
+                }
+            }
+        },
         "routes.ResponseSingle-database_Round": {
             "type": "object",
             "properties": {
@@ -1123,6 +1212,12 @@ const docTemplate = `{
                 "blacklist": {
                     "type": "string"
                 },
+                "coordinators": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "description": {
                     "type": "string"
                 },
@@ -1131,12 +1226,6 @@ const docTemplate = `{
                 },
                 "image": {
                     "type": "string"
-                },
-                "jury": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "language": {
                     "$ref": "#/definitions/consts.Language"
@@ -1170,6 +1259,12 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "organizers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "rules": {
                     "type": "string"
@@ -1206,6 +1301,12 @@ const docTemplate = `{
                 "blacklist": {
                     "type": "string"
                 },
+                "coordinators": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "description": {
                     "type": "string"
                 },
@@ -1214,12 +1315,6 @@ const docTemplate = `{
                 },
                 "image": {
                     "type": "string"
-                },
-                "jury": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
                 },
                 "language": {
                     "$ref": "#/definitions/consts.Language"
@@ -1254,6 +1349,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "organizers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "rules": {
                     "type": "string"
                 },
@@ -1262,6 +1363,34 @@ const docTemplate = `{
                 },
                 "startDate": {
                     "type": "string"
+                }
+            }
+        },
+        "services.DistributionRequest": {
+            "type": "object",
+            "properties": {
+                "juries": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "services.EvaluationRequest": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "votePassed": {
+                    "type": "boolean"
+                },
+                "votePosition": {
+                    "type": "integer"
+                },
+                "voteScore": {
+                    "type": "integer"
                 }
             }
         },
