@@ -10,6 +10,11 @@ import (
 )
 
 type IDType string
+type CommonFilter struct {
+	Limit         int    `form:"limit"`
+	ContinueToken string `form:"continueToken"`
+	PreviousToken string `form:"previousToken"`
+}
 
 func (i *IDType) String() string {
 	return string(*i)

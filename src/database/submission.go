@@ -11,8 +11,7 @@ type SubmissionListFilter struct {
 	CampaignID    IDType `form:"campaignId"`
 	RoundID       IDType `form:"roundId"`
 	ParticipantID IDType `form:"participantId"`
-	Limit         int    `form:"limit"`
-	ContinueToken string `form:"continueToken"`
+	CommonFilter
 }
 type ArticleSubmission struct {
 	Language   string `json:"language"`

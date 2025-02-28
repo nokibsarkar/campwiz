@@ -38,6 +38,11 @@ const docTemplate = `{
                 "summary": "List all campaigns",
                 "parameters": [
                     {
+                        "type": "string",
+                        "name": "continueToken",
+                        "in": "query"
+                    },
+                    {
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -53,7 +58,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "nextToken",
+                        "name": "previousToken",
                         "in": "query"
                     }
                 ],
@@ -134,6 +139,68 @@ const docTemplate = `{
                 }
             }
         },
+        "/evaluation/": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get all evaluations",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "List all evaluations",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "name": "campaignId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "roundId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "ranking",
+                            "score",
+                            "binary"
+                        ],
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "EvaluationTypeRanking",
+                            "EvaluationTypeScore",
+                            "EvaluationTypeBinary"
+                        ],
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "userId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseList-database_Evaluation"
+                        }
+                    }
+                }
+            }
+        },
         "/round/": {
             "get": {
                 "description": "get all rounds",
@@ -151,8 +218,47 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "string",
+                        "name": "continueToken",
+                        "in": "query"
+                    },
+                    {
                         "type": "integer",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "previousToken",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "PENDING",
+                            "IMPORTING",
+                            "DISTRIBUTING",
+                            "EVALUATING",
+                            "REJECTED",
+                            "CANCELLED",
+                            "PAUSED",
+                            "SCHEDULED",
+                            "ACTIVE",
+                            "COMPLETED"
+                        ],
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "RoundStatusPending",
+                            "RoundStatusImporting",
+                            "RoundStatusDistributing",
+                            "RoundStatusEvaluating",
+                            "RoundStatusRejected",
+                            "RoundStatusCancelled",
+                            "RoundStatusPaused",
+                            "RoundStatusScheduled",
+                            "RoundStatusActive",
+                            "RoundStatusCompleted"
+                        ],
+                        "name": "status",
                         "in": "query"
                     }
                 ],
@@ -300,6 +406,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "participantId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "previousToken",
                         "in": "query"
                     },
                     {
@@ -513,6 +624,66 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "database.Evaluation": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "evaluatedAt": {
+                    "type": "string"
+                },
+                "evaluationId": {
+                    "type": "string"
+                },
+                "judgeId": {
+                    "type": "string"
+                },
+                "participantId": {
+                    "type": "string"
+                },
+                "score": {
+                    "description": "Applicable if the evaluation type is score, it would be between 0-100",
+                    "type": "integer"
+                },
+                "serial": {
+                    "type": "integer"
+                },
+                "submissionId": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/database.EvaluationType"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "votePassed": {
+                    "description": "Applicable if the evaluation type is binary, it would be true or false",
+                    "type": "boolean"
+                },
+                "votePosition": {
+                    "description": "Applicable if the evaluation type is binary, it would be 0 to Number of submissions in this round\nThe pair (JudgeID, VotePosition) should be unique (i.e. a judge can't vote for the same position twice)",
+                    "type": "integer"
+                }
+            }
+        },
+        "database.EvaluationType": {
+            "type": "string",
+            "enum": [
+                "ranking",
+                "score",
+                "binary"
+            ],
+            "x-enum-varnames": [
+                "EvaluationTypeRanking",
+                "EvaluationTypeScore",
+                "EvaluationTypeBinary"
+            ]
         },
         "database.MediaType": {
             "type": "string",
@@ -825,6 +996,23 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Campaign"
+                    }
+                },
+                "previousToken": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.ResponseList-database_Evaluation": {
+            "type": "object",
+            "properties": {
+                "continueToken": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.Evaluation"
                     }
                 },
                 "previousToken": {

@@ -26,9 +26,8 @@ type Campaign struct {
 	CreatedBy *User `json:"-" gorm:"foreignKey:CreatedByID"`
 }
 type CampaignFilter struct {
-	IDs       []IDType `form:"ids,omitEmpty"`
-	Limit     int      `form:"limit,omitEmpty"`
-	NextToken string   `form:"nextToken,omitEmpty"`
+	IDs []IDType `form:"ids,omitEmpty"`
+	CommonFilter
 }
 type CampaignRepository struct{}
 

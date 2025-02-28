@@ -91,11 +91,13 @@ type Round struct {
 	Status           RoundStatus `json:"status"`
 	Campaign         *Campaign   `json:"-"`
 	Creator          *User       `json:"-" gorm:"foreignKey:CreatedByID"`
+	LatestTaskID     *IDType     `json:"latestTaskId" gorm:"default:null"`
 	RoundWritable
 }
 type RoundFilter struct {
-	CampaignID IDType `form:"campaignId"`
-	Limit      int    `form:"limit"`
+	CampaignID IDType      `form:"campaignId"`
+	Status     RoundStatus `form:"status"`
+	CommonFilter
 }
 type RoundRepository struct{}
 

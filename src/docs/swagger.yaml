@@ -128,6 +128,52 @@ definitions:
       startDate:
         type: string
     type: object
+  database.Evaluation:
+    properties:
+      comment:
+        type: string
+      createdAt:
+        type: string
+      evaluatedAt:
+        type: string
+      evaluationId:
+        type: string
+      judgeId:
+        type: string
+      participantId:
+        type: string
+      score:
+        description: Applicable if the evaluation type is score, it would be between
+          0-100
+        type: integer
+      serial:
+        type: integer
+      submissionId:
+        type: string
+      type:
+        $ref: '#/definitions/database.EvaluationType'
+      updatedAt:
+        type: string
+      votePassed:
+        description: Applicable if the evaluation type is binary, it would be true
+          or false
+        type: boolean
+      votePosition:
+        description: |-
+          Applicable if the evaluation type is binary, it would be 0 to Number of submissions in this round
+          The pair (JudgeID, VotePosition) should be unique (i.e. a judge can't vote for the same position twice)
+        type: integer
+    type: object
+  database.EvaluationType:
+    enum:
+    - ranking
+    - score
+    - binary
+    type: string
+    x-enum-varnames:
+    - EvaluationTypeRanking
+    - EvaluationTypeScore
+    - EvaluationTypeBinary
   database.MediaType:
     enum:
     - ARTICLE
@@ -348,6 +394,17 @@ definitions:
       data:
         items:
           $ref: '#/definitions/database.Campaign'
+        type: array
+      previousToken:
+        type: string
+    type: object
+  routes.ResponseList-database_Evaluation:
+    properties:
+      continueToken:
+        type: string
+      data:
+        items:
+          $ref: '#/definitions/database.Evaluation'
         type: array
       previousToken:
         type: string
@@ -612,6 +669,9 @@ paths:
     get:
       description: get all campaigns
       parameters:
+      - in: query
+        name: continueToken
+        type: string
       - collectionFormat: csv
         in: query
         items:
@@ -622,7 +682,7 @@ paths:
         name: limit
         type: integer
       - in: query
-        name: nextToken
+        name: previousToken
         type: string
       produces:
       - application/json
@@ -678,6 +738,45 @@ paths:
       summary: Update a campaign
       tags:
       - Campaign
+  /evaluation/:
+    get:
+      description: get all evaluations
+      parameters:
+      - in: query
+        name: campaignId
+        type: string
+      - in: query
+        name: roundId
+        type: string
+      - in: query
+        name: status
+        type: boolean
+      - enum:
+        - ranking
+        - score
+        - binary
+        in: query
+        name: type
+        type: string
+        x-enum-varnames:
+        - EvaluationTypeRanking
+        - EvaluationTypeScore
+        - EvaluationTypeBinary
+      - in: query
+        name: userId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseList-database_Evaluation'
+      security:
+      - ApiKeyAuth: []
+      summary: List all evaluations
+      tags:
+      - Evaluation
   /round/:
     get:
       description: get all rounds
@@ -686,8 +785,39 @@ paths:
         name: campaignId
         type: string
       - in: query
+        name: continueToken
+        type: string
+      - in: query
         name: limit
         type: integer
+      - in: query
+        name: previousToken
+        type: string
+      - enum:
+        - PENDING
+        - IMPORTING
+        - DISTRIBUTING
+        - EVALUATING
+        - REJECTED
+        - CANCELLED
+        - PAUSED
+        - SCHEDULED
+        - ACTIVE
+        - COMPLETED
+        in: query
+        name: status
+        type: string
+        x-enum-varnames:
+        - RoundStatusPending
+        - RoundStatusImporting
+        - RoundStatusDistributing
+        - RoundStatusEvaluating
+        - RoundStatusRejected
+        - RoundStatusCancelled
+        - RoundStatusPaused
+        - RoundStatusScheduled
+        - RoundStatusActive
+        - RoundStatusCompleted
       produces:
       - application/json
       responses:
@@ -783,6 +913,9 @@ paths:
         type: integer
       - in: query
         name: participantId
+        type: string
+      - in: query
+        name: previousToken
         type: string
       - in: query
         name: roundId
