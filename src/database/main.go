@@ -12,8 +12,8 @@ import (
 type IDType string
 type CommonFilter struct {
 	Limit         int    `form:"limit"`
-	ContinueToken string `form:"continueToken"`
-	PreviousToken string `form:"previousToken"`
+	ContinueToken string `form:"next"`
+	PreviousToken string `form:"prev"`
 }
 
 func (i *IDType) String() string {

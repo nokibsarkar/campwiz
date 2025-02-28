@@ -5,8 +5,8 @@ type ResponseSingle[T any] struct {
 }
 type ResponseList[T any] struct {
 	Data          []T    `json:"data"`
-	ContinueToken string `json:"continueToken"`
-	PreviousToken string `json:"previousToken"`
+	ContinueToken string `json:"next"`
+	PreviousToken string `json:"prev"`
 }
 type ResponseError struct {
 	Detail string `json:"detail"`

@@ -38,11 +38,6 @@ const docTemplate = `{
                 "summary": "List all campaigns",
                 "parameters": [
                     {
-                        "type": "string",
-                        "name": "continueToken",
-                        "in": "query"
-                    },
-                    {
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -58,7 +53,12 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "previousToken",
+                        "name": "next",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "prev",
                         "in": "query"
                     }
                 ],
@@ -161,6 +161,21 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "next",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "prev",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "name": "roundId",
                         "in": "query"
@@ -218,18 +233,18 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "name": "continueToken",
-                        "in": "query"
-                    },
-                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "previousToken",
+                        "name": "next",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "prev",
                         "in": "query"
                     },
                     {
@@ -394,13 +409,13 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "name": "continueToken",
+                        "type": "integer",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "limit",
+                        "type": "string",
+                        "name": "next",
                         "in": "query"
                     },
                     {
@@ -410,7 +425,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "name": "previousToken",
+                        "name": "prev",
                         "in": "query"
                     },
                     {
@@ -634,6 +649,9 @@ const docTemplate = `{
                 "createdAt": {
                     "type": "string"
                 },
+                "distributionTaskId": {
+                    "type": "string"
+                },
                 "evaluatedAt": {
                     "type": "string"
                 },
@@ -749,6 +767,9 @@ const docTemplate = `{
                 },
                 "isPublic": {
                     "type": "boolean"
+                },
+                "latestTaskId": {
+                    "type": "string"
                 },
                 "maximumSubmissionOfSameArticle": {
                     "type": "integer"
@@ -989,16 +1010,16 @@ const docTemplate = `{
         "routes.ResponseList-database_Campaign": {
             "type": "object",
             "properties": {
-                "continueToken": {
-                    "type": "string"
-                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Campaign"
                     }
                 },
-                "previousToken": {
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
                     "type": "string"
                 }
             }
@@ -1006,16 +1027,16 @@ const docTemplate = `{
         "routes.ResponseList-database_Evaluation": {
             "type": "object",
             "properties": {
-                "continueToken": {
-                    "type": "string"
-                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Evaluation"
                     }
                 },
-                "previousToken": {
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
                     "type": "string"
                 }
             }
@@ -1023,16 +1044,16 @@ const docTemplate = `{
         "routes.ResponseList-database_Round": {
             "type": "object",
             "properties": {
-                "continueToken": {
-                    "type": "string"
-                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Round"
                     }
                 },
-                "previousToken": {
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
                     "type": "string"
                 }
             }
@@ -1040,16 +1061,16 @@ const docTemplate = `{
         "routes.ResponseList-database_Submission": {
             "type": "object",
             "properties": {
-                "continueToken": {
-                    "type": "string"
-                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Submission"
                     }
                 },
-                "previousToken": {
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
                     "type": "string"
                 }
             }

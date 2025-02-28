@@ -134,6 +134,8 @@ definitions:
         type: string
       createdAt:
         type: string
+      distributionTaskId:
+        type: string
       evaluatedAt:
         type: string
       evaluationId:
@@ -220,6 +222,8 @@ definitions:
         type: boolean
       isPublic:
         type: boolean
+      latestTaskId:
+        type: string
       maximumSubmissionOfSameArticle:
         type: integer
       minimumAddedBytes:
@@ -389,46 +393,46 @@ definitions:
     - TaskTypeDistributeEvaluations
   routes.ResponseList-database_Campaign:
     properties:
-      continueToken:
-        type: string
       data:
         items:
           $ref: '#/definitions/database.Campaign'
         type: array
-      previousToken:
+      next:
+        type: string
+      prev:
         type: string
     type: object
   routes.ResponseList-database_Evaluation:
     properties:
-      continueToken:
-        type: string
       data:
         items:
           $ref: '#/definitions/database.Evaluation'
         type: array
-      previousToken:
+      next:
+        type: string
+      prev:
         type: string
     type: object
   routes.ResponseList-database_Round:
     properties:
-      continueToken:
-        type: string
       data:
         items:
           $ref: '#/definitions/database.Round'
         type: array
-      previousToken:
+      next:
+        type: string
+      prev:
         type: string
     type: object
   routes.ResponseList-database_Submission:
     properties:
-      continueToken:
-        type: string
       data:
         items:
           $ref: '#/definitions/database.Submission'
         type: array
-      previousToken:
+      next:
+        type: string
+      prev:
         type: string
     type: object
   routes.ResponseSingle-database_Round:
@@ -669,9 +673,6 @@ paths:
     get:
       description: get all campaigns
       parameters:
-      - in: query
-        name: continueToken
-        type: string
       - collectionFormat: csv
         in: query
         items:
@@ -682,7 +683,10 @@ paths:
         name: limit
         type: integer
       - in: query
-        name: previousToken
+        name: next
+        type: string
+      - in: query
+        name: prev
         type: string
       produces:
       - application/json
@@ -746,6 +750,15 @@ paths:
         name: campaignId
         type: string
       - in: query
+        name: limit
+        type: integer
+      - in: query
+        name: next
+        type: string
+      - in: query
+        name: prev
+        type: string
+      - in: query
         name: roundId
         type: string
       - in: query
@@ -785,13 +798,13 @@ paths:
         name: campaignId
         type: string
       - in: query
-        name: continueToken
-        type: string
-      - in: query
         name: limit
         type: integer
       - in: query
-        name: previousToken
+        name: next
+        type: string
+      - in: query
+        name: prev
         type: string
       - enum:
         - PENDING
@@ -906,16 +919,16 @@ paths:
         name: campaignId
         type: string
       - in: query
-        name: continueToken
-        type: string
-      - in: query
         name: limit
         type: integer
+      - in: query
+        name: next
+        type: string
       - in: query
         name: participantId
         type: string
       - in: query
-        name: previousToken
+        name: prev
         type: string
       - in: query
         name: roundId

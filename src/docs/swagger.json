@@ -36,11 +36,6 @@
                 "summary": "List all campaigns",
                 "parameters": [
                     {
-                        "type": "string",
-                        "name": "continueToken",
-                        "in": "query"
-                    },
-                    {
                         "type": "array",
                         "items": {
                             "type": "string"
@@ -56,7 +51,12 @@
                     },
                     {
                         "type": "string",
-                        "name": "previousToken",
+                        "name": "next",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "prev",
                         "in": "query"
                     }
                 ],
@@ -159,6 +159,21 @@
                         "in": "query"
                     },
                     {
+                        "type": "integer",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "next",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "prev",
+                        "in": "query"
+                    },
+                    {
                         "type": "string",
                         "name": "roundId",
                         "in": "query"
@@ -216,18 +231,18 @@
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "name": "continueToken",
-                        "in": "query"
-                    },
-                    {
                         "type": "integer",
                         "name": "limit",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "name": "previousToken",
+                        "name": "next",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "prev",
                         "in": "query"
                     },
                     {
@@ -392,13 +407,13 @@
                         "in": "query"
                     },
                     {
-                        "type": "string",
-                        "name": "continueToken",
+                        "type": "integer",
+                        "name": "limit",
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "name": "limit",
+                        "type": "string",
+                        "name": "next",
                         "in": "query"
                     },
                     {
@@ -408,7 +423,7 @@
                     },
                     {
                         "type": "string",
-                        "name": "previousToken",
+                        "name": "prev",
                         "in": "query"
                     },
                     {
@@ -632,6 +647,9 @@
                 "createdAt": {
                     "type": "string"
                 },
+                "distributionTaskId": {
+                    "type": "string"
+                },
                 "evaluatedAt": {
                     "type": "string"
                 },
@@ -747,6 +765,9 @@
                 },
                 "isPublic": {
                     "type": "boolean"
+                },
+                "latestTaskId": {
+                    "type": "string"
                 },
                 "maximumSubmissionOfSameArticle": {
                     "type": "integer"
@@ -987,16 +1008,16 @@
         "routes.ResponseList-database_Campaign": {
             "type": "object",
             "properties": {
-                "continueToken": {
-                    "type": "string"
-                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Campaign"
                     }
                 },
-                "previousToken": {
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
                     "type": "string"
                 }
             }
@@ -1004,16 +1025,16 @@
         "routes.ResponseList-database_Evaluation": {
             "type": "object",
             "properties": {
-                "continueToken": {
-                    "type": "string"
-                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Evaluation"
                     }
                 },
-                "previousToken": {
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
                     "type": "string"
                 }
             }
@@ -1021,16 +1042,16 @@
         "routes.ResponseList-database_Round": {
             "type": "object",
             "properties": {
-                "continueToken": {
-                    "type": "string"
-                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Round"
                     }
                 },
-                "previousToken": {
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
                     "type": "string"
                 }
             }
@@ -1038,16 +1059,16 @@
         "routes.ResponseList-database_Submission": {
             "type": "object",
             "properties": {
-                "continueToken": {
-                    "type": "string"
-                },
                 "data": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/database.Submission"
                     }
                 },
-                "previousToken": {
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
                     "type": "string"
                 }
             }

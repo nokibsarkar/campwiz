@@ -14,12 +14,12 @@ import (
 // @Produce  json
 // @Success 200 {object} ResponseList[database.Evaluation]
 // @Router /evaluation/ [get]
-// @param EvaluationFilter query services.EvaluationFilter false "Filter the evaluations"
+// @param EvaluationFilter query database.EvaluationFilter false "Filter the evaluations"
 // @Tags Evaluation
 // @Security ApiKeyAuth
 // @Error 400 {object} ResponseError
 func ListEvaluations(c *gin.Context, sess *cache.Session) {
-	filter := &services.EvaluationFilter{}
+	filter := &database.EvaluationFilter{}
 	err := c.ShouldBindQuery(filter)
 	if err != nil {
 		c.JSON(400, ResponseError{Detail: "Invalid request : " + err.Error()})

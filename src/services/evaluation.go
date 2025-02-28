@@ -12,14 +12,9 @@ func (e *EvaluationService) Evaluate() {
 func (e *EvaluationService) GetEvaluationById() {
 }
 
-type EvaluationFilter struct {
-	Type                 database.EvaluationType `form:"type"`
-	AssociatedRoundID    database.IDType         `form:"roundId"`
-	AssociatedCampaignID database.IDType         `form:"campaignId"`
-	AssociatedUserID     database.IDType         `form:"userId"`
-	Status               bool                    `form:"status"`
-}
-
-func (e *EvaluationService) ListEvaluations(filter *EvaluationFilter) ([]database.Evaluation, error) {
-	return nil, nil
+func (e *EvaluationService) ListEvaluations(filter *database.EvaluationFilter) ([]database.Evaluation, error) {
+	ev_repo := database.NewEvaluationRepository()
+	conn, close := database.GetDB()
+	defer close()
+	return ev_repo.ListAllEvaluations(conn, filter)
 }
