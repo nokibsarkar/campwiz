@@ -85,10 +85,13 @@ func (r *RoleService) CalculateRoleDifference(tx *gorm.DB, Type database.RoleTyp
 	log.Println("Remove ", removedRoles)
 	return addedRoles, removedRoles, nil
 }
-func (service *RoleService) FetchChangeRoles(tx *gorm.DB, roleType database.RoleType, campaignId database.IDType, updatedRoleUsernames []database.UserName) error {
+func (service *RoleService) FetchChangeRoles(tx *gorm.DB, roleType database.RoleType, campaignId database.IDType, roundID database.IDType, updatedRoleUsernames []database.UserName) error {
 	filter := &database.RoleFilter{
 		CampaignID: campaignId,
 		Type:       &roleType,
+	}
+	if roundID != "" {
+		filter.RoundID = roundID
 	}
 	addedRoles, removedRoles, err := service.CalculateRoleDifference(tx, roleType, filter, updatedRoleUsernames)
 	if err != nil {

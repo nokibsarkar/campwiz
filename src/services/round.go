@@ -54,8 +54,7 @@ func NewRoundService() *RoundService {
 func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, error) {
 	round_repo := database.NewRoundRepository()
 	campaign_repo := database.NewCampaignRepository()
-	user_repo := database.NewUserRepository()
-	role_repo := database.NewRoleRepository()
+	role_service := NewRoleService()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
@@ -75,55 +74,8 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, erro
 		tx.Rollback()
 		return nil, err
 	}
-	username2IDMap := map[database.UserName]database.IDType{}
-	for _, coordinatorUsername := range request.Juries {
-		username2IDMap[coordinatorUsername] = idgenerator.GenerateID("u")
-	}
-	username2IDMap, err = user_repo.EnsureExists(tx, username2IDMap)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-	roles := []database.Role{}
-	for _, userName := range request.Juries {
-		userID, ok := username2IDMap[userName]
-		if !ok {
-			log.Println("User not found: ", userName)
-			continue
-		}
-		if userID == "" {
-			continue
-		}
-		roles = append(roles, database.Role{
-			RoleID:     idgenerator.GenerateID("j"),
-			UserID:     userID,
-			CampaignID: campaign.CampaignID,
-			Type:       database.RoleTypeCoordinator,
-			RoundID:    nil,
-		})
-	}
-	for _, userName := range request.Juries {
-		userID, ok := username2IDMap[userName]
-		if !ok {
-			log.Println("User not found: ", userName)
-			continue
-		}
-		if userID == "" {
-			continue
-		}
-		roles = append(roles, database.Role{
-			RoleID:     idgenerator.GenerateID("j"),
-			UserID:     userID,
-			CampaignID: campaign.CampaignID,
-			Type:       database.RoleTypeJury,
-			RoundID:    &round.RoundID,
-		})
-	}
-	if len(roles) == 0 {
-		tx.Rollback()
-		return nil, fmt.Errorf("no valid jury found")
-	}
-	err = role_repo.CreateRoles(tx, roles)
+
+	err = role_service.FetchChangeRoles(tx, database.RoleTypeJury, campaign.CampaignID, round.RoundID, request.Juries)
 	if err != nil {
 		tx.Rollback()
 		return nil, err

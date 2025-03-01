@@ -50,12 +50,12 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 		tx.Rollback()
 		return nil, err
 	}
-	err = role_service.FetchChangeRoles(tx, database.RoleTypeCoordinator, campaign.CampaignID, campaignRequest.Coordinators)
+	err = role_service.FetchChangeRoles(tx, database.RoleTypeCoordinator, campaign.CampaignID, "", campaignRequest.Coordinators)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
-	err = role_service.FetchChangeRoles(tx, database.RoleTypeOrganizer, campaign.CampaignID, campaignRequest.Organizers)
+	err = role_service.FetchChangeRoles(tx, database.RoleTypeOrganizer, campaign.CampaignID, "", campaignRequest.Organizers)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
@@ -109,12 +109,12 @@ func (service *CampaignService) UpdateCampaign(ID database.IDType, campaignReque
 		tx.Rollback()
 		return nil, err
 	}
-	err = role_repo.FetchChangeRoles(tx, database.RoleTypeOrganizer, campaign.CampaignID, campaignRequest.Organizers)
+	err = role_repo.FetchChangeRoles(tx, database.RoleTypeOrganizer, campaign.CampaignID, "", campaignRequest.Organizers)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
-	err = role_repo.FetchChangeRoles(tx, database.RoleTypeCoordinator, campaign.CampaignID, campaignRequest.Coordinators)
+	err = role_repo.FetchChangeRoles(tx, database.RoleTypeCoordinator, campaign.CampaignID, "", campaignRequest.Coordinators)
 	if err != nil {
 		tx.Rollback()
 		return nil, err

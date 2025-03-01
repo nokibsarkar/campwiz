@@ -185,7 +185,6 @@ func (b *TaskRunner) distributeEvaluations(conn *gorm.DB, task *database.Task) (
 		return
 	}
 	fmt.Println("Found juries: ", juries)
-	juries[1].TotalAssigned = 100
 	strategy := distributionstrategy.NewRoundRobinDistributionStrategy()
 	err = strategy.AssignJuries(conn, round, juries)
 	if err != nil {
