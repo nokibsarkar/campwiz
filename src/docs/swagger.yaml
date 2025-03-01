@@ -123,6 +123,10 @@ definitions:
         $ref: '#/definitions/consts.Language'
       name:
         type: string
+      roles:
+        items:
+          $ref: '#/definitions/database.Role'
+        type: array
       rules:
         type: string
       startDate:
@@ -190,6 +194,41 @@ definitions:
     - MediaTypeAudio
     - MediaTypeVideo
     - MediaTypePDF
+  database.Role:
+    properties:
+      campaignId:
+        type: string
+      isAllowed:
+        type: boolean
+      roleId:
+        type: string
+      roundId:
+        type: string
+      totalAssigned:
+        type: integer
+      totalEvaluated:
+        type: integer
+      totalScore:
+        type: integer
+      type:
+        $ref: '#/definitions/database.RoleType'
+      userId:
+        type: string
+    type: object
+  database.RoleType:
+    enum:
+    - jury
+    - admin
+    - participant
+    - coordinator
+    - organizer
+    type: string
+    x-enum-varnames:
+    - RoleTypeJury
+    - RoleTypeAdmin
+    - RoleTypeParticipant
+    - RoleTypeCoordinator
+    - RoleTypeOrganizer
   database.Round:
     properties:
       allowCreations:
@@ -244,6 +283,10 @@ definitions:
         type: integer
       name:
         type: string
+      roles:
+        items:
+          $ref: '#/definitions/database.Role'
+        type: array
       roundId:
         type: string
       secretBallot:
@@ -256,6 +299,8 @@ definitions:
         $ref: '#/definitions/database.RoundStatus'
       totalSubmissions:
         type: integer
+      type:
+        $ref: '#/definitions/database.EvaluationType'
     type: object
   database.RoundStatus:
     enum:
@@ -507,64 +552,9 @@ definitions:
         items:
           type: string
         type: array
-      rules:
-        type: string
-      secretBallot:
-        type: boolean
-      startDate:
-        type: string
-    type: object
-  services.CampaignUpdateRequest:
-    properties:
-      allowCreations:
-        type: boolean
-      allowExpansions:
-        type: boolean
-      allowJuryToParticipate:
-        type: boolean
-      allowMultipleJudgement:
-        type: boolean
-      allowedMediaTypes:
+      roles:
         items:
-          $ref: '#/definitions/database.MediaType'
-        type: array
-      blacklist:
-        type: string
-      coordinators:
-        items:
-          type: string
-        type: array
-      description:
-        type: string
-      endDate:
-        type: string
-      image:
-        type: string
-      language:
-        $ref: '#/definitions/consts.Language'
-      maximumSubmissionOfSameArticle:
-        type: integer
-      minimumAddedBytes:
-        type: integer
-      minimumAddedWords:
-        type: integer
-      minimumDurationMilliseconds:
-        type: integer
-      minimumHeight:
-        type: integer
-      minimumResolution:
-        type: integer
-      minimumTotalBytes:
-        type: integer
-      minimumTotalWords:
-        type: integer
-      minimumWidth:
-        type: integer
-      name:
-        type: string
-      organizers:
-        items:
-          type: string
+          $ref: '#/definitions/database.Role'
         type: array
       rules:
         type: string
@@ -657,6 +647,8 @@ definitions:
         type: integer
       startDate:
         type: string
+      type:
+        $ref: '#/definitions/database.EvaluationType'
     type: object
   services.TaskResponse:
     properties:
@@ -752,37 +744,15 @@ paths:
       summary: Create a new campaign
       tags:
       - Campaign
-  /campaign/{id}:
-    post:
-      description: Update a campaign
-      parameters:
-      - description: The campaign ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: The campaign request
-        in: body
-        name: campaignRequest
-        required: true
-        schema:
-          $ref: '#/definitions/services.CampaignUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/database.Campaign'
-      summary: Update a campaign
-      tags:
-      - Campaign
   /evaluation/:
     get:
       description: get all evaluations
       parameters:
       - in: query
         name: campaignId
+        type: string
+      - in: query
+        name: juryId
         type: string
       - in: query
         name: limit
@@ -799,6 +769,9 @@ paths:
       - in: query
         name: status
         type: boolean
+      - in: query
+        name: submissionId
+        type: string
       - enum:
         - ranking
         - score

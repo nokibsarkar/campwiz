@@ -71,28 +71,28 @@ type RoundRestrictions struct {
 	AllowedMediaTypes MediaTypeSet `json:"allowedMediaTypes" gore:"type:text;not null;default:'ARTICLE'"`
 }
 type RoundWritable struct {
-	Name             string    `json:"name"`
-	Description      string    `json:"description" gorm:"type:text"`
-	StartDate        time.Time `json:"startDate" gorm:"type:datetime"`
-	EndDate          time.Time `json:"endDate" gorm:"type:datetime"`
-	IsOpen           bool      `json:"isOpen" gorm:"default:true"`
-	IsPublic         bool      `json:"isPublic" gorm:"default:false"`
-	DependsOnRoundID *string   `json:"dependsOnRoundId" gorm:"default:null"`
-	DependsOnRound   *Round    `json:"-" gorm:"foreignKey:DependsOnRoundID"`
-	Serial           int       `json:"serial" gorm:"default:0"`
+	Name             string         `json:"name"`
+	Description      string         `json:"description" gorm:"type:text"`
+	StartDate        time.Time      `json:"startDate" gorm:"type:datetime"`
+	EndDate          time.Time      `json:"endDate" gorm:"type:datetime"`
+	IsOpen           bool           `json:"isOpen" gorm:"default:true"`
+	IsPublic         bool           `json:"isPublic" gorm:"default:false"`
+	DependsOnRoundID *string        `json:"dependsOnRoundId" gorm:"default:null"`
+	DependsOnRound   *Round         `json:"-" gorm:"foreignKey:DependsOnRoundID"`
+	Serial           int            `json:"serial" gorm:"default:0"`
+	Type             EvaluationType `json:"type"`
 	RoundRestrictions
 }
 type Round struct {
-	RoundID          IDType         `json:"roundId" gorm:"primaryKey"`
-	CampaignID       IDType         `json:"campaignId" gorm:"index;cascade:OnUpdate,OnDelete"`
-	CreatedAt        *time.Time     `json:"createdAt" gorm:"-<-:create"`
-	CreatedByID      IDType         `json:"createdById" gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	TotalSubmissions int            `json:"totalSubmissions" gorm:"default:0"`
-	Status           RoundStatus    `json:"status"`
-	Campaign         *Campaign      `json:"-"`
-	Creator          *User          `json:"-" gorm:"foreignKey:CreatedByID"`
-	LatestTaskID     *IDType        `json:"latestTaskId" gorm:"default:null"`
-	Type             EvaluationType `json:"type"`
+	RoundID          IDType      `json:"roundId" gorm:"primaryKey"`
+	CampaignID       IDType      `json:"campaignId" gorm:"index;cascade:OnUpdate,OnDelete"`
+	CreatedAt        *time.Time  `json:"createdAt" gorm:"-<-:create"`
+	CreatedByID      IDType      `json:"createdById" gorm:"index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	TotalSubmissions int         `json:"totalSubmissions" gorm:"default:0"`
+	Status           RoundStatus `json:"status"`
+	Campaign         *Campaign   `json:"-"`
+	Creator          *User       `json:"-" gorm:"foreignKey:CreatedByID"`
+	LatestTaskID     *IDType     `json:"latestTaskId" gorm:"default:null"`
 	RoundWritable
 	Roles []Role `json:"roles"`
 }

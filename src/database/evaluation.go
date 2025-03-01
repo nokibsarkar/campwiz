@@ -38,11 +38,13 @@ type Evaluation struct {
 	DistributionTaskID IDType      `json:"distributionTaskId" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 type EvaluationFilter struct {
-	Type                 EvaluationType `form:"type"`
-	AssociatedRoundID    IDType         `form:"roundId"`
-	AssociatedCampaignID IDType         `form:"campaignId"`
-	AssociatedUserID     IDType         `form:"userId"`
-	Evaluated            *bool          `form:"status"`
+	Type          EvaluationType `form:"type"`
+	RoundID       IDType         `form:"roundId"`
+	CampaignID    IDType         `form:"campaignId"`
+	ParticipantID IDType         `form:"userId"`
+	Evaluated     *bool          `form:"status"`
+	SubmissionID  IDType         `form:"submissionId"`
+	JuryID        IDType         `form:"juryId"`
 	CommonFilter
 }
 type EvaluationRepository struct{}
@@ -65,17 +67,17 @@ func (r *EvaluationRepository) ListAllEvaluations(tx *gorm.DB, filter *Evaluatio
 	stmt := tx
 	if filter != nil {
 		s := &Submission{}
-		if filter.AssociatedRoundID != "" || filter.AssociatedCampaignID != "" {
-			if filter.AssociatedRoundID != "" {
-				s.CurrentRoundID = filter.AssociatedRoundID
+		if filter.RoundID != "" || filter.CampaignID != "" {
+			if filter.RoundID != "" {
+				s.CurrentRoundID = filter.RoundID
 			}
-			if filter.AssociatedCampaignID != "" {
-				s.CampaignID = filter.AssociatedCampaignID
+			if filter.CampaignID != "" {
+				s.CampaignID = filter.CampaignID
 			}
 			stmt = tx.Joins("Submission", tx.Where(s))
 		}
-		if filter.AssociatedUserID != "" {
-			condition.ParticipantID = filter.AssociatedUserID
+		if filter.ParticipantID != "" {
+			condition.ParticipantID = filter.ParticipantID
 		}
 		if filter.Type != "" {
 			condition.Type = filter.Type
@@ -87,17 +89,20 @@ func (r *EvaluationRepository) ListAllEvaluations(tx *gorm.DB, filter *Evaluatio
 				stmt = stmt.Where("evaluated_at IS NULL")
 			}
 		}
+		if filter.SubmissionID != "" {
+			condition.SubmissionID = filter.SubmissionID
+		}
+		if filter.JuryID != "" {
+			condition.JudgeID = filter.JuryID
+		}
+		if filter.ContinueToken != "" {
+			stmt = stmt.Where("evaluation_id > ?", filter.ContinueToken)
+		}
+		if filter.Limit > 0 {
+			stmt = stmt.Limit(max(5, filter.Limit))
+		}
 	}
-
-	where := stmt.Where(condition)
-	// if filter.ContinueToken != "" {
-	// 	where = where.Where("evaluation_id > ?", filter.ContinueToken)
-	// }
-	stmt = where
-	if filter.Limit > 0 {
-		stmt = stmt.Limit(max(5, filter.Limit))
-	}
-	result := stmt.Find(&evaluations)
+	result := stmt.Where(condition).Find(&evaluations)
 	return evaluations, result.Error
 }
 func (r *EvaluationRepository) UpdateEvaluation(tx *gorm.DB, evaluation *Evaluation) error {

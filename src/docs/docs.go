@@ -101,44 +101,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/campaign/{id}": {
-            "post": {
-                "description": "Update a campaign",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Campaign"
-                ],
-                "summary": "Update a campaign",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The campaign ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "The campaign request",
-                        "name": "campaignRequest",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/services.CampaignUpdateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/database.Campaign"
-                        }
-                    }
-                }
-            }
-        },
         "/evaluation/": {
             "get": {
                 "security": [
@@ -158,6 +120,11 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "name": "campaignId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "juryId",
                         "in": "query"
                     },
                     {
@@ -183,6 +150,11 @@ const docTemplate = `{
                     {
                         "type": "boolean",
                         "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "submissionId",
                         "in": "query"
                     },
                     {
@@ -713,6 +685,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.Role"
+                    }
+                },
                 "rules": {
                     "type": "string"
                 },
@@ -801,6 +779,55 @@ const docTemplate = `{
                 "MediaTypePDF"
             ]
         },
+        "database.Role": {
+            "type": "object",
+            "properties": {
+                "campaignId": {
+                    "type": "string"
+                },
+                "isAllowed": {
+                    "type": "boolean"
+                },
+                "roleId": {
+                    "type": "string"
+                },
+                "roundId": {
+                    "type": "string"
+                },
+                "totalAssigned": {
+                    "type": "integer"
+                },
+                "totalEvaluated": {
+                    "type": "integer"
+                },
+                "totalScore": {
+                    "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/database.RoleType"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.RoleType": {
+            "type": "string",
+            "enum": [
+                "jury",
+                "admin",
+                "participant",
+                "coordinator",
+                "organizer"
+            ],
+            "x-enum-varnames": [
+                "RoleTypeJury",
+                "RoleTypeAdmin",
+                "RoleTypeParticipant",
+                "RoleTypeCoordinator",
+                "RoleTypeOrganizer"
+            ]
+        },
         "database.Round": {
             "type": "object",
             "properties": {
@@ -882,6 +909,12 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/database.Role"
+                    }
+                },
                 "roundId": {
                     "type": "string"
                 },
@@ -899,6 +932,9 @@ const docTemplate = `{
                 },
                 "totalSubmissions": {
                     "type": "integer"
+                },
+                "type": {
+                    "$ref": "#/definitions/database.EvaluationType"
                 }
             }
         },
@@ -1266,93 +1302,10 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "rules": {
-                    "type": "string"
-                },
-                "secretBallot": {
-                    "type": "boolean"
-                },
-                "startDate": {
-                    "type": "string"
-                }
-            }
-        },
-        "services.CampaignUpdateRequest": {
-            "type": "object",
-            "properties": {
-                "allowCreations": {
-                    "type": "boolean"
-                },
-                "allowExpansions": {
-                    "type": "boolean"
-                },
-                "allowJuryToParticipate": {
-                    "type": "boolean"
-                },
-                "allowMultipleJudgement": {
-                    "type": "boolean"
-                },
-                "allowedMediaTypes": {
+                "roles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/database.MediaType"
-                    }
-                },
-                "blacklist": {
-                    "type": "string"
-                },
-                "coordinators": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "description": {
-                    "type": "string"
-                },
-                "endDate": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "language": {
-                    "$ref": "#/definitions/consts.Language"
-                },
-                "maximumSubmissionOfSameArticle": {
-                    "type": "integer"
-                },
-                "minimumAddedBytes": {
-                    "type": "integer"
-                },
-                "minimumAddedWords": {
-                    "type": "integer"
-                },
-                "minimumDurationMilliseconds": {
-                    "type": "integer"
-                },
-                "minimumHeight": {
-                    "type": "integer"
-                },
-                "minimumResolution": {
-                    "type": "integer"
-                },
-                "minimumTotalBytes": {
-                    "type": "integer"
-                },
-                "minimumTotalWords": {
-                    "type": "integer"
-                },
-                "minimumWidth": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "organizers": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/database.Role"
                     }
                 },
                 "rules": {
@@ -1492,6 +1445,9 @@ const docTemplate = `{
                 },
                 "startDate": {
                     "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/database.EvaluationType"
                 }
             }
         },

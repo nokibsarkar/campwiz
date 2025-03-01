@@ -21,8 +21,8 @@ func preRun() {
 func postRun() {
 }
 func beforeSetupRouter(testing bool) {
-	database.InitDB()
-	cache.InitCacheDB()
+	database.InitDB(testing)
+	cache.InitCacheDB(testing)
 }
 func afterSetupRouter(testing bool) {
 }

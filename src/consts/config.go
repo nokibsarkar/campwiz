@@ -7,10 +7,12 @@ import (
 )
 
 type MainDatabaseConfiguration struct {
-	DSN string `mapstructure:"DSN"`
+	DSN     string `mapstructure:"DSN"`
+	TestDSN string `mapstructure:"TestDSN"`
 }
 type CacheDatabaseConfiguration struct {
-	DSN string `mapstructure:"DSN"`
+	DSN     string `mapstructure:"DSN"`
+	TestDSN string `mapstructure:"TestDSN"`
 }
 type DatabaseConfiguration struct {
 	Main  MainDatabaseConfiguration  `mapstructure:"Main"`
