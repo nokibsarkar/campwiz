@@ -98,6 +98,9 @@ func (r *EvaluationRepository) ListAllEvaluations(tx *gorm.DB, filter *Evaluatio
 		if filter.ContinueToken != "" {
 			stmt = stmt.Where("evaluation_id > ?", filter.ContinueToken)
 		}
+		if filter.PreviousToken != "" {
+			stmt = stmt.Where("evaluation_id < ?", filter.PreviousToken)
+		}
 		if filter.Limit > 0 {
 			stmt = stmt.Limit(max(5, filter.Limit))
 		}
