@@ -96,13 +96,11 @@ func (service *RoleService) FetchChangeRoles(tx *gorm.DB, roleType database.Role
 	addedRoles, removedRoles, err := service.CalculateRoleDifference(tx, roleType, filter, updatedRoleUsernames)
 	if err != nil {
 		log.Println(err)
-		tx.Rollback()
 		return err
 	}
 	if len(addedRoles) > 0 {
 		res := tx.Save(addedRoles)
 		if res.Error != nil {
-			tx.Rollback()
 			return res.Error
 		}
 	}
@@ -111,7 +109,6 @@ func (service *RoleService) FetchChangeRoles(tx *gorm.DB, roleType database.Role
 			log.Println("Banning role: ", roleID)
 			res := tx.Model(&database.Role{RoleID: roleID}).Update("is_allowed", false)
 			if res.Error != nil {
-				tx.Rollback()
 				return res.Error
 			}
 		}

@@ -6,7 +6,6 @@ import (
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
 	rnd "nokib/campwiz/services/round"
-	distributionstrategy "nokib/campwiz/services/round/taskrunner/distribution-strategy"
 	"strings"
 
 	"gorm.io/datatypes"
@@ -27,8 +26,9 @@ type IDistributionStrategy interface {
 }
 
 type TaskRunner struct {
-	TaskId       database.IDType
-	ImportSource IImportSource
+	TaskId               database.IDType
+	ImportSource         IImportSource
+	DistributionStrategy IDistributionStrategy
 }
 
 func NewImportTaskRunner(taskId database.IDType, importService IImportSource) *TaskRunner {
@@ -39,7 +39,8 @@ func NewImportTaskRunner(taskId database.IDType, importService IImportSource) *T
 }
 func NewDistributionTaskRunner(taskId database.IDType, strategy IDistributionStrategy) *TaskRunner {
 	return &TaskRunner{
-		TaskId: taskId,
+		TaskId:               taskId,
+		DistributionStrategy: strategy,
 	}
 }
 func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCount, failedCount int) {
@@ -165,9 +166,9 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 	return
 }
 
-func (b *TaskRunner) distributeEvaluations(conn *gorm.DB, task *database.Task) (successCount, failedCount int) {
+func (b *TaskRunner) distributeEvaluations(tx *gorm.DB, task *database.Task) (successCount, failedCount int, err error) {
 	round_repo := database.NewRoundRepository()
-	round, err := round_repo.FindByID(conn, *task.AssociatedRoundID)
+	round, err := round_repo.FindByID(tx, *task.AssociatedRoundID)
 	if err != nil {
 		log.Println("Error fetching round: ", err)
 		return
@@ -179,14 +180,13 @@ func (b *TaskRunner) distributeEvaluations(conn *gorm.DB, task *database.Task) (
 	}
 	j := database.RoleTypeJury
 	filter.Type = &j
-	juries, err := jury_repo.ListAllRoles(conn, filter)
+	juries, err := jury_repo.ListAllRoles(tx, filter)
 	if err != nil {
 		log.Println("Error fetching juries: ", err)
 		return
 	}
 	fmt.Println("Found juries: ", juries)
-	strategy := distributionstrategy.NewRoundRobinDistributionStrategy()
-	err = strategy.AssignJuries(conn, round, juries)
+	err = b.DistributionStrategy.AssignJuries(tx, round, juries)
 	if err != nil {
 		log.Println("Error assigning juries: ", err)
 		return
@@ -220,7 +220,15 @@ func (b *TaskRunner) Run() {
 		}
 		successCount, failedCount = b.importImagws(conn, task)
 	} else if task.Type == database.TaskTypeDistributeEvaluations {
-		successCount, failedCount = b.distributeEvaluations(conn, task)
+		tx := conn.Begin()
+		successCount, failedCount, err = b.distributeEvaluations(tx, task)
+		if err != nil {
+			log.Println("Error distributing evaluations: ", err)
+			tx.Rollback()
+			task.Status = database.TaskStatusFailed
+			return
+		}
+		tx.Commit()
 	} else {
 		log.Printf("Unknown task type %s\n", task.Type)
 		task.Status = database.TaskStatusFailed

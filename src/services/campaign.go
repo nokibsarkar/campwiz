@@ -92,10 +92,10 @@ func (service *CampaignService) UpdateCampaign(ID database.IDType, campaignReque
 	defer close()
 	campaign_repo := database.NewCampaignRepository()
 	campaign, err := campaign_repo.FindByID(conn, ID)
-	role_repo := NewRoleService()
 	if err != nil {
 		return nil, err
 	}
+	roleService := NewRoleService()
 	campaign.Name = campaignRequest.Name
 	campaign.Description = campaignRequest.Description
 	campaign.StartDate = campaignRequest.StartDate
@@ -109,12 +109,12 @@ func (service *CampaignService) UpdateCampaign(ID database.IDType, campaignReque
 		tx.Rollback()
 		return nil, err
 	}
-	err = role_repo.FetchChangeRoles(tx, database.RoleTypeOrganizer, campaign.CampaignID, "", campaignRequest.Organizers)
+	err = roleService.FetchChangeRoles(tx, database.RoleTypeOrganizer, campaign.CampaignID, "", campaignRequest.Organizers)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
-	err = role_repo.FetchChangeRoles(tx, database.RoleTypeCoordinator, campaign.CampaignID, "", campaignRequest.Coordinators)
+	err = roleService.FetchChangeRoles(tx, database.RoleTypeCoordinator, campaign.CampaignID, "", campaignRequest.Coordinators)
 	if err != nil {
 		tx.Rollback()
 		return nil, err

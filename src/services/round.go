@@ -288,7 +288,7 @@ func (r *RoundService) DistributeEvaluations(currentUserID database.IDType, roun
 	}
 	tx.Commit()
 	fmt.Println("Task created with ID: ", task.TaskID)
-	strategy := distributionstrategy.NewRoundRobinDistributionStrategy()
+	strategy := distributionstrategy.NewRoundRobinDistributionStrategy(task.TaskID)
 	runner := importservice.NewDistributionTaskRunner(task.TaskID, strategy)
 	go runner.Run()
 	return task, nil
