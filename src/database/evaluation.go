@@ -44,7 +44,7 @@ type EvaluationFilter struct {
 	ParticipantID IDType         `form:"userId"`
 	Evaluated     *bool          `form:"status"`
 	SubmissionID  IDType         `form:"submissionId"`
-	JuryID        IDType         `form:"juryId"`
+	JuryRoleID    IDType         `form:"juryId"`
 	CommonFilter
 }
 type EvaluationRepository struct{}
@@ -92,8 +92,8 @@ func (r *EvaluationRepository) ListAllEvaluations(tx *gorm.DB, filter *Evaluatio
 		if filter.SubmissionID != "" {
 			condition.SubmissionID = filter.SubmissionID
 		}
-		if filter.JuryID != "" {
-			condition.JudgeID = filter.JuryID
+		if filter.JuryRoleID != "" {
+			condition.JudgeID = filter.JuryRoleID
 		}
 		if filter.ContinueToken != "" {
 			stmt = stmt.Where("evaluation_id > ?", filter.ContinueToken)

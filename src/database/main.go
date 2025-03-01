@@ -9,18 +9,10 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type IDType string
 type CommonFilter struct {
 	Limit         int    `form:"limit"`
 	ContinueToken string `form:"next"`
 	PreviousToken string `form:"prev"`
-}
-
-func (i *IDType) String() string {
-	return string(*i)
-}
-func (i *IDType) GormDataType() string {
-	return "varchar(255)"
 }
 
 func GetDB() (db *gorm.DB, close func()) {
