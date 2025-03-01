@@ -29,7 +29,7 @@ func GetSession(c *gin.Context) *cache.Session {
 	}
 	return session
 }
-func NewRoutes(nonAPIParent *gin.RouterGroup) {
+func NewRoutes(nonAPIParent *gin.RouterGroup) *gin.RouterGroup {
 	r := nonAPIParent.Group("/api/v2")
 	authenticatorService := NewAuthenticationService()
 	r.Use(authenticatorService.Authenticate)
@@ -41,4 +41,5 @@ func NewRoutes(nonAPIParent *gin.RouterGroup) {
 	NewUserRoutes(r)
 	NewTaskRoutes(r)
 	NewEvaluationRoutes(r)
+	return r
 }

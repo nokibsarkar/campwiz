@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"nokib/campwiz/consts"
+	"nokib/campwiz/database"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -56,11 +57,11 @@ groups
 rights
 */
 type WikipediaProfileBasic struct {
-	CentralID string   `json:"sub"`
-	Name      string   `json:"username"`
-	Rights    []string `json:"rights"`
-	Blocked   bool     `json:"blocked"`
-	Groups    []string `json:"groups"`
+	CentralID string            `json:"sub"`
+	Name      database.UserName `json:"username"`
+	Rights    []string          `json:"rights"`
+	Blocked   bool              `json:"blocked"`
+	Groups    []string          `json:"groups"`
 }
 type WikipediaProfile struct {
 	WikipediaProfileBasic

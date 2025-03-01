@@ -27,7 +27,7 @@ func (u *UserService) GetUserByID(conn *gorm.DB, id database.IDType) (*database.
 	return user, nil
 
 }
-func (u *UserService) GetUserByUsername(conn *gorm.DB, username string) (*database.User, error) {
+func (u *UserService) GetUserByUsername(conn *gorm.DB, username database.UserName) (*database.User, error) {
 	userFilter := &database.User{Username: username}
 	user := &database.User{}
 	result := conn.First(user, userFilter)
@@ -44,7 +44,7 @@ func (u *UserService) GetOrCreateUser(conn *gorm.DB, user *database.User) (*data
 	}
 	return user, nil
 }
-func (u *UserService) EnsureExists(tx *gorm.DB, usernameSet sets.Set[string]) (map[string]database.IDType, error) {
+func (u *UserService) EnsureExists(tx *gorm.DB, usernameSet sets.Set[database.UserName]) (map[database.UserName]database.IDType, error) {
 	user_repo := database.NewUserRepository()
 	userName2Id, err := user_repo.FetchExistingUsernames(tx, usernameSet.UnsortedList())
 	if err != nil {

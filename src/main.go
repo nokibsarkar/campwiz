@@ -16,10 +16,25 @@ import (
 
 // preRun is a function that will be called before the main function
 func preRun() {
-	database.InitDB()
-	cache.InitCacheDB()
+
 }
 func postRun() {
+}
+func beforeSetupRouter(testing bool) {
+	database.InitDB(testing)
+	cache.InitCacheDB(testing)
+}
+func afterSetupRouter(testing bool) {
+}
+func SetupRouter(testing bool) *gin.Engine {
+	beforeSetupRouter(testing)
+	r := gin.Default()
+	r.LoadHTMLGlob("templates/*.html")
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	r.StaticFS("/static", http.Dir("static"))
+	routes.NewRoutes(r.Group("/"))
+	afterSetupRouter(testing)
+	return r
 }
 
 // @title Campwiz API
@@ -41,14 +56,8 @@ func postRun() {
 // @contact.email nokibsarkar@gmail.com
 // @contact.url https://github.com/nokibsarkar
 func main() {
-	// batch_service := services.NewBatchService()
-	// batch_service.CreateBatchFromCommonsCategory()
 	preRun()
-	r := gin.Default()
-	r.LoadHTMLGlob("templates/*.html")
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	r.StaticFS("/static", http.Dir("static"))
-	routes.NewRoutes(r.Group("/"))
+	r := SetupRouter(false)
 	r.Run()
 	postRun()
 }

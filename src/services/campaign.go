@@ -6,12 +6,14 @@ import (
 	idgenerator "nokib/campwiz/services/idGenerator"
 )
 
-type JuryUserName string
+// UserName is a type for jury user name
+
 type CampaignService struct{}
 type CampaignCreateRequest struct {
 	database.CampaignWithWriteableFields
-	CreatedByID database.IDType `json:"-"`
-	Jury        []JuryUserName  `json:"jury"`
+	CreatedByID  database.IDType     `json:"-"`
+	Coordinators []database.UserName `json:"coordinators"`
+	Organizers   []database.UserName `json:"organizers"`
 	database.RoundRestrictions
 }
 type CampaignUpdateRequest struct {
@@ -38,6 +40,8 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 		CreatedByID: campaignRequest.CreatedByID,
 	}
 	campaign_repo := database.NewCampaignRepository()
+	// user_repo := database.NewUserRepository()
+	role_service := NewRoleService()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
@@ -46,7 +50,16 @@ func (service *CampaignService) CreateCampaign(campaignRequest *CampaignCreateRe
 		tx.Rollback()
 		return nil, err
 	}
-
+	err = role_service.FetchChangeRoles(tx, database.RoleTypeCoordinator, campaign.CampaignID, "", campaignRequest.Coordinators)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	err = role_service.FetchChangeRoles(tx, database.RoleTypeOrganizer, campaign.CampaignID, "", campaignRequest.Organizers)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
 	tx.Commit()
 	return campaign, nil
 }
@@ -74,15 +87,6 @@ func (service *CampaignService) GetCampaignByID(id database.IDType) (*database.C
 	return campaign, nil
 }
 
-// UpdateCampaign updates a campaign
-// @summary Update a campaign
-// @description Update a campaign
-// @tags Campaign
-// @param id path string true "The campaign ID"
-// @param campaignRequest body CampaignUpdateRequest true "The campaign request"
-// @produce json
-// @success 200 {object} database.Campaign
-// @router /campaign/{id} [post]
 func (service *CampaignService) UpdateCampaign(ID database.IDType, campaignRequest *CampaignUpdateRequest) (*database.Campaign, error) {
 	conn, close := database.GetDB()
 	defer close()
@@ -91,6 +95,7 @@ func (service *CampaignService) UpdateCampaign(ID database.IDType, campaignReque
 	if err != nil {
 		return nil, err
 	}
+	roleService := NewRoleService()
 	campaign.Name = campaignRequest.Name
 	campaign.Description = campaignRequest.Description
 	campaign.StartDate = campaignRequest.StartDate
@@ -98,9 +103,22 @@ func (service *CampaignService) UpdateCampaign(ID database.IDType, campaignReque
 	// campaign.Language = campaignRequest.Language
 	campaign.Rules = campaignRequest.Rules
 	campaign.Image = campaignRequest.Image
-	err = campaign_repo.Update(conn, campaign)
+	tx := conn.Begin()
+	err = campaign_repo.Update(tx, campaign)
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
+	err = roleService.FetchChangeRoles(tx, database.RoleTypeOrganizer, campaign.CampaignID, "", campaignRequest.Organizers)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	err = roleService.FetchChangeRoles(tx, database.RoleTypeCoordinator, campaign.CampaignID, "", campaignRequest.Coordinators)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
 	return campaign, nil
 }

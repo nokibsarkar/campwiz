@@ -1,4 +1,4 @@
-package taskrunner
+package distributionstrategy
 
 type Range struct {
 	Start int

@@ -47,7 +47,7 @@ type Submission struct {
 	CampaignID   IDType `json:"campaignId" gorm:"null;index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	URL          string `json:"url"`
 	// The Actual Author in the Wikimedia
-	Author string `json:"author"`
+	Author UserName `json:"author"`
 	// The User who submitted the article on behalf of the participant
 	SubmittedByID  IDType    `json:"submittedById" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	ParticipantID  IDType    `json:"participantId" gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
@@ -59,6 +59,9 @@ type Submission struct {
 	CreatedAtExternal *time.Time `json:"createdAtServer"`
 	CurrentRound      *Round     `json:"-" gorm:"foreignKey:CurrentRoundID"`
 	MediaSubmission
+}
+type SubmissionSelectID struct {
+	SubmissionID IDType
 }
 type SubmissionRepository struct{}
 
@@ -99,4 +102,30 @@ func (r *SubmissionRepository) ListAllSubmissions(tx *gorm.DB, filter *Submissio
 	}
 	result := stmt.Find(&submissions)
 	return submissions, result.Error
+}
+func (r *SubmissionRepository) ListAllSubmissionIDs(tx *gorm.DB, filter *SubmissionListFilter) ([]SubmissionSelectID, error) {
+	var submissionIDs []SubmissionSelectID
+	condition := &Submission{}
+	if filter != nil {
+		if filter.CampaignID != "" {
+			condition.CampaignID = filter.CampaignID
+		}
+		if filter.RoundID != "" {
+			condition.CurrentRoundID = filter.RoundID
+		}
+		if filter.ParticipantID != "" {
+			condition.ParticipantID = filter.ParticipantID
+		}
+	}
+	where := tx.Where(condition)
+	if filter.ContinueToken != "" {
+		where = where.Where("submission_id > ?", filter.ContinueToken)
+	}
+
+	stmt := where //.Order("submission_id")
+	if filter.Limit > 0 {
+		stmt = stmt.Limit(max(100, filter.Limit))
+	}
+	result := stmt.Model(&Submission{}).Find(&submissionIDs)
+	return submissionIDs, result.Error
 }

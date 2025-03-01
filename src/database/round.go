@@ -71,15 +71,16 @@ type RoundRestrictions struct {
 	AllowedMediaTypes MediaTypeSet `json:"allowedMediaTypes" gore:"type:text;not null;default:'ARTICLE'"`
 }
 type RoundWritable struct {
-	Name             string    `json:"name"`
-	Description      string    `json:"description" gorm:"type:text"`
-	StartDate        time.Time `json:"startDate" gorm:"type:datetime"`
-	EndDate          time.Time `json:"endDate" gorm:"type:datetime"`
-	IsOpen           bool      `json:"isOpen" gorm:"default:true"`
-	IsPublic         bool      `json:"isPublic" gorm:"default:false"`
-	DependsOnRoundID *string   `json:"dependsOnRoundId" gorm:"default:null"`
-	DependsOnRound   *Round    `json:"-" gorm:"foreignKey:DependsOnRoundID"`
-	Serial           int       `json:"serial" gorm:"default:0"`
+	Name             string         `json:"name"`
+	Description      string         `json:"description" gorm:"type:text"`
+	StartDate        time.Time      `json:"startDate" gorm:"type:datetime"`
+	EndDate          time.Time      `json:"endDate" gorm:"type:datetime"`
+	IsOpen           bool           `json:"isOpen" gorm:"default:true"`
+	IsPublic         bool           `json:"isPublic" gorm:"default:false"`
+	DependsOnRoundID *string        `json:"dependsOnRoundId" gorm:"default:null"`
+	DependsOnRound   *Round         `json:"-" gorm:"foreignKey:DependsOnRoundID"`
+	Serial           int            `json:"serial" gorm:"default:0"`
+	Type             EvaluationType `json:"type"`
 	RoundRestrictions
 }
 type Round struct {
@@ -93,6 +94,7 @@ type Round struct {
 	Creator          *User       `json:"-" gorm:"foreignKey:CreatedByID"`
 	LatestTaskID     *IDType     `json:"latestTaskId" gorm:"default:null"`
 	RoundWritable
+	Roles []Role `json:"roles"`
 }
 type RoundFilter struct {
 	CampaignID IDType      `form:"campaignId"`

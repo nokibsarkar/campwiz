@@ -24,7 +24,7 @@ type ImageResult struct {
 	Name             string `json:"title"`
 	URL              string
 	SubmittedAt      time.Time
-	UploaderUsername string
+	UploaderUsername UserName
 	Height           uint64
 	Width            uint64
 	Size             uint64
@@ -42,7 +42,7 @@ type Paginator[PageType any] struct {
 	repo *CommonsRepository
 }
 type WikimediaUser struct {
-	Name       string    `json:"name"`
+	Name       UserName  `json:"name"`
 	Registered time.Time `json:"registration"`
 	CentralIds *struct {
 		CentralAuth uint64 `json:"CentralAuth"`
@@ -60,7 +60,7 @@ type KeyValue struct {
 type ImageInfo struct {
 	Info []struct {
 		Timestamp      time.Time    `json:"timestamp"`
-		User           string       `json:"user"`
+		User           UserName     `json:"user"`
 		Size           uint64       `json:"size"`
 		Width          uint64       `json:"width"`
 		Height         uint64       `json:"height"`
@@ -154,7 +154,7 @@ func (c *CommonsRepository) GetImagesFromCommonsCategories(category string) ([]I
 }
 
 // returns images from commons categories
-func (c *CommonsRepository) GeUsersFromUsernames(usernames []string) ([]WikimediaUser, error) {
+func (c *CommonsRepository) GeUsersFromUsernames(usernames []UserName) ([]WikimediaUser, error) {
 	// Get images from commons category
 	// Create batch from commons category
 	paginator := NewPaginator[WikimediaUser](c)
@@ -167,7 +167,10 @@ func (c *CommonsRepository) GeUsersFromUsernames(usernames []string) ([]Wikimedi
 	for i := range batchCount {
 		start := i * batchSize
 		end := min((i+1)*batchSize, len(usernames))
-		batch := usernames[start:end]
+		batch := []string{}
+		for _, username := range usernames[start:end] {
+			batch = append(batch, string(username))
+		}
 		params := url.Values{
 			"action":  {"query"},
 			"format":  {"json"},
@@ -185,6 +188,10 @@ func (c *CommonsRepository) GeUsersFromUsernames(usernames []string) ([]Wikimedi
 			// Append images to result
 			if user == nil {
 				break
+			}
+			if user.Registered.IsZero() {
+				fmt.Println("No registration date found. Skipping")
+				continue
 			}
 			result = append(result, *user)
 		}

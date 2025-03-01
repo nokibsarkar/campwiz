@@ -3,10 +3,12 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"math/rand/v2"
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
 	importservice "nokib/campwiz/services/round/taskrunner"
+	distributionstrategy "nokib/campwiz/services/round/taskrunner/distribution-strategy"
 	importsources "nokib/campwiz/services/round/taskrunner/import-sources"
 	"slices"
 
@@ -19,6 +21,7 @@ type RoundRequest struct {
 	CampaignID  database.IDType `json:"campaignId"`
 	CreatedByID database.IDType `json:"-"`
 	database.RoundWritable
+	Juries []database.UserName `json:"jury"`
 }
 
 type DistributionRequest struct {
@@ -51,6 +54,7 @@ func NewRoundService() *RoundService {
 func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, error) {
 	round_repo := database.NewRoundRepository()
 	campaign_repo := database.NewCampaignRepository()
+	role_service := NewRoleService()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
@@ -70,6 +74,13 @@ func (s *RoundService) CreateRound(request *RoundRequest) (*database.Round, erro
 		tx.Rollback()
 		return nil, err
 	}
+
+	err = role_service.FetchChangeRoles(tx, database.RoleTypeJury, campaign.CampaignID, round.RoundID, request.Juries)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
 	tx.Commit()
 	return round, nil
 }
@@ -119,7 +130,7 @@ func (b *RoundService) ImportFromCommons(roundId database.IDType, categories []s
 	tx.Commit()
 	fmt.Println("Task created with ID: ", task.TaskID)
 	commonsCategorySource := importsources.NewCommonsCategoryListSource(categories)
-	batch_processor := importservice.NewTaskRunner(task.TaskID, commonsCategorySource)
+	batch_processor := importservice.NewImportTaskRunner(task.TaskID, commonsCategorySource)
 	go batch_processor.Run()
 	return task, nil
 }
@@ -189,8 +200,10 @@ func (b *RoundService) DistributeTaskAmongExistingJuries(images []database.Image
 		fmt.Printf("Jury %d has %d images\n", sortedJuryByAssigned[j].ID, len(groupByJuryID[sortedJuryByAssigned[j].ID]))
 	}
 }
+
 func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundRequest) (*database.Round, error) {
 	round_repo := database.NewRoundRepository()
+	role_service := NewRoleService()
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
@@ -202,18 +215,83 @@ func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundReq
 		tx.Rollback()
 		return nil, fmt.Errorf("round not found")
 	}
-	// round.CampaignID = req.CampaignID
+	// round.CampaignID = req.CampaignID // CampaignID is not updatable
 	round.RoundWritable = req.RoundWritable
 	round, err = round_repo.Update(tx, round)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
+	juryType := database.RoleTypeJury
+	filter := &database.RoleFilter{
+		RoundID:    roundID,
+		CampaignID: round.CampaignID,
+		Type:       &juryType,
+	}
+	addedRoles, removedRoles, err := role_service.CalculateRoleDifference(tx, database.RoleTypeJury, filter, req.Juries)
+	if err != nil {
+		log.Println(err)
+		tx.Rollback()
+		return nil, err
+	}
+	if len(addedRoles) > 0 {
+		res := tx.Save(addedRoles)
+		if res.Error != nil {
+			tx.Rollback()
+			return nil, res.Error
+		}
+	}
+	if len(removedRoles) > 0 {
+		for _, roleID := range removedRoles {
+			log.Println("Banning role: ", roleID)
+			res := tx.Model(&database.Role{RoleID: roleID}).Update("is_allowed", false)
+			if res.Error != nil {
+				tx.Rollback()
+				return nil, res.Error
+			}
+		}
+	}
 	tx.Commit()
 	return round, nil
 }
-func (r *RoundService) DistributeEvaluations(roundId database.IDType, distributionReq *DistributionRequest) (*database.Task, error) {
-	return nil, nil
+func (r *RoundService) DistributeEvaluations(currentUserID database.IDType, roundId database.IDType, distributionReq *DistributionRequest) (*database.Task, error) {
+	round_repo := database.NewRoundRepository()
+	task_repo := database.NewTaskRepository()
+	conn, close := database.GetDB()
+	defer close()
+	tx := conn.Begin()
+	round, err := round_repo.FindByID(tx, roundId)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else if round == nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("round not found")
+	}
+	taskReq := &database.Task{
+		TaskID:               idgenerator.GenerateID("t"),
+		Type:                 database.TaskTypeDistributeEvaluations,
+		Status:               database.TaskStatusPending,
+		AssociatedRoundID:    &roundId,
+		AssociatedUserID:     &currentUserID,
+		CreatedByID:          currentUserID,
+		AssociatedCampaignID: &round.CampaignID,
+		SuccessCount:         0,
+		FailedCount:          0,
+		FailedIds:            &datatypes.JSONType[map[string]string]{},
+		RemainingCount:       0,
+	}
+	task, err := task_repo.Create(tx, taskReq)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
+	fmt.Println("Task created with ID: ", task.TaskID)
+	strategy := distributionstrategy.NewRoundRobinDistributionStrategy(task.TaskID)
+	runner := importservice.NewDistributionTaskRunner(task.TaskID, strategy)
+	go runner.Run()
+	return task, nil
 }
 
 /*
