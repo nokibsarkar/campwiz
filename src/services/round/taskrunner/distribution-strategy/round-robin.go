@@ -63,6 +63,7 @@ func (strategy *RoundRobinDistributionStrategy) AssignJuries(conn *gorm.DB, roun
 					JudgeID:            jury.RoleID,
 					ParticipantID:      submission.ParticipantID,
 					DistributionTaskID: strategy.TaskId,
+					Type:               round.Type,
 				}
 				evaluations = append(evaluations, evaluation)
 			}

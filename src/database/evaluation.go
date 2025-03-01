@@ -42,7 +42,7 @@ type EvaluationFilter struct {
 	AssociatedRoundID    IDType         `form:"roundId"`
 	AssociatedCampaignID IDType         `form:"campaignId"`
 	AssociatedUserID     IDType         `form:"userId"`
-	Status               bool           `form:"status"`
+	Evaluated            *bool          `form:"status"`
 	CommonFilter
 }
 type EvaluationRepository struct{}
@@ -62,16 +62,40 @@ func (r *EvaluationRepository) FindEvaluationByID(tx *gorm.DB, evaluationID IDTy
 func (r *EvaluationRepository) ListAllEvaluations(tx *gorm.DB, filter *EvaluationFilter) ([]Evaluation, error) {
 	var evaluations []Evaluation
 	condition := &Evaluation{}
+	stmt := tx
 	if filter != nil {
+		s := &Submission{}
+		if filter.AssociatedRoundID != "" || filter.AssociatedCampaignID != "" {
+			if filter.AssociatedRoundID != "" {
+				s.CurrentRoundID = filter.AssociatedRoundID
+			}
+			if filter.AssociatedCampaignID != "" {
+				s.CampaignID = filter.AssociatedCampaignID
+			}
+			stmt = tx.Joins("Submission", tx.Where(s))
+		}
+		if filter.AssociatedUserID != "" {
+			condition.ParticipantID = filter.AssociatedUserID
+		}
+		if filter.Type != "" {
+			condition.Type = filter.Type
+		}
+		if filter.Evaluated != nil {
+			if *filter.Evaluated {
+				stmt = stmt.Where("evaluated_at IS NOT NULL")
+			} else {
+				stmt = stmt.Where("evaluated_at IS NULL")
+			}
+		}
+	}
 
-	}
-	where := tx.Where(condition)
-	if filter.ContinueToken != "" {
-		where = where.Where("evaluation_id > ?", filter.ContinueToken)
-	}
-	stmt := where
+	where := stmt.Where(condition)
+	// if filter.ContinueToken != "" {
+	// 	where = where.Where("evaluation_id > ?", filter.ContinueToken)
+	// }
+	stmt = where
 	if filter.Limit > 0 {
-		stmt = stmt.Limit(max(100, filter.Limit))
+		stmt = stmt.Limit(max(5, filter.Limit))
 	}
 	result := stmt.Find(&evaluations)
 	return evaluations, result.Error
