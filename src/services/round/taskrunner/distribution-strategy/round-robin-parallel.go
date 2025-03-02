@@ -3,6 +3,7 @@ package distributionstrategy
 import (
 	"fmt"
 	"log"
+	"nokib/campwiz/consts"
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
 	"sync"
@@ -38,10 +39,10 @@ type MinimumWorkloadHeapV2 []JurorV2
 func (h MinimumWorkloadHeapV2) Len() int           { return len(h) }
 func (h MinimumWorkloadHeapV2) Less(i, j int) bool { return h[i].Workload < h[j].Workload }
 func (h MinimumWorkloadHeapV2) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-func (h *MinimumWorkloadHeapV2) Push(x interface{}) {
+func (h *MinimumWorkloadHeapV2) Push(x any) {
 	*h = append(*h, x.(JurorV2))
 }
-func (h *MinimumWorkloadHeapV2) Pop() interface{} {
+func (h *MinimumWorkloadHeapV2) Pop() any {
 	old := *h
 	n := len(old)
 	x := old[n-1]
@@ -63,39 +64,42 @@ func distributeImagesBalancedConcurrent(numberOfImages, numberOfJury, distinctJu
 	log.Println("Number of jurors: ", numberOfJury)
 	log.Println("Distinct jurors per image: ", distinctJuryPerImage)
 	log.Println("Already workload: ", alreadyWorkload)
-	const batchSize = 100
 	// Min-heap to track least-loaded jurors
 	hp := NewNokibPriorityQueue(&MinimumWorkloadHeapV2{})
-
 	// Initialize the heap with jurors and their workloads
 	for i := range numberOfJury {
 		hp.Push(JurorV2{i, alreadyWorkload[i]})
 	}
-	log.Println("Heap initialized")
 	assignments := make([]sets.Set[int], numberOfImages)
-
-	var wg sync.WaitGroup
-	batchCount := numberOfImages / batchSize
+	batchCount := consts.Config.Distribution.MaximumBatchCount
+	batchSize := numberOfImages / batchCount
+	if batchSize < consts.Config.Distribution.MinimumBatchSize {
+		batchSize = consts.Config.Distribution.MinimumBatchSize
+		batchCount = numberOfImages / batchSize
+	}
 	if numberOfImages%batchSize != 0 {
 		batchCount++
 	}
 	log.Printf("Batch count: %d\n", batchCount)
-	for currentBatch := 0; currentBatch < batchCount; currentBatch++ {
+	var wg sync.WaitGroup
+	// Mutual exclusion lock to protect the heap
+	// This protects the heap for
+	var perImageMutex sync.RWMutex
+	wg.Add(batchCount)
+	for currentBatch := range batchCount {
 		start := currentBatch * batchSize
 		end := min((currentBatch+1)*batchSize, numberOfImages)
 		log.Println("Processing batch of images from ", start, " to ", end)
-		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for i := start; i < end; i++ {
-				// log.Println("Processing image ", i)
-				if i >= numberOfImages {
-					return
-				}
+				perImageMutex.Lock()
+				// log.Println("Processing image: ", i)
 				selectedJurySet := sets.Set[int]{} // To keep track of distinct jurors
 				// Pick K distinct least-loaded jurors
 				for len(selectedJurySet) < distinctJuryPerImage {
 					juror := hp.Pop().(JurorV2)
+					// log.Println("Juror: ", juror)
 					selectedJurySet.Insert(juror.ID)
 				}
 				assignments[i] = selectedJurySet
@@ -105,12 +109,12 @@ func distributeImagesBalancedConcurrent(numberOfImages, numberOfJury, distinctJu
 					newJuror := JurorV2{juror, alreadyWorkload[juror]}
 					hp.Push(newJuror)
 				}
+				perImageMutex.Unlock()
 			}
 		}()
 	}
 	wg.Wait()
 	hp.StopWatchHeapOps()
-
 	return assignments, nil
 }
 

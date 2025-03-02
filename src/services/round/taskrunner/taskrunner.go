@@ -1,7 +1,6 @@
 package taskrunner
 
 import (
-	"fmt"
 	"log"
 	"nokib/campwiz/database"
 	idgenerator "nokib/campwiz/services/idGenerator"
@@ -185,7 +184,6 @@ func (b *TaskRunner) distributeEvaluations(tx *gorm.DB, task *database.Task) (su
 		log.Println("Error fetching juries: ", err)
 		return
 	}
-	fmt.Println("Found juries: ", juries)
 	successCount, err = b.DistributionStrategy.AssignJuries(tx, round, juries)
 	if err != nil {
 		log.Println("Error assigning juries: ", err)

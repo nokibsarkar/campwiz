@@ -6,6 +6,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+type DistributionConfiguration struct {
+	Strategy          string `mapstructure:"Algorithm"`
+	MinimumBatchSize  int    `mapstructure:"MinimumBatchSize"`
+	MaximumBatchCount int    `mapstructure:"MaximumBatchCount"`
+}
 type MainDatabaseConfiguration struct {
 	DSN     string `mapstructure:"DSN"`
 	TestDSN string `mapstructure:"TestDSN"`
@@ -41,9 +46,10 @@ type AuthenticationConfiguration struct {
 }
 
 type ApplicationConfiguration struct {
-	Server   ServerConfiguration         `mapstructure:"Server"`
-	Database DatabaseConfiguration       `mapstructure:"Database"`
-	Auth     AuthenticationConfiguration `mapstructure:"Authentication"`
+	Server       ServerConfiguration         `mapstructure:"Server"`
+	Database     DatabaseConfiguration       `mapstructure:"Database"`
+	Auth         AuthenticationConfiguration `mapstructure:"Authentication"`
+	Distribution DistributionConfiguration   `mapstructure:"DistributionStrategy"`
 }
 
 var Config *ApplicationConfiguration
