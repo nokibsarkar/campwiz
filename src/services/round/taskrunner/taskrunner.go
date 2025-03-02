@@ -50,7 +50,7 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 		log.Println("Error fetching round: ", err)
 		return
 	}
-	if round.LatestTaskID != nil && *round.LatestTaskID != task.TaskID {
+	if round.LatestDistributionTaskID != nil && *round.LatestDistributionTaskID != task.TaskID {
 		// log.Println("Task is not the latest task for the round")
 		// task.Status = database.TaskStatusFailed
 		// return
@@ -58,7 +58,7 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 	currentRoundStatus := round.Status
 	{
 		// Update the round status to importing
-		round.LatestTaskID = &task.TaskID
+		round.LatestDistributionTaskID = &task.TaskID
 		round.Status = database.RoundStatusImporting
 		conn.Save(round)
 		defer func() {
@@ -161,7 +161,7 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 	}
 	{
 		task.Status = database.TaskStatusSuccess
-		round.LatestTaskID = nil // Reset the latest task id
+		round.LatestDistributionTaskID = nil // Reset the latest task id
 	}
 	return
 }

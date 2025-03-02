@@ -25,7 +25,7 @@ func (e *EvaluationService) Evaluate(currentUserID database.IDType, evaluationID
 	conn, close := database.GetDB()
 	defer close()
 	tx := conn.Begin()
-	evaluation, err := ev_repo.FindEvaluationByID(tx, evaluationID)
+	evaluation, err := ev_repo.FindEvaluationByID(tx.Preload("Submission"), evaluationID)
 	if err != nil {
 		tx.Rollback()
 		return nil, err
