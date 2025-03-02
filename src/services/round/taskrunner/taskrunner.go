@@ -75,7 +75,6 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 			*task.FailedIds = datatypes.NewJSONType(*failedBatch)
 		}
 		if successBatch == nil {
-			log.Println("No images found in the batch")
 			break
 		}
 		images := []database.ImageResult{}
@@ -85,7 +84,8 @@ func (b *TaskRunner) importImagws(conn *gorm.DB, task *database.Task) (successCo
 				images = append(images, image)
 			}
 		}
-		task.SuccessCount += len(images)
+		successCount += len(images)
+		task.SuccessCount = successCount
 		participants := map[database.UserName]database.IDType{}
 		for _, image := range images {
 			participants[image.UploaderUsername] = idgenerator.GenerateID("u")
@@ -179,11 +179,32 @@ func (b *TaskRunner) distributeEvaluations(tx *gorm.DB, task *database.Task) (su
 	}
 	j := database.RoleTypeJury
 	filter.Type = &j
+	// cacheDB, closeCache := cache.GetCacheDB()
+	// defer closeCache()
+	// _, err = cache.ExportToCache(tx, cacheDB, &database.EvaluationFilter{
+	// 	// RoundID:    round.RoundID,
+	// 	// CampaignID: round.CampaignID,
+	// 	CommonFilter: database.CommonFilter{
+	// 		Limit: 50,
+	// 	},
+	// }) //, task.TaskID)
+	// if err != nil {
+	// 	log.Println("Error exporting to cache: ", err)
+	// 	cacheDB.Rollback()
+	// 	return
+	// }
+	// cacheDB.Commit()
 	juries, err := jury_repo.ListAllRoles(tx, filter)
 	if err != nil {
 		log.Println("Error fetching juries: ", err)
 		return
 	}
+	if len(juries) == 0 {
+		log.Println("No juries found")
+		return
+	}
+	log.Printf("Found %d juries\n", len(juries))
+
 	successCount, err = b.DistributionStrategy.AssignJuries(tx, round, juries)
 	if err != nil {
 		log.Println("Error assigning juries: ", err)

@@ -69,8 +69,37 @@ func UpdateEvaluation(c *gin.Context, sess *cache.Session) {
 	c.JSON(200, ResponseSingle[database.Evaluation]{Data: *evaluation})
 }
 
+// Bulk Evaluate godoc
+// @Summary Bulk evaluate
+// @Description Bulk evaluate
+// @Produce  json
+// @Success 200 {object} ResponseList[database.Evaluation]
+// @Router /evaluation/ [post]
+// @Tags Evaluation
+// @Security ApiKeyAuth
+// @Param evaluationRequest body []services.EvaluationRequest true "The evaluation request"
+// @Error 400 {object} ResponseError
+// @Error 403 {object} ResponseError
+// @Error 404 {object} ResponseError
+func BulkEvaluate(c *gin.Context, sess *cache.Session) {
+	requestedEvaluations := []services.EvaluationRequest{}
+	err := c.ShouldBindJSON(&requestedEvaluations)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Invalid request : " + err.Error()})
+		return
+	}
+	evaluation_service := services.NewEvaluationService()
+	evaluations, err := evaluation_service.BulkEvaluate(sess.UserID, requestedEvaluations)
+	if err != nil {
+		c.JSON(400, ResponseError{Detail: "Error updating evaluations : " + err.Error()})
+		return
+	}
+	c.JSON(200, ResponseList[*database.Evaluation]{Data: evaluations})
+}
+
 func NewEvaluationRoutes(r *gin.RouterGroup) {
 	route := r.Group("/evaluation")
 	route.GET("/", WithSession(ListEvaluations))
+	route.POST("/", WithPermission(consts.PermissionCreateCampaign, BulkEvaluate))
 	route.POST("/:evaluationId", WithPermission(consts.PermissionCreateCampaign, UpdateEvaluation))
 }

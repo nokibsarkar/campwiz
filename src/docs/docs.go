@@ -186,6 +186,43 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Bulk evaluate",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Evaluation"
+                ],
+                "summary": "Bulk evaluate",
+                "parameters": [
+                    {
+                        "description": "The evaluation request",
+                        "name": "evaluationRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/services.EvaluationRequest"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseList-database_Evaluation"
+                        }
+                    }
+                }
             }
         },
         "/evaluation/{evaluationId}": {
@@ -1372,6 +1409,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "comment": {
+                    "type": "string"
+                },
+                "evaluationId": {
                     "type": "string"
                 },
                 "votePassed": {

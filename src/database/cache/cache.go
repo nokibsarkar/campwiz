@@ -28,7 +28,7 @@ func GetCacheDB() (db *gorm.DB, close func()) {
 func GetTestCacheDB() (db *gorm.DB, close func()) {
 	dsn := consts.Config.Database.Cache.TestDSN
 	db, err := gorm.Open(sqlite.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Warn),
+		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		log.Fatal("failed to connect cache database")
@@ -48,4 +48,5 @@ func InitCacheDB(testing bool) {
 	}
 	defer close()
 	db.AutoMigrate(&Session{})
+	db.AutoMigrate(&Assignments{})
 }

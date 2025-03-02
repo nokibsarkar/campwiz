@@ -153,6 +153,7 @@ func (strategy *RoundRobinDistributionStrategyV2) AssignJuries(tx *gorm.DB, roun
 				Type:               round.Type,
 				Serial:             uint(i),
 			}
+			log.Println("Evaluation: ", evaluation)
 			juryRole := updatedJury[juryIndex]
 			juryRole.RoleID = jury.RoleID
 			juryRole.TotalAssigned++

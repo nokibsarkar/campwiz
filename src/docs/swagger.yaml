@@ -574,6 +574,8 @@ definitions:
     properties:
       comment:
         type: string
+      evaluationId:
+        type: string
       votePassed:
         type: boolean
       votePosition:
@@ -796,6 +798,29 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: List all evaluations
+      tags:
+      - Evaluation
+    post:
+      description: Bulk evaluate
+      parameters:
+      - description: The evaluation request
+        in: body
+        name: evaluationRequest
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/services.EvaluationRequest'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseList-database_Evaluation'
+      security:
+      - ApiKeyAuth: []
+      summary: Bulk evaluate
       tags:
       - Evaluation
   /evaluation/{evaluationId}:
