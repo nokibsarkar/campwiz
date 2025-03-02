@@ -369,6 +369,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/round/distribute/{roundId}/simulate": {
+            "post": {
+                "description": "Simulate distributing evaluations to juries",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Round"
+                ],
+                "summary": "Simulate distributing evaluations to juries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The round ID",
+                        "name": "roundId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "The distribution request",
+                        "name": "DistributionRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/services.DistributionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ResponseSingle-database_Task"
+                        }
+                    }
+                }
+            }
+        },
         "/round/import/{roundId}/commons": {
             "post": {
                 "description": "The user would provide a round ID and a list of commons categories and the system would import images from those categories",

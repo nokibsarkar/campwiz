@@ -945,6 +945,31 @@ paths:
       summary: Distribute evaluations to juries
       tags:
       - Round
+  /round/distribute/{roundId}/simulate:
+    post:
+      description: Simulate distributing evaluations to juries
+      parameters:
+      - description: The round ID
+        in: path
+        name: roundId
+        required: true
+        type: string
+      - description: The distribution request
+        in: body
+        name: DistributionRequest
+        required: true
+        schema:
+          $ref: '#/definitions/services.DistributionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ResponseSingle-database_Task'
+      summary: Simulate distributing evaluations to juries
+      tags:
+      - Round
   /round/import/{roundId}/commons:
     post:
       description: The user would provide a round ID and a list of commons categories

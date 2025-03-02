@@ -14,7 +14,11 @@ import (
 type RoundRobinDistributionStrategy struct {
 	TaskId database.IDType
 }
-
+type DistributionResult struct {
+	TotalWorkLoad             WorkLoadType                     `json:"totalWorkLoad"`
+	AvergaeWorkLoad           WorkLoadType                     `json:"averageWorkLoad"`
+	TotalWorkloadDistribution map[database.IDType]WorkLoadType `json:"totalworkloadDistribution"`
+}
 type WorkLoadType int64
 
 // Juror represents a juror with workload and ID
@@ -83,42 +87,17 @@ func distributeImagesBalanced(numberOfImages, numberOfJury, distinctJuryPerImage
 			heap.Push(h, newJuror)
 		}
 	}
-
 	return assignments, nil
 }
-func simulateDistributeImagesBalanced(numberOfImages int, numberOfJury int, distinctJuryPerImage int, alreadyWorkload []WorkLoadType) (totalWorkLoad, avergaeWorkLoad WorkLoadType, workloadDistribution []WorkLoadType, err error) {
-	if numberOfJury < distinctJuryPerImage {
-		return 0, 0, nil, fmt.Errorf("number of jurors must be greater than or equal to distinct jurors per image")
-	}
-	var previousWorkload WorkLoadType = 0
-	for i := range numberOfJury {
-		previousWorkload += alreadyWorkload[i]
-	}
-	newWorkload := WorkLoadType(numberOfImages) * WorkLoadType(distinctJuryPerImage)
-	totalWorkLoad = previousWorkload + newWorkload
-	avergaeWorkLoad = totalWorkLoad / WorkLoadType(numberOfJury)
-	workloadDistribution = make([]WorkLoadType, numberOfJury)
-	extra := totalWorkLoad % WorkLoadType(numberOfJury)
-	for i := range numberOfJury {
-		workloadDistribution[i] = max(avergaeWorkLoad-alreadyWorkload[i], 0)
-		for k := extra; k > 0; k-- {
-			if workloadDistribution[i]+k+alreadyWorkload[i] <= avergaeWorkLoad+1 {
-				workloadDistribution[i] += k
-				extra -= k
-				break
-			}
-		}
-	}
-	return
-}
-func (strategy *RoundRobinDistributionStrategy) AssignJuries(tx *gorm.DB, round *database.Round, juries []database.Role) error {
+
+func (strategy *RoundRobinDistributionStrategy) AssignJuries(tx *gorm.DB, round *database.Round, juries []database.Role) (evaluationCount int, err error) {
 	submission_repo := database.NewSubmissionRepository()
 	submissions, err := submission_repo.ListAllSubmissions(tx, &database.SubmissionListFilter{
 		RoundID:    round.RoundID,
 		CampaignID: round.CampaignID,
 	})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	numberOfImages := len(submissions)
 	numberOfJury := len(juries)
@@ -127,17 +106,9 @@ func (strategy *RoundRobinDistributionStrategy) AssignJuries(tx *gorm.DB, round 
 	for index, jury := range juries {
 		alreadyWorkload[index] = WorkLoadType(jury.TotalAssigned)
 	}
-	totalWorkload, averageWorkload, distribution, err := simulateDistributeImagesBalanced(numberOfImages, numberOfJury, distinctJuryPerImage, alreadyWorkload)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		return err
-	}
-	fmt.Println("Total Workload: ", totalWorkload)
-	fmt.Println("Average Workload: ", averageWorkload)
-	fmt.Println("Workload Distribution: ", distribution)
 	assignments, err := distributeImagesBalanced(numberOfImages, numberOfJury, distinctJuryPerImage, alreadyWorkload)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	evaluations := []database.Evaluation{}
 	updatedJury := make([]database.Role, numberOfJury)
@@ -164,30 +135,9 @@ func (strategy *RoundRobinDistributionStrategy) AssignJuries(tx *gorm.DB, round 
 	for _, jury := range updatedJury {
 		st := tx.Updates(&jury)
 		if st.Error != nil {
-			return st.Error
+			return 0, st.Error
 		}
 	}
-	tx.Create(&evaluations)
-	tx.Rollback()
-	// for i, jury := range juries {
-	// 	for _, rn := range juryPosition2Range[i] {
-	// 		for j := rn.Start; j <= rn.End; j++ {
-	// 			submission := submissions[j]
-	// 			evaluation := database.Evaluation{
-	// 				SubmissionID:       submission.SubmissionID,
-	// 				EvaluationID:       idgenerator.GenerateID("e"),
-	// 				JudgeID:            jury.RoleID,
-	// 				ParticipantID:      submission.ParticipantID,
-	// 				DistributionTaskID: strategy.TaskId,
-	// 				Type:               round.Type,
-	// 			}
-	// 			evaluations = append(evaluations, evaluation)
-	// 		}
-	// 	}
-	// }
-	// res := conn.Create(&evaluations)
-	// if res.Error != nil {
-	// 	return res.Error
-	// }
-	return nil
+	res := tx.Create(&evaluations)
+	return len(evaluations), res.Error
 }

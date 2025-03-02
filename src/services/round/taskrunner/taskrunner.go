@@ -22,7 +22,7 @@ type IImportSource interface {
 	ImportImageResults(failedImageReason *map[string]string) ([]database.ImageResult, *map[string]string)
 }
 type IDistributionStrategy interface {
-	AssignJuries(conn *gorm.DB, round *database.Round, juries []database.Role) error
+	AssignJuries(tx *gorm.DB, round *database.Round, juries []database.Role) (int, error)
 }
 
 type TaskRunner struct {
@@ -186,14 +186,15 @@ func (b *TaskRunner) distributeEvaluations(tx *gorm.DB, task *database.Task) (su
 		return
 	}
 	fmt.Println("Found juries: ", juries)
-	err = b.DistributionStrategy.AssignJuries(tx, round, juries)
+	successCount, err = b.DistributionStrategy.AssignJuries(tx, round, juries)
 	if err != nil {
 		log.Println("Error assigning juries: ", err)
+		tx.Rollback()
 		return
 	}
-	successCount, failedCount = 0, 0
 	return
 }
+
 func (b *TaskRunner) Run() {
 	task_repo := database.NewTaskRepository()
 	conn, close := database.GetDB()
@@ -205,8 +206,7 @@ func (b *TaskRunner) Run() {
 		return
 	}
 	defer func() {
-
-		res := conn.Save(task)
+		res := conn.Updates(&task)
 		if res.Error != nil {
 			log.Println("Error saving task: ", res.Error)
 		}
@@ -219,6 +219,7 @@ func (b *TaskRunner) Run() {
 			return
 		}
 		successCount, failedCount = b.importImagws(conn, task)
+		task.Status = database.TaskStatusSuccess
 	} else if task.Type == database.TaskTypeDistributeEvaluations {
 		tx := conn.Begin()
 		successCount, failedCount, err = b.distributeEvaluations(tx, task)
@@ -228,11 +229,13 @@ func (b *TaskRunner) Run() {
 			task.Status = database.TaskStatusFailed
 			return
 		}
+		task.Status = database.TaskStatusSuccess
 		tx.Commit()
 	} else {
 		log.Printf("Unknown task type %s\n", task.Type)
 		task.Status = database.TaskStatusFailed
 		return
 	}
+	task.Status = database.TaskStatusSuccess
 	log.Printf("Task %s completed with %d success and %d failed\n", b.TaskId, successCount, failedCount)
 }

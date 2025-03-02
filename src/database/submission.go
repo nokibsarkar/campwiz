@@ -103,6 +103,23 @@ func (r *SubmissionRepository) ListAllSubmissions(tx *gorm.DB, filter *Submissio
 	result := stmt.Find(&submissions)
 	return submissions, result.Error
 }
+func (r *SubmissionRepository) GetSubmissionCount(tx *gorm.DB, filter *SubmissionListFilter) (int64, error) {
+	condition := &Submission{}
+	if filter != nil {
+		if filter.CampaignID != "" {
+			condition.CampaignID = filter.CampaignID
+		}
+		if filter.RoundID != "" {
+			condition.CurrentRoundID = filter.RoundID
+		}
+		if filter.ParticipantID != "" {
+			condition.ParticipantID = filter.ParticipantID
+		}
+	}
+	var count int64
+	result := tx.Model(&Submission{}).Where(condition).Count(&count)
+	return count, result.Error
+}
 func (r *SubmissionRepository) ListAllSubmissionIDs(tx *gorm.DB, filter *SubmissionListFilter) ([]SubmissionSelectID, error) {
 	var submissionIDs []SubmissionSelectID
 	condition := &Submission{}

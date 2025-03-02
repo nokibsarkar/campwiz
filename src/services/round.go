@@ -244,7 +244,7 @@ func (r *RoundService) UpdateRoundDetails(roundID database.IDType, req *RoundReq
 	if len(removedRoles) > 0 {
 		for _, roleID := range removedRoles {
 			log.Println("Banning role: ", roleID)
-			res := tx.Model(&database.Role{RoleID: roleID}).Update("is_allowed", false)
+			res := tx.Updates(&database.Role{RoleID: roleID, IsAllowed: false})
 			if res.Error != nil {
 				tx.Rollback()
 				return nil, res.Error
@@ -288,59 +288,47 @@ func (r *RoundService) DistributeEvaluations(currentUserID database.IDType, roun
 	}
 	tx.Commit()
 	fmt.Println("Task created with ID: ", task.TaskID)
-	strategy := distributionstrategy.NewRoundRobinDistributionStrategy(task.TaskID)
+	strategy := distributionstrategy.NewRoundRobinDistributionStrategyV2(task.TaskID)
 	runner := importservice.NewDistributionTaskRunner(task.TaskID, strategy)
 	go runner.Run()
 	return task, nil
 }
-
-/*
-NewImages := []database.ImageResult{}
-NewImageCount := len(NewImages)
-Jury[i] is already assigned count of the jury
-TotalEvaluation := NewImageCount * evaluationCountRequired + sum(Jury[i])
-TotalJury := len(Jury)
-Average := TotalEvaluation / TotalJury
-Now the goal is to distribute in such way so that each jury would be assigned Average +/- toleranceCount
-If the toleranceCount is 0, then it will be set to 1
-Difference[i] = Average - Jury[i] // if Difference[i] is positive, then the jury has to be assigned more images, if negative or zero then discard the jury because he already has more images
-Now Difference[i] images will be assigned to the jury[i]
-Adjusted Jury Count = len(Difference) after removing the juries with Difference[i] <= 0
-Now the goal is to distribute the remaining images among the Adjusted Jury Count
-Give each image a serial number from 0 to NewImageCount
-Now sort the juries based on the Difference[i]
-Now start assigning the images to the juries in a round-robin fashion
-ImageCount 16
-AlreadyAssigned 4
-JuryCount 5
-EvaluationCountRequired 1
-ToleranceCount 1
-TotalEvaluation 16 * 1 + 4 = 20
-TotalJury 5
-Average 19 / 5 = 4
-------------------------
-Jury 0: 13	14	15	16
-Jury 1:	9	10	11	12
-Jury 2: * 	6	7	8
-Jury 3: * 	3	4	5
-Jury 4: * 	* 	1 	2
-------------------------
-Now for the next iteration,
-adjusted set = images
-jurylist = previous jurylist - 4 (because jury 4 already have been assigned 1 and 2 once)
-Images: 3 4 5 6 7 8 9 10 11 12 13 14 15 16
-Total Evaluation = 16 * 1 + 4 = 20
-Total Jury = 4
-Average = 20 / 4 = 5
-Difference = 0 0 0 0
----------------------
-Jury 0: 13	14	15	16 8
-Jury 1:	9	10	11	12
-Jury 2: * 	6	7	8	3	4	5	6	7
-Jury 3: * 	3	4	5
-// Jury 4: * 	* 	1 	2
-*/
-
-func Distribute() {
-
+func (r *RoundService) SimulateDistributeEvaluations(currentUserID database.IDType, roundId database.IDType, distributionReq *DistributionRequest) (*database.Task, error) {
+	round_repo := database.NewRoundRepository()
+	task_repo := database.NewTaskRepository()
+	conn, close := database.GetDB()
+	defer close()
+	tx := conn.Begin()
+	round, err := round_repo.FindByID(tx, roundId)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	} else if round == nil {
+		tx.Rollback()
+		return nil, fmt.Errorf("round not found")
+	}
+	taskReq := &database.Task{
+		TaskID:               idgenerator.GenerateID("t"),
+		Type:                 database.TaskTypeDistributeEvaluations,
+		Status:               database.TaskStatusPending,
+		AssociatedRoundID:    &roundId,
+		AssociatedUserID:     &currentUserID,
+		CreatedByID:          currentUserID,
+		AssociatedCampaignID: &round.CampaignID,
+		SuccessCount:         0,
+		FailedCount:          0,
+		FailedIds:            &datatypes.JSONType[map[string]string]{},
+		RemainingCount:       0,
+	}
+	task, err := task_repo.Create(tx, taskReq)
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
+	fmt.Println("Task created with ID: ", task.TaskID)
+	strategy := distributionstrategy.NewRoundRobinDistributionStrategySimulator(task.TaskID)
+	runner := importservice.NewDistributionTaskRunner(task.TaskID, strategy)
+	go runner.Run()
+	return task, nil
 }
