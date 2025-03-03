@@ -6,6 +6,7 @@ require (
 	github.com/dimail777/snowflake-go v0.0.0-20240111153750-b698a70b85ca
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/rdleal/intervalst v1.4.1
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files v1.0.1

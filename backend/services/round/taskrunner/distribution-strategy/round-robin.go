@@ -53,6 +53,25 @@ func NewRoundRobinDistributionStrategy(taskId database.IDType) *RoundRobinDistri
 		TaskId: taskId,
 	}
 }
+func distributeImagesBalanced2(numberOfImages, numberOfJury, distinctJuryPerImage int, alreadyWorkload []WorkLoadType) (assignments []sets.Set[int], err error) {
+	if numberOfJury < distinctJuryPerImage {
+		return nil, fmt.Errorf("number of jurors must be greater than or equal to distinct jurors per image")
+	}
+	log.Println("Number of images: ", numberOfImages)
+	log.Println("Number of jurors: ", numberOfJury)
+	log.Println("Distinct jurors per image: ", distinctJuryPerImage)
+	log.Println("Already workload: ", alreadyWorkload)
+	alreadyTotalWorkload := WorkLoadType(0)
+	for _, workload := range alreadyWorkload {
+		alreadyTotalWorkload += workload
+	}
+	type Ev struct {
+		JuryID       int
+		SubmissionID int
+		EvaluationID int
+	}
+	return
+}
 
 // distributeImagesBalanced distributes images among jurors while balancing workload
 func distributeImagesBalanced(numberOfImages, numberOfJury, distinctJuryPerImage int, alreadyWorkload []WorkLoadType) ([]sets.Set[int], error) {
