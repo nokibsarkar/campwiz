@@ -1,0 +1,9 @@
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/nokibsarkar/campwiz-frontend.git
+[submodule "backend"]
+	path = backend
+	url = https://github.com/nokibsarkar/campwiz-backend.git
+[submodule "extensions/campwiz-categorizer"]
+	path = extensions/campwiz-categorizer
+	url = https://github.com/nokibsarkar/campwiz-categorizer.git
