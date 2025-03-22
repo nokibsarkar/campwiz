@@ -5,9 +5,8 @@ This is a tool to help you to upload images to Wikimedia Commons. This tool is d
 - [x] 2025-03-22: Initial version of the tool is ready.
 - [ ] 2025-03-25: The tool will be ready for testing.
 # License
-&copy; 2025 [Nokib Sarkar](https://github.com/nokibsarkar), Tiven Gonsalves, Mst. Rukaiya Islam Tonni
+&copy; 2025 [Nokib Sarkar](https://github.com/nokibsarkar), Tiven Gonsalves (main supporting figure from [Wiki Loves Folklore](https://wikilovesfolklore.org)), [Mst. Rukaiya Islam Tonni](https://github.com/Tonni28)
 
-Initaiily supported by [Wiki Loves Folklore](https://wikilovesfolklore.org).
 
 If not otherwise mentioned, this tool is licensed under the GPL-3.0 license. You can find the full text of the license in the [LICENSE](./LICENSE.md) file.
 
