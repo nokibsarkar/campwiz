@@ -1,4 +1,4 @@
-The code located inside `[extensions](./extensions/)` is not part of this codebase and therefore, it is not covered by this license. The code inside the `extensions` folder is covered by seperate license mentioned there.
+The code located inside [`extensions`](./extensions/) is not part of this codebase and therefore, it is not covered by this license. The code inside the `extensions` folder is covered by seperate license mentioned there.
 # GNU GENERAL PUBLIC LICENSE
 
 Version 3, 29 June 2007
