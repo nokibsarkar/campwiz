@@ -1,5 +1,9 @@
 # Introduction
 This is a tool to help you to upload images to Wikimedia Commons. This tool is designed to help you to evaluate many photography contest organized EACH YEAR IN wikimedia commons.
+# Timeline
+
+- [x] 2025-03-22: Initial version of the tool is ready.
+- [ ] 2025-03-25: The tool will be ready for testing.
 # License
 &copy; 2025 [Nokib Sarkar](https://github.com/nokibsarkar)
 
