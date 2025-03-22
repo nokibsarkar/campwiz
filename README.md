@@ -5,7 +5,7 @@ This is a tool to help you to upload images to Wikimedia Commons. This tool is d
 - [x] 2025-03-22: Initial version of the tool is ready.
 - [ ] 2025-03-25: The tool will be ready for testing.
 # License
-&copy; 2025 
+&copy; 2025 by
 - [Nokib Sarkar](https://github.com/nokibsarkar) (Lead Developer)
 - Tiven Gonsalves (Co-ordinator and the person with the vision)
 - [Mst. Rukaiya Islam Tonni](https://github.com/Tonni28) (Frontend)
