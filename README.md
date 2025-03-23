@@ -1,9 +1,10 @@
 # Introduction
 This is a tool to help you to upload images to Wikimedia Commons. This tool is designed to help you to evaluate many photography contest organized each year wikimedia commons. The tool is the visioned by Tiven Gonsalves, the lead of Wiki Loves Folklore.
-# Timeline
-
+# Timeine
 - [x] 2025-03-22: Initial version of the tool is ready.
 - [ ] 2025-03-25: The tool will be ready for testing.
+- [ ] 2025-04-01: Open for beta testing to the public
+- [ ] 2025-05-01: Make the Code Open Source under a suitable license.
 # License
 &copy; 2025 by
 - [Nokib Sarkar](https://github.com/nokibsarkar) (Lead Developer)
