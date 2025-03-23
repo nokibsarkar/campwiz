@@ -1,3 +1,4 @@
+![Logo of CampWiz](./logo.svg)
 # Introduction
 This is a tool to help you to upload images to Wikimedia Commons. This tool is designed to help you to evaluate many photography contest organized each year wikimedia commons. The tool is the visioned by Tiven Gonsalves, the lead of Wiki Loves Folklore.
 # Timeine
