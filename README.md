@@ -9,7 +9,6 @@ This is a tool to help you to upload images to Wikimedia Commons. This tool is d
 do. Each of those tasks is a section of your user guide.*
 
 ### Evaluate a Public Round
-
 1.  Step 1
     1.  Sub-step a
     2.  Sub-step b
