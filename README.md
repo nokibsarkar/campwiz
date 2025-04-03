@@ -174,7 +174,10 @@ conventions}.
 ## Credits
 Copyright &copy; 2025 by
 - [Nokib Sarkar](https://github.com/nokibsarkar) (Lead Developer)
-- [Tiven Gonsalves](https://github.com/Tiven2240) (Co-ordinator and the person with the vision)
+- [Tiven Gonsalves](https://github.com/Tiven2240)
+    - Co-ordinator
+    - the person with the vision
+    - the person who designed the logo
 - [Mst. Rukaiya Islam Tonni](https://github.com/Tonni28) (Frontend)
 
 ## License
