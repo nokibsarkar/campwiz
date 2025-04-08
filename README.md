@@ -184,7 +184,7 @@ Copyright &copy; 2025 by
 If not otherwise mentioned, this tool is licensed under the GPL-3.0 license. You can find the full text of the license in the [LICENSE](./LICENSE.md) file.
 
 ***The code located inside [`extensions`](./extensions/) is not part of this codebase and therefore, it is not covered by this license. The code inside the `extensions` folder is covered by seperate license mentioned there.***
-## Timeine
+## Timeline
 - [x] 2025-03-22: Initial version of the tool is ready.
 - [ ] 2025-03-25: The tool will be ready for testing.
 - [ ] 2025-04-01: Open for beta testing to the public
