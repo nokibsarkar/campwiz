@@ -1,24 +1,24 @@
 ![Logo of CampWiz](./logo.svg)
 ## CampWiz 
-This is a tool to help you to upload images to Wikimedia Commons. This tool is designed to help you to evaluate many photography contest organized each year wikimedia commons. The tool is the visioned by Tiven Gonsalves, the lead of Wiki Loves Folklore.
+This is a tool to help you to review media uploaded to Wikimedia Commons. This tool is designed to help you to evaluate any photography contest organized each year wikimedia commons. The tool is the visioned by Tiven Gonsalves, the lead coordinator of Wiki Loves Folklore. The tool is hosted on [https://campwiz.wikilovesfolklore.org/](https://campwiz.wikilovesfolklore.org/).
 ### Basic functionality
 This tool let you
-- Create a campaign
-- Create rounds for the campaign
-- Create evaluation criteria for the rounds
-- Assign Jury for the rounds (In case of public rounds, anyone can evaluate)
-- Import images/AUDIO/VIDEO from Wikimedia Commons for evaluation
-- Evaluate the images/AUDIO/VIDEO based on the criteria
-- Export the evaluation result
-- View the evaluation result
+- Create a campaign.
+- Create rounds for each campaign.
+- Create evaluation criteria for the rounds.
+- Assign Jury for the rounds (In case of public rounds, anyone with an active account can evaluate).
+- Import Images/AUDIO/VIDEO from Wikimedia Commons for evaluation.
+- Evaluate the Images/AUDIO/VIDEO based on the criteria.
+- Export the evaluation result into csv/Excel format.
+- View the evaluation result.
 ### What CampWiz does not do
 As of now, CampWiz does not provide the following features:
 - any way to directly upload the images to Wikimedia Commons.
 - hosting **article** writing competition. But for that, you can use [CampWiz v1.0](https://tools.wikilovesfolklore.org/campwiz/).
 ## Prerequisites
-To access the tool, you need to have a device with an internet connection and a web browser. The tool is designed to work on all devices, including mobile phones, tablets, and desktop computers. Also, you need to have a Wikimedia account to access the tool. Apart from these, you should not need any other prerequisites to access the tool. Please go to the tool located at [https://campwiz.wikilovesfolklore.org/](https://campwiz.wikilovesfolklore.org/).
+To access the tool, you need to have a device with an internet connection and a web browser. The tool is optimised to work on all devices, including mobile phones, tablets, and desktop computers. Also, you need to have an active Wikimedia account to access the tool. Apart from these, you should not need any other prerequisites to access the tool. Please go to the tool located at [https://campwiz.wikilovesfolklore.org/](https://campwiz.wikilovesfolklore.org/).
 ## How to use CampWiz
-The most of you would be using the tool is to evaluate the images/audios/videos uploaded to Wikimedia Commons as a `Jury`. But, there are other roles as well. We will discuss them later.
+The most of you would be using the tool is to evaluate the images/audios/videos uploaded to Wikimedia Commons as a `Jury`. But, there are other roles as well. They are available below.
 ### As a Jury
 This section will guide you on how to evaluate the images/audios/videos uploaded to Wikimedia Commons as a `Jury` of a round.
 #### Evaluate the submissions (Images/Audio/Video)
@@ -28,9 +28,9 @@ This section will guide you on how to evaluate the images/audios/videos uploaded
 4.  After clicking on `Authorize`, you will be redirected back to the tool. You should see the list of the ongoing campaigns. Click on the `Go to Campaign` button to start evaluation.
 5.  You will be brought to thecampaign page. You should see all the rounds, campaign information, and a button called `Evaluation Area`. Click on the `Evaluation Area` button to start evaluating the images.
 ![Evaluation Area Screenshot](./screenshots/evaluation%20area-highlighted.png)
-6.  You will be brought to the evaluation area. Depending on the round configuration, you might see three different interfaces. 
-    -   **Yes/No Interface**: You will se a single submission (image/audio/video) at a time. You should see two buttons, `Yes` and `No`. Click on the button that you think is appropriate.
-    - **Rating Interface**: You will see a single submission (image/audio/video) at a time. You should see total five stars. Click on the number of stars you think is appropriate.
+6.  You will be brought to the evaluation area. Depending on the round configuration set by coordinators, you might see three different interfaces. 
+    -   **Yes/No Interface**: You will se a single submission (image/audio/video) at a time. You should see four buttons, `Previous`, `Yes`, `No` and `Skip`. Click on the button that you think is appropriate. They are in the form of special button denoting ⏮️ ❌ 🇴 ⏭️
+    - **Rating Interface**: You will see a single submission (image/audio/video) at a time. You should see total five stars. Click on the number of stars you think is appropriate. hey are in the form of special button denoting ⏮️ ⭐⭐⭐⭐⭐ ⏭️
     - **Ranking Interface**: You will see approximately 20 images at a time. Each image will have a position at the top left corner. You should drag and drop the images to the appropriate position.
 7.  After evaluating all the images, you should see a screen saying `No pending submissions`. You can now return to the campaign page by clicking on the `Go to Round` button.
 ![No pending submissions](./screenshots/all-set.png)
