@@ -17,8 +17,21 @@ As of now, CampWiz does not provide the following features:
 - hosting **article** writing competition. But for that, you can use [CampWiz v1.0](https://tools.wikilovesfolklore.org/campwiz/).
 ## Prerequisites
 To access the tool, you need to have a device with an internet connection and a web browser. The tool is optimised to work on all devices, including mobile phones, tablets, and desktop computers. Also, you need to have an active Wikimedia account to access the tool. Apart from these, you should not need any other prerequisites to access the tool. Please go to the tool located at [https://campwiz.wikilovesfolklore.org/](https://campwiz.wikilovesfolklore.org/).
+## FRAMEWORK
+1. Project
+2. Campaign
+3. Rounds
+### Roles
+1. **Admin**
+    - Admin are system administrators who can create new Projects like Wiki Loves Folklore/Wiki Loves Africa and can assign Lead to the specific project. These leads can be leaders/founders/coordinators of a wiki campaign.
+2. **Lead**
+    - Lead are users who can create campaigns like `Wiki Loves Folklore 2024, Wiki Loves Africa in Igbo community, Wiki Loves Monuments in Switzerland` etc. They are the leaders of the campaign and can assign coordinators who can assist them in their tasks.
+3. **Coordinator**
+    - Coordinators are the users who help to create rounds and help the lead in the works related to jury of wiki campaigns. They can be assigned by the Lead.
+4. **Jury**
+    - Jury are the set of experienced users/Volunteers who have access to the judging interface of the tool. These users help in selection of the Winning media of the campaign.
 ## How to use CampWiz
-The most of you would be using the tool is to evaluate the images/audios/videos uploaded to Wikimedia Commons as a `Jury`. But, there are other roles as well. They are available below.
+The most of you would be using the tool is to evaluate the images/audios/videos uploaded to Wikimedia Commons as a `Jury`. But, there are other roles as well which carry out the base for jury tasks.
 ### As a Jury
 This section will guide you on how to evaluate the images/audios/videos uploaded to Wikimedia Commons as a `Jury` of a round.
 #### Evaluate the submissions (Images/Audio/Video)
@@ -35,145 +48,9 @@ This section will guide you on how to evaluate the images/audios/videos uploaded
 7.  After evaluating all the images, you should see a screen saying `No pending submissions`. You can now return to the campaign page by clicking on the `Go to Round` button.
 ![No pending submissions](./screenshots/all-set.png)
 8. You canalways come back to the evaluation area by clicking on the `Evaluation Area` button (if the round is still active).
-
-
-<!--
-
-
-### Evaluate a Public Round
-1.  Step 1
-    1.  Sub-step a
-    2.  Sub-step b
-    3.  Sub-step c
-2.  Step 2
-3.  Step 3
-
-*When a user has completed all the steps you list, they should have
-successfully done the thing you named in the section header.*
-### {Do another thing}
-
-1.  Step 1
-2.  Step 2
-    1.  Sub-step a
-    2.  Sub-step b
-    3.  Sub-step c
-3.  Step 3
-
-*When a user has completed all the steps you list, they should have
-successfully done the thing you named in the section header.*
-
-## Troubleshooting
-
-{One thing that can go wrong}
-
--   How to resolve it
-
-{Another thing that can go wrong}
-
--   How to resolve it
-
-## How to get help and report issues
-
--   Report issues at {your issue tracker or process}.
--   Ask questions or get help at {where to contact you}. You can expect
-    a response in {time period}.
-## Developer documentation
-
-### Technical implementation
-
-*Provide a brief technical overview of how you implemented the tool's
-main functionality.*
-
-This tool uses {some library, API, platform, other technology} to do
-{some technical operation}. It depends on {some library, API, platform,
-other technology} because it uses {some technology} for {some technical
-operation}.
-
-### Code structure
-
-The {_______} module does {_______}. The {_______} directory contains
-{_______}.
-
-*A high-level description of the code architecture, focusing on what a
-developer would need to understand if they were trying to get oriented
-to the repository so they can contribute code or debug an issue.*
-
-### Local development
-
-#### Set up
-
-How to set up development environment:
-
-1.  {Write the step here.}
-    1.  {Substep 1}
-    2.  {Substep 2}
-
-#### Install
-
-How to install:
-
-1.  {Write the step here.}
-    1.  {Substep 1}
-    2.  {Substep 2}
-
-{Optional: Include a code sample or screenshot that helps your users
-complete this step}
-
-#### Configure
-
-How to configure:
-
-1.  {Substep 1}
-2.  {Substep 2}
-
-#### Build and test
-
-How to build and run locally:
-
-1.  {Write the step here.}
-    1.  {Substep 1}
-    2.  {Substep 2}
-
-How to run tests:
-
-1.  {Write the step here.}
-    1.  {Substep 1}
-    2.  {Substep 2}
-
-#### Debugging
-
--   {specific error message or log/console output}
-    -   How to resolve the error, or what the log output means
-
-<!--code example 
-
--   {specific error message or log/console output}
-    -   How to resolve the error, or what the log output means
-
-## How to contribute
-
-The CampWiz maintainers welcome contributions! (OR)...are not able
-to accept contributions at this time.
-
--   {Type of contribution you want}
--   {Another type of contribution you want}
-
-### Contribution process
-
-Before contributing, read the {Code of Conduct} that outlines community
-guidelines and expectations. We follow {style guide / coding
-conventions}.
-
-1.  {Write the step here.}
-    1.  {Substep 1}
-    2.  {Substep 2}
-
-<!-- code example 
-
-1.  {Write the step here.}
-    1.  {Substep 1}
-    2.  {Substep 2}
--->
+### As a Lead/Coordinator
+This section will guide you on how to create a campaign as well as create rounds on a campaign.
+A
 
 ## Credits
 Copyright &copy; 2025 by
