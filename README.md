@@ -25,7 +25,7 @@ To access the tool, you need to have a device with an internet connection and a 
 1. **Admin**
     - Admin are system administrators who can create new Projects like Wiki Loves Folklore/Wiki Loves Africa and can assign Lead to the specific project. These leads can be leaders/founders/coordinators of a wiki campaign.
 2. **Lead**
-    - Lead are users who can create campaigns like `Wiki Loves Folklore 2024, Wiki Loves Africa in Igbo community, Wiki Loves Monuments in Switzerland` etc. They are the leaders of the campaign and can assign coordinators who can assist them in their tasks.
+    - Lead are users who can create campaigns like `Wiki Loves Folklore 2024, Wiki Loves Africa in Igbo community, Wiki Loves Monuments in Switzerland` etc. They are the leaders of the campaign and can assign coordinators who can assist them in their tasks. Note: - A lead cannot be lead in two projects.
 3. **Coordinator**
     - Coordinators are the users who help to create rounds and help the lead in the works related to jury of wiki campaigns. They can be assigned by the Lead.
 4. **Jury**
@@ -40,17 +40,58 @@ This section will guide you on how to evaluate the images/audios/videos uploaded
 3.  After logging in, you should click on `Authorize` to give the tool the necessary permissions. (The tool will only have access to your username and the date you created the wikipedia account. For more information, please read the [Privacy Policy](https://campwiz.wikilovesfolklore.org//policy/privacy)).
 4.  After clicking on `Authorize`, you will be redirected back to the tool. You should see the list of the ongoing campaigns. Click on the `Go to Campaign` button to start evaluation.
 5.  You will be brought to thecampaign page. You should see all the rounds, campaign information, and a button called `Evaluation Area`. Click on the `Evaluation Area` button to start evaluating the images.
+
 ![Evaluation Area Screenshot](./screenshots/evaluation%20area-highlighted.png)
+
 6.  You will be brought to the evaluation area. Depending on the round configuration set by coordinators, you might see three different interfaces. 
     -   **Yes/No Interface**: You will se a single submission (image/audio/video) at a time. You should see four buttons, `Previous`, `Yes`, `No` and `Skip`. Click on the button that you think is appropriate. They are in the form of special button denoting ⏮️ ❌ 🇴 ⏭️
     - **Rating Interface**: You will see a single submission (image/audio/video) at a time. You should see total five stars. Click on the number of stars you think is appropriate. hey are in the form of special button denoting ⏮️ ⭐⭐⭐⭐⭐ ⏭️
     - **Ranking Interface**: You will see approximately 20 images at a time. Each image will have a position at the top left corner. You should drag and drop the images to the appropriate position.
 7.  After evaluating all the images, you should see a screen saying `No pending submissions`. You can now return to the campaign page by clicking on the `Go to Round` button.
+   
 ![No pending submissions](./screenshots/all-set.png)
+
 8. You canalways come back to the evaluation area by clicking on the `Evaluation Area` button (if the round is still active).
+    
 ### As a Lead/Coordinator
 This section will guide you on how to create a campaign as well as create rounds on a campaign.
-A
+#### Creation of campaign and rounds by Lead/Coordinator.
+1. A Lead can create a campaign using the dashboard section on the Homepage at [https://campwiz.wikilovesfolklore.org/](https://campwiz.wikilovesfolklore.org/)
+2. Use the `Create Campaign` button and create campaign by inputting information like 
+    - Name of the campaign 
+    - Date range of the campaign - All images during this date frame will only be taken into the tool. 
+    - Short Description of the campaign.
+    - Rules of the campiagn/ Wikimedia Commons Link.
+    - Adding of Coordinators.
+3. Lead/Coordinator can edit the campaign details.
+4. Lead/Coordinaors can create a round in the specific campaign. The same can be done by clicking `Create Round` button on the campaign page.
+5. A new popup with details to be included as below.
+    - Name of the round - A custom name like `prejury round` / `Round 1` etc can be filled in the name.
+    - Voting deadline - A deadline for the campaign.
+    - Jury directions - A set of directions for the jury.
+    - Jurors - Wikimedia Usernames of the Jury members
+    - Quorum - A slider to denote that one image to be evaluated by a number of jurors. Quorum cannot exceed number of jury.
+    - Additional restrictions - These are some ways you can have control over what photos get imported in your round.
+    - User to click on `Create round` button.
+6. Lead/Coordinator get a popup of adding media from wikimedia category option. Multiple categories can also be imported in the round.
+7. Lead/Coordinator need to wait untill all the media is imported in the tool and then click `Start Round`
+8. The Lead/Coordinator can pause and redestribute the evaluations in case of jury default.
+9. Lead/Coordinator can mark round as complete by clicking `Mark as Complete` button after all jury complete the evaluation.
+10. Same process to be followed for creating multiple round.
+
+### As an Admin
+This section will guide you on how to create a Project 
+#### Creation of Project by Tool Admin.
+1. An Admin can create a Project by using the dashboard section on the Homepage at [https://campwiz.wikilovesfolklore.org/](https://campwiz.wikilovesfolklore.org/)
+2. Admin can click on the `Create Project` on the dashboard.
+3. create Project by inputting information like 
+    - Name of the Project
+    - Modify the project code if required.
+    - Website/Wikipage of the project.
+    - Add Project Leads
+    - Add logo of the Project.
+    - Click Create Project button.
+4. Admins can modify the projects using the same steps.
 
 ## Credits
 Copyright &copy; 2025 by
