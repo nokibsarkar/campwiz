@@ -37,6 +37,9 @@ This section will guide you on how to evaluate the images/audios/videos uploaded
 8. You canalways come back to the evaluation area by clicking on the `Evaluation Area` button (if the round is still active).
 
 
+<!--
+
+
 ### Evaluate a Public Round
 1.  Step 1
     1.  Sub-step a
@@ -142,7 +145,7 @@ How to run tests:
 -   {specific error message or log/console output}
     -   How to resolve the error, or what the log output means
 
-<!--code example -->
+<!--code example 
 
 -   {specific error message or log/console output}
     -   How to resolve the error, or what the log output means
@@ -165,11 +168,12 @@ conventions}.
     1.  {Substep 1}
     2.  {Substep 2}
 
-<!-- code example -->
+<!-- code example 
 
 1.  {Write the step here.}
     1.  {Substep 1}
     2.  {Substep 2}
+-->
 
 ## Credits
 Copyright &copy; 2025 by
