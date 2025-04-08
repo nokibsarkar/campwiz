@@ -108,9 +108,31 @@ If not otherwise mentioned, this tool is licensed under the GPL-3.0 license. You
 ***The code located inside [`extensions`](./extensions/) is not part of this codebase and therefore, it is not covered by this license. The code inside the `extensions` folder is covered by seperate license mentioned there.***
 ## Timeline
 - [x] 2025-03-22: Initial version of the tool is ready.
-- [ ] 2025-03-25: The tool will be ready for testing.
-- [ ] 2025-04-01: Open for beta testing to the public
-- [ ] 2025-05-01: Make the Code Open Source under a suitable license.
+- [x] 2025-03-25: The tool will be ready for testing.
+- [x] 2025-04-01: Open for beta testing to the public.
+- [ ] 2025-04-15: In production
+- [ ] 2025-06-01: Make the Code Open Source under a suitable license.
+
+## History & Vision
+"This tool was created as part of the ongoing efforts of Nokib Sarkar, the lead developer behind the Wiki Loves Folklore project—one of the most prominent photography campaigns within the Wikimedia Movement. During past editions of the competition, it became evident to the organizing team and jury that existing tools lacked a community-centric approach and failed to fully empower volunteers in the image selection process on Wikimedia Commons.
+
+Driven by this need, the development of this tool began—guided by feedback from Wikimedia Commons volunteers, jury members, and years of experience from organizing Wiki Loves Folklore. The inspiration for this project was significantly shaped by the success of the previous Feminism and Folklore article jury tool, known as Campwiz, which received the Coolest Tool Award at Wikimania Poland.
+
+Powered by Wikimedia Switzerland, the vision to build a jury tool designed for the community, by the community took shape. Initial development was supported by the servers of Wiki Loves Folklore, a community initiative endorsed by the Wikimedia Foundation. The project gained further momentum during Wikimania, where the development roadmap and vision were collaboratively sketched by community members.
+
+After months of dedicated research, coding, and testing, the tool is now live—debuting with the jury process for the seventh edition of Wiki Loves Folklore. This marks a proud milestone, as we host our very first campaign using infrastructure built specifically for Wikimedia campaigns.
+
+Built with Golang—a language the developer learned specifically for this project—this tool represents a labor of love, technical curiosity, and deep commitment to the Wikimedia community. We look forward to migrating it to Wikimedia Cloud servers soon, ensuring greater accessibility and sustainability.
+
+We extend our heartfelt thanks to:
+- **Wikimedia Switzerland** and the **Wikimedia Foundation** for their generous support,
+- Our fellow volunteers for their help in translation, documentation, testing,
+- And the jury members who placed their trust in this tool.
+
+#WeTogether, have built something that empowers the community and strengthens our collective mission. This is just the beginning."
+
+History & Vision Authored by [Tiven Gonsalves](https://github.com/Tiven2240) Lead Coordinator. Wiki Loves Folklore.
+
 ## Some happy memories
 - [Wikimedia CH having an interview about CampWiz being the one of the coolest tool award 2024](https://wikimedia.ch/en/news/surprise-at-the-wikimania-why-wikimedia-ch-had-a-special-reason-to-be-happy/)
 - [The you tube video showing CampWiz being one of the coolest tool award](https://www.youtube.com/watch?v=F-Z2ODmUySY)
