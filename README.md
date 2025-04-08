@@ -127,7 +127,7 @@ Built with Golang—a language the developer learned specifically for this proje
 We extend our heartfelt thanks to:
 - **Wikimedia Switzerland** and the **Wikimedia Foundation** for their generous support,
 - **Wiki Loves Folklore** for the initial support hosting the tool and resources to experiment the software engineering needs
-> ***Personal Note From the Developer:*** Wiki Loves Folklore always supported all kind of technical advancement toward the community including amazing tools like FnF List Generator, CampWiz, CampWiz nxt (this tool). They were always open to experimentation and technical vision. Sometimes, mistakes by me happened, which incurred some resources being wasted or under-utilized. But they gave me the freedom to work on the research and development without any dragging by behind. I am very very grateful to them.
+> ***Personal Note From the Developer:*** Wiki Loves Folklore always supported all kind of technical advancement toward the community including amazing tools like FnF List Generator, CampWiz, CampWiz nxt (this tool). They were always open to experimentation and technical vision. Sometimes, mistakes by me happened, which incurred some resources being wasted or under-utilized. But they gave me the freedom to work on the research and development without any back-pulling. I am very very grateful to them.
 > <br/> &mdash; Nokib Sarkar, Lead Developer
 
 - Our fellow volunteers for their help in translation, documentation, testing,
