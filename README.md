@@ -18,19 +18,19 @@ As of now, CampWiz does not provide the following features:
 ## Prerequisites
 To access the tool, you need to have a device with an internet connection and a web browser. The tool is optimised to work on all devices, including mobile phones, tablets, and desktop computers. Also, you need to have an active Wikimedia account to access the tool. Apart from these, you should not need any other prerequisites to access the tool. Please go to the tool located at [https://campwiz.wikilovesfolklore.org/](https://campwiz.wikilovesfolklore.org/).
 ## FRAMEWORK
-1. Project
-2. Campaign
-3. Rounds
+1. Project : Project are project names like Projects like Wiki Loves Folklore/Wiki Loves X etc
+2. Campaign : Campaigns are yearly editions of the project like Wiki Loves Folklore 2025, Wiki Loves X 2025 etc
+3. Rounds : Rounds are jury rounds on a specific campaign.
 ### Roles
 1. **Admin**
-    - Admin are system administrators who can create new Projects like Wiki Loves Folklore/Wiki Loves Africa and can assign Lead to the specific project. These leads can be leaders/founders/coordinators of a wiki campaign.
+    - Admin are system administrators who can create new Projects like Wiki Loves Folklore/Wiki Loves X and can assign Lead to the specific project. These leads can be leaders/founders/coordinators of a wiki campaign.
 2. **Lead**
-    - Lead are users who can create campaigns like `Wiki Loves Folklore 2024, Wiki Loves Africa in Igbo community, Wiki Loves Monuments in Switzerland` etc. They are the leaders of the campaign and can assign coordinators who can assist them in their tasks. Note: - A lead cannot be lead in two projects.
+    - Lead are users who can create campaigns like `Wiki Loves Folklore 2024, Wiki Loves X in Igbo community, Wiki Loves M in Switzerland` etc. They are the leaders of the campaign and can assign coordinators who can assist them in their tasks. Note: - A lead cannot be lead in two projects.
 3. **Coordinator**
     - Coordinators are the users who help to create rounds and help the lead in the works related to jury of wiki campaigns. They can be assigned by the Lead.
 4. **Jury**
     - Jury are the set of experienced users/Volunteers who have access to the judging interface of the tool. These users help in selection of the Winning media of the campaign.
-## How to use CampWiz
+## How to use CampWiz NXT
 The most of you would be using the tool is to evaluate the images/audios/videos uploaded to Wikimedia Commons as a `Jury`. But, there are other roles as well which carry out the base for jury tasks.
 ### As a Jury
 This section will guide you on how to evaluate the images/audios/videos uploaded to Wikimedia Commons as a `Jury` of a round.
@@ -45,7 +45,7 @@ This section will guide you on how to evaluate the images/audios/videos uploaded
 
 6.  You will be brought to the evaluation area. Depending on the round configuration set by coordinators, you might see three different interfaces. 
     -   **Yes/No Interface**: You will se a single submission (image/audio/video) at a time. You should see four buttons, `Previous`, `Yes`, `No` and `Skip`. Click on the button that you think is appropriate. They are in the form of special button denoting ⏮️ ❌ 🇴 ⏭️
-    - **Rating Interface**: You will see a single submission (image/audio/video) at a time. You should see total five stars. Click on the number of stars you think is appropriate. hey are in the form of special button denoting ⏮️ ⭐⭐⭐⭐⭐ ⏭️
+    - **Rating Interface**: You will see a single submission (image/audio/video) at a time. You should see total five hearts. Click on the number of stars you think is appropriate. They are in the form of special button denoting ⏮️ ❤️❤️❤️❤️❤️ ⏭️
     - **Ranking Interface**: You will see approximately 20 images at a time. Each image will have a position at the top left corner. You should drag and drop the images to the appropriate position.
 7.  After evaluating all the images, you should see a screen saying `No pending submissions`. You can now return to the campaign page by clicking on the `Go to Round` button.
    
