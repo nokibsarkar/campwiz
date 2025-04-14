@@ -110,7 +110,7 @@ If not otherwise mentioned, this tool is licensed under the GPL-3.0 license. You
 - [x] 2025-03-22: Initial version of the tool is ready.
 - [x] 2025-03-25: The tool will be ready for testing.
 - [x] 2025-04-01: Open for beta testing to the public.
-- [ ] 2025-04-15: In production
+- [x] 2025-04-15: In production
 - [ ] 2025-06-01: Make the Code Open Source under a suitable license.
 
 ## History & Vision
