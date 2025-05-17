@@ -111,7 +111,8 @@ If not otherwise mentioned, this tool is licensed under the GPL-3.0 license. You
 - [x] 2025-03-25: The tool will be ready for testing.
 - [x] 2025-04-01: Open for beta testing to the public.
 - [x] 2025-04-15: In production
-- [ ] 2025-06-01: Make the Code Open Source under a suitable license.
+- [x] 2025-06-01: Make the Code Open Source under a suitable license.
+- [ ] 2025-05-17: Migrate the Code to Toolforge ([T394515](https://phabricator.wikimedia.org/T394515))
 
 ## History & Vision
 "This tool was created as part of the ongoing efforts of Nokib Sarkar, the lead developer behind the Wiki Loves Folklore project—one of the most prominent photography campaigns within the Wikimedia Movement. During past editions of the competition, it became evident to the organizing team and jury that existing tools lacked a community-centric approach and failed to fully empower volunteers in the image selection process on Wikimedia Commons.
