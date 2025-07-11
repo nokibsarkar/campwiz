@@ -94,7 +94,7 @@ This section will guide you on how to create a Project
 4. Admins can modify the projects using the same steps.
 
 ## Credits
-Copyright &copy; 2025 by
+Team Member
 - [Nokib Sarkar](https://github.com/nokibsarkar) (Lead Developer)
 - [Tiven Gonsalves](https://github.com/Tiven2240)
     - Co-ordinator
