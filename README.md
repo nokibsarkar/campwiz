@@ -1,6 +1,6 @@
 ![Logo of CampWiz](./logo.svg)
 ## CampWiz 
-This is a tool to help you to review media uploaded to Wikimedia Commons. This tool is designed to help you to evaluate any photography contest organized each year wikimedia commons. The tool is the visioned by Tiven Gonsalves, the lead coordinator of Wiki Loves Folklore. The tool is hosted on [https://campwiz.wikilovesfolklore.org/](https://campwiz.wikilovesfolklore.org/).
+This is a tool to help you to review media uploaded to Wikimedia Commons. This tool is designed to help you to evaluate any photography contest organized each year wikimedia commons. The tool is the visioned by Tiven Gonsalves, the lead coordinator of Wiki Loves Folklore. The tool is hosted on [https://campwiz.toolforge.org/](https://campwiz.toolforge.org/).
 ### Basic functionality
 This tool let you
 - Create a campaign.
